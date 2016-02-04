@@ -2,6 +2,7 @@ import numpy
 from osgeo import ogr
 from osgeo import osr
 from osgeo import gdal
+import os
 
 class Octtree:
     def __init__(self, box):
@@ -28,6 +29,9 @@ class OcttreeNode(Octtree):
         self.box = box
         self.children = children
 
+    def getChildren(self):
+        return self.children
+
 
 def build(array, origin, resolution, pop_threshold):
     if numpy.sum(array) < pop_threshold or array.size == 1: # leaf
@@ -48,10 +52,10 @@ def build(array, origin, resolution, pop_threshold):
         rb_origin =  (origin_left + lb.shape[0]*resolution, origin_bottom)
 
         box = coords_to_polygon(origin_left, origin_bottom, num_cols, num_rows, resolution)
-        lt = build_octtree(lt, lt_origin, resolution, pop_threshold)
-        lb = build_octtree(lb, lb_origin, resolution, pop_threshold)
-        rt = build_octtree(rt, rt_origin, resolution, pop_threshold)
-        rb = build_octtree(rb, rb_origin, resolution, pop_threshold)
+        lt = build(lt, lt_origin, resolution, pop_threshold)
+        lb = build(lb, lb_origin, resolution, pop_threshold)
+        rt = build(rt, rt_origin, resolution, pop_threshold)
+        rb = build(rb, rb_origin, resolution, pop_threshold)
 
         return OcttreeNode(box, [lt,lb,rt,rb])
 
@@ -65,3 +69,39 @@ def coords_to_polygon(origin_left, origin_bottom, num_cols, num_rows, resolution
     poly = ogr.Geometry(ogr.wkbPolygon)
     poly.AddGeometry(ring)
     return poly
+
+def save_octtree_as_shapefile(octtree):
+    driver = ogr.GetDriverByName("ESRI Shapefile")
+    # create the data source
+    # Remove output shapefile if it already exists
+    if os.path.exists("zones"):
+        driver.DeleteDataSource("zones")
+    data_source = driver.CreateDataSource("zones")
+
+    # create the spatial reference, WGS84
+    srs = osr.SpatialReference()
+    srs.ImportFromEPSG(3035)
+
+    layer = data_source.CreateLayer("zones", srs, ogr.wkbPolygon)
+    layer.CreateField(ogr.FieldDefn("Population", ogr.OFTInteger))
+    add_nodes_to_layer(layer, octtree)
+
+    data_source.Destroy()
+
+def add_nodes_to_layer(layer, octtree):
+    for node in iterate_octtree(octtree):
+        feature = ogr.Feature(layer.GetLayerDefn())
+        feature.SetField("Population", node.value)
+        feature.SetGeometry(node.box)
+        layer.CreateFeature(feature)
+        feature.Destroy()
+
+
+def iterate_octtree(octtree):
+    if isinstance(octtree, OcttreeLeaf):
+        yield octtree
+    else:
+        for child in octtree.getChildren():
+            for r in iterate_octtree(child):
+                yield r
+

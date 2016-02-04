@@ -6,10 +6,7 @@ from matplotlib import pyplot as plt
 from matplotlib import cm
 import psycopg2
 
-import pprint
-
-import zoning_algorithm2 as za
-
+import octtree
 
 conn = psycopg2.connect(None, "arcgis", "postgres", "postgres")
 cursor = conn.cursor()
@@ -64,9 +61,8 @@ box.AddPoint(x_min, y_min)
 poly = ogr.Geometry(ogr.wkbPolygon)
 poly.AddGeometry(box)
 
-(octtree, zoned_array) = za.run_build_octtree(pop_array, (x_min, y_min), resolution, pop_threshold)
+result_octtree = octtree.build(pop_array, (x_min, y_min), resolution, pop_threshold)
 
-za.create_shapefile(octtree)
-za.export_to_raster(zoned_array, x_min, y_max, num_cols, num_rows, resolution, 'popraster.tif')
+octtree.save_octtree_as_shapefile(result_octtree)
 
 #given a polygon boundary, count number of polygons that
