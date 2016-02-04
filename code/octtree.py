@@ -24,6 +24,12 @@ class OcttreeLeaf(Octtree):
         resolution = self.resolution
         return coords_to_polygon(origin_left, origin_bottom, num_cols, num_rows, resolution)
 
+    def count(self):
+        return 1
+
+    def prune(self, bounding_geo):
+        return
+
 class OcttreeNode(Octtree):
     def __init__(self, box, children):
         self.box = box
@@ -31,6 +37,16 @@ class OcttreeNode(Octtree):
 
     def getChildren(self):
         return self.children
+
+    def count(self): #get total number of leaves
+        counts = map(lambda x: x.count(), self.children)
+        return sum(counts)
+
+    def prune(self, bounding_geo):
+        self.children[:] = [child for child in self.children if not bounding_geo.Disjoint(child.box)]
+        for child in self.children:
+            child.prune(bounding_geo)
+
 
 
 def build(array, origin, resolution, pop_threshold):

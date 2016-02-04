@@ -1,12 +1,31 @@
 import numpy
-import pprint
-from PIL import Image
+import os
+
 from osgeo import ogr
-from matplotlib import pyplot as plt
-from matplotlib import cm
+
 import psycopg2
 
 import octtree
+
+def loadboundaries(shapefile):
+    driver = ogr.GetDriverByName("ESRI Shapefile")
+    # load shapefile
+    dataSource = driver.Open(shapefile, 0)
+
+    if dataSource is None:
+        print 'Could not open %s' % (shapefile)
+    else:
+        print 'Opened %s' % (shapefile)
+        layer = dataSource.GetLayer()
+        featureCount = layer.GetFeatureCount()
+        print "Number of features in %s: %d" % (os.path.basename(shapefile),featureCount)
+
+        feature = layer.GetFeature(0)
+        geom = feature.GetGeometryRef().Clone()
+
+        return geom
+
+
 
 conn = psycopg2.connect(None, "arcgis", "postgres", "postgres")
 cursor = conn.cursor()
@@ -62,7 +81,12 @@ poly = ogr.Geometry(ogr.wkbPolygon)
 poly.AddGeometry(box)
 
 result_octtree = octtree.build(pop_array, (x_min, y_min), resolution, pop_threshold)
+print "original number of cells:", result_octtree.count()
+
+boundary = loadboundaries(r"boundary/munich_metro_area.shp")
+result_octtree.prune(boundary)
+print "after pruning to boundary:", result_octtree.count()
+
 
 octtree.save_octtree_as_shapefile(result_octtree)
 
-#given a polygon boundary, count number of polygons that
