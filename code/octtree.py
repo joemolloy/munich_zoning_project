@@ -27,8 +27,14 @@ class OcttreeLeaf(Octtree):
     def count(self):
         return 1
 
+    def count_populated(self):
+        if self.value > 0:
+            return 1
+        else:
+            return 0
+
     def prune(self, bounding_geo):
-        return
+        return self.count()
 
 class OcttreeNode(Octtree):
     def __init__(self, box, children):
@@ -42,10 +48,15 @@ class OcttreeNode(Octtree):
         counts = map(lambda x: x.count(), self.children)
         return sum(counts)
 
+    def count_populated(self): #get total number of leaves
+        counts = map(lambda x: x.count_populated(), self.children)
+        return sum(counts)
+
     def prune(self, bounding_geo):
         self.children[:] = [child for child in self.children if not bounding_geo.Disjoint(child.box)]
         for child in self.children:
             child.prune(bounding_geo)
+        return self.count()
 
 
 

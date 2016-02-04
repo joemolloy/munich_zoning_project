@@ -1,5 +1,6 @@
 import numpy
 import os
+import sys
 
 from osgeo import ogr
 
@@ -31,7 +32,6 @@ conn = psycopg2.connect(None, "arcgis", "postgres", "postgres")
 cursor = conn.cursor()
 
 resolution = 100
-pop_threshold = 5000
 
 #100m x 100m grid.
 cursor.execute("""SELECT
@@ -80,13 +80,45 @@ box.AddPoint(x_min, y_min)
 poly = ogr.Geometry(ogr.wkbPolygon)
 poly.AddGeometry(box)
 
-result_octtree = octtree.build(pop_array, (x_min, y_min), resolution, pop_threshold)
-print "original number of cells:", result_octtree.count()
+
+##
+# if num zones is too large, we need a higher threshold
+# keep a record of the thresholds that result in the nearest low, and nearest high
+# for the next step, take the halfway number between the two
 
 boundary = loadboundaries(r"boundary/munich_metro_area.shp")
-result_octtree.prune(boundary)
-print "after pruning to boundary:", result_octtree.count()
+desired_num_zones = 1000
+pop_threshold = 1000
 
+step = 1
+solved = False
+num_zones = 0
+best_low = 0
+best_high = 1000000 #TODO: how to pick this initial  upper limit number?
+#TODO: flag to choose whether to include empty zones in counting, and when saving?
+
+while not solved: # difference greater than 10%
+    result_octtree = octtree.build(pop_array, (x_min, y_min), resolution, pop_threshold)
+    print 'step %d with threshold level %d' % (step, pop_threshold)
+    print "\toriginal number of cells:", result_octtree.count()
+    num_zones = result_octtree.prune(boundary)
+    print "\tafter pruning to boundary:", num_zones
+    print ''
+
+    solved = abs(num_zones - desired_num_zones)/float(desired_num_zones) < 0.10
+    if not solved:
+        if num_zones > desired_num_zones:
+            best_low = max (best_low, pop_threshold)
+        else:
+            best_high = min (best_high, pop_threshold)
+        pop_threshold = (best_low + best_high) / 2
+
+    step += 1
+
+print "Solution found!"
+print "\t%6d zones" % (num_zones)
+print "\t%6d threshold" % (pop_threshold)
 
 octtree.save_octtree_as_shapefile(result_octtree)
 
+#next step, find the 'power of two' box that best captures the polygonal boundary area.
