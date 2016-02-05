@@ -49,7 +49,6 @@ def solve_iteratively(pop_array, (x_min, y_min), resolution, boundary):
     # for the next step, take the halfway number between the two
 
     desired_num_zones = 1000
-    pop_threshold = 1000
 
     step = 1
     solved = False
@@ -57,6 +56,9 @@ def solve_iteratively(pop_array, (x_min, y_min), resolution, boundary):
     best_low = 0
     best_high = 1000000 #TODO: how to pick this initial  upper limit number?
     #TODO: flag to choose whether to include empty zones in counting, and when saving?
+
+    pop_threshold = (best_high - best_low) / 2
+
 
     while not solved: # difference greater than 10%
         result_octtree = octtree.build(pop_array, (x_min, y_min), resolution, pop_threshold)
@@ -94,15 +96,15 @@ def load_data(array_origin_x, array_origin_y, size, resolution):
     y_max = array_origin_y + size * 100
 
     #100m x 100m grid.
-    cursor.execute("""SELECT
-                count (distinct x_mp_100m),
-                count (distinct y_mp_100m),
-                count (*),
-                min (y_mp_100m),
-                min (x_mp_100m)
-            FROM public.muc_large_population""")
-
-    (table_num_cols, table_num_rows, total, y_min,x_min) = cursor.fetchone()
+    # cursor.execute("""SELECT
+    #             count (distinct x_mp_100m),
+    #             count (distinct y_mp_100m),
+    #             count (*),
+    #             min (y_mp_100m),
+    #             min (x_mp_100m)
+    #         FROM public.muc_population""")
+    #
+    # (table_num_cols, table_num_rows, total, y_min,x_min) = cursor.fetchone()
 
     pop_array = numpy.zeros((size, size), dtype=numpy.int)
 
@@ -110,7 +112,7 @@ def load_data(array_origin_x, array_origin_y, size, resolution):
     #this metheod only works when total rows = ncols x nrows in database. (IE no missing values)
     print "parameters", (array_origin_x, x_max, array_origin_y, y_max)
     cursor.execute("""SELECT x_mp_100m, y_mp_100m, "Einwohner"
-                        FROM public.muc_large_population
+                        FROM public."Population"
                         WHERE x_mp_100m between %s and %s
                         AND   y_mp_100m between %s and %s
                         """, (array_origin_x, x_max, array_origin_y, y_max))
