@@ -116,7 +116,7 @@ def load_data(array_origin_x, array_origin_y, size, resolution):
                         WHERE x_mp_100m between %s and %s
                         AND   y_mp_100m between %s and %s
                         """, (array_origin_x, x_max, array_origin_y, y_max))
-
+    #ttes charhra
     for row in cursor:
         if row[2] > 0:
             x = (row[0] - array_origin_x) / resolution
