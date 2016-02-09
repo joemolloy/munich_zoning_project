@@ -69,8 +69,8 @@ def build(array, origin, resolution, pop_threshold):
         (num_cols, num_rows) = array.shape
 
         (l,r) = numpy.array_split(array,2, axis=1)
-        (lt,lb) = numpy.array_split(l, 2)
-        (rt,rb) = numpy.array_split(r, 2)
+        (lb,lt) = numpy.array_split(l, 2)
+        (rb,rt) = numpy.array_split(r, 2)
 
         #coordinate based origins for sub boxes
         lt_origin =  (origin_left, origin_bottom + lb.shape[1]*resolution)

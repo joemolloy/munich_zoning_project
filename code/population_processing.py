@@ -120,7 +120,7 @@ def load_data(array_origin_x, array_origin_y, size, resolution):
     for row in cursor:
         if row[2] > 0:
             x = (row[0] - array_origin_x) / resolution
-            y = (size - 1) - (row[1] - array_origin_y) / resolution
+            y = (row[1] - array_origin_y) / resolution
             pop_array[y,x] = row[2]
         #reference arrays by (row_no , col_no)
         #reference arrays by (   a_y,      a_x   )
