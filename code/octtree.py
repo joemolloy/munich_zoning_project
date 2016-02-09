@@ -12,6 +12,7 @@ class Octtree:
 class OcttreeLeaf(Octtree):
     def __init__(self, array, origin, resolution):
         self.value = numpy.sum(array)
+        self.array = array
         self.origin = origin
         self.size = array.shape
         self.resolution = resolution
@@ -33,8 +34,31 @@ class OcttreeLeaf(Octtree):
         else:
             return 0
 
-    def prune(self, bounding_geo):
+    def prune(self, bounding_geo, trim = False):
+        (num_rows, num_cols) = self.size
+        (origin_left, origin_bottom) = self.origin #clean these up
+
+        if trim and self.box.Intersects(bounding_geo):
+            #Trim box
+            self.box = self.box.Intersection(bounding_geo)
+            #recalculate population
+                #convert raster cells to polygons with value
+                #adjust value by percentage of coverage by new box
+                #sum up values
+            value = 0
+            it = numpy.nditer(self.array, flags=['multi_index'])
+            while not it.finished:
+                (y,x) = it.multi_index #'from top, from left'
+                poly = coords_to_polygon(origin_left + (x*self.resolution), origin_bottom + (y*self.resolution), 1, 1, self.resolution)
+                original_area = poly.GetArea()
+                new_area = poly.Intersection(bounding_geo).GetArea()
+                value += (new_area / original_area) * self.value
+                it.iternext()
+            self.value = value
+
+
         return self.count()
+
 
 class OcttreeNode(Octtree):
     def __init__(self, box, children):
