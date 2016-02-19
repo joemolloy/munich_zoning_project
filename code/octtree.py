@@ -3,6 +3,7 @@ from osgeo import ogr
 from osgeo import osr
 from osgeo import gdal
 import os
+import math
 
 class Octtree:
     def __init__(self, box):
@@ -34,11 +35,14 @@ class OcttreeLeaf(Octtree):
         else:
             return 0
 
-    def prune(self, bounding_geo, trim = False):
-        (num_rows, num_cols) = self.size
+    def prune(self, bounding_geo):
+        return self.count()
+
+    #TODO: this is current pretty slow (mostly fixed by check for 0 values)
+    def trim (self, bounding_geo):
         (origin_left, origin_bottom) = self.origin #clean these up
 
-        if trim and self.box.Intersects(bounding_geo):
+        if self.box.Intersects(bounding_geo) and not self.box.Within(bounding_geo):
             #Trim box
             self.box = self.box.Intersection(bounding_geo)
             #recalculate population
@@ -49,15 +53,14 @@ class OcttreeLeaf(Octtree):
             it = numpy.nditer(self.array, flags=['multi_index'])
             while not it.finished:
                 (y,x) = it.multi_index #'from top, from left'
-                poly = coords_to_polygon(origin_left + (x*self.resolution), origin_bottom + (y*self.resolution), 1, 1, self.resolution)
-                original_area = poly.GetArea()
-                new_area = poly.Intersection(bounding_geo).GetArea()
-                value += (new_area / original_area) * self.value
+                if self.array[y,x] > 0: #dont calculate polygons for empty cells
+                    poly = coords_to_polygon(origin_left + (x*self.resolution), origin_bottom + (y*self.resolution), 1, 1, self.resolution)
+                    original_area = poly.GetArea()
+                    new_area = poly.Intersection(bounding_geo).GetArea()
+                    #print original_area, new_area, self.array[y,x]
+                    value += (new_area / original_area) * self.array[y,x]
                 it.iternext()
-            self.value = value
-
-
-        return self.count()
+            self.value = math.ceil(value)
 
 
 class OcttreeNode(Octtree):
@@ -77,10 +80,18 @@ class OcttreeNode(Octtree):
         return sum(counts)
 
     def prune(self, bounding_geo):
-        self.children[:] = [child for child in self.children if not bounding_geo.Disjoint(child.box)]
+        self.children[:] = [child for child in self.children if bounding_geo.Intersects(child.box)]
         for child in self.children:
             child.prune(bounding_geo)
         return self.count()
+
+    def trim(self, bounding_geo):
+        for child in self.children:
+            if not self.box.Within(bounding_geo)and self.box.Intersects(bounding_geo):
+                #print 'trim children'
+                child.trim(bounding_geo)
+            #else:
+                #print 'dont trim'
 
 
 
@@ -155,4 +166,3 @@ def iterate_octtree(octtree):
         for child in octtree.getChildren():
             for r in iterate_octtree(child):
                 yield r
-

@@ -148,4 +148,6 @@ pop_array = load_data(array_origin_x, array_origin_y, sub_array_size, resolution
 
 result_octtree = solve_iteratively(pop_array, (array_origin_x, array_origin_y), resolution, boundary)
 
+result_octtree.trim(boundary)
+
 octtree.save_octtree_as_shapefile(result_octtree)
