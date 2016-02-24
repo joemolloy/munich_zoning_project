@@ -18,9 +18,50 @@ class Octtree:
             yield self
         else:
             for child in self.getChildren():
-                for r in iterate_octtree(child):
+                for r in child.iterate():
                     yield r
 
+
+    def find_matches(self, poly, poly_class):
+
+        if self.box.Intersects(poly):
+            if isinstance(self, OcttreeLeaf):
+                intersection = self.box.Intersection(poly)
+                pc_coverage = intersection.GetArea() / self.box.GetArea()
+                yield (self, (poly_class, pc_coverage))
+            else:
+                for child in self.getChildren():
+                    for r in child.find_matches(poly, poly_class):
+                        yield r
+
+    def add_nodes_to_layer(self, layer):
+        for node in self.iterate():
+            feature = ogr.Feature(layer.GetLayerDefn())
+            feature.SetField("FID", node.index)
+            feature.SetField("Population", node.value)
+            feature.SetGeometry(node.box)
+            layer.CreateFeature(feature)
+            feature.Destroy()
+
+
+    def save_as_shapefile(self, filename):
+        driver = ogr.GetDriverByName("ESRI Shapefile")
+        # create the data source
+        # Remove output shapefile if it already exists
+        if os.path.exists(filename):
+            driver.DeleteDataSource(filename)
+        data_source = driver.CreateDataSource(filename)
+
+        # create the spatial reference, WGS84
+        srs = osr.SpatialReference()
+        srs.ImportFromEPSG(3035)
+
+        layer = data_source.CreateLayer("zones", srs, ogr.wkbPolygon)
+        layer.CreateField(ogr.FieldDefn("FID", ogr.OFTInteger))
+        layer.CreateField(ogr.FieldDefn("Population", ogr.OFTInteger))
+        self.add_nodes_to_layer(layer)
+
+        data_source.Destroy()
 
 class OcttreeLeaf(Octtree):
     def __init__(self, array, origin, resolution):
@@ -149,76 +190,3 @@ def coords_to_polygon(origin_left, origin_bottom, num_cols, num_rows, resolution
     poly.AddGeometry(ring)
     return poly
 
-def save_octtree_as_shapefile(octtree):
-    driver = ogr.GetDriverByName("ESRI Shapefile")
-    # create the data source
-    # Remove output shapefile if it already exists
-    if os.path.exists("zones"):
-        driver.DeleteDataSource("zones")
-    data_source = driver.CreateDataSource("zones")
-
-    # create the spatial reference, WGS84
-    srs = osr.SpatialReference()
-    srs.ImportFromEPSG(3035)
-
-    layer = data_source.CreateLayer("zones", srs, ogr.wkbPolygon)
-    layer.CreateField(ogr.FieldDefn("FID", ogr.OFTInteger))
-    layer.CreateField(ogr.FieldDefn("Population", ogr.OFTInteger))
-    add_nodes_to_layer(layer, octtree)
-
-    data_source.Destroy()
-
-def add_nodes_to_layer(layer, octtree):
-    for node in iterate_octtree(octtree):
-        feature = ogr.Feature(layer.GetLayerDefn())
-        feature.SetField("FID", node.index)
-        feature.SetField("Population", node.value)
-        feature.SetGeometry(node.box)
-        layer.CreateFeature(feature)
-        feature.Destroy()
-
-
-def iterate_octtree(octtree):
-    if isinstance(octtree, OcttreeLeaf):
-        yield octtree
-    else:
-        for child in octtree.getChildren():
-            for r in iterate_octtree(child):
-                yield r
-
-def tabulate_intersection(octtree, layer, class_field):
-    #get all distinct class_field values
-    features = [feature.Clone() for feature in layer]
-    field_values = list({f.GetField(class_field) for f in features})
-
-    #set value for each zones and class to zero
-    zones = {node: {} for node in iterate_octtree(octtree)}
-
-    for z in zones.iterkeys():
-        for c in field_values:
-            zones[z][c] = 0
-
-    for feature in features: #need to reload features.
-        poly_class = feature.GetField(class_field)
-        poly = feature.GetGeometryRef()#.Clone()
-
-        matches = find_matches(octtree, poly, poly_class)
-        for x in matches: print x
-
-        for (zone, (class_name, percentage)) in matches:
-            print class_name, percentage
-            zones[zone][class_name] += percentage
-
-    return zones
-
-def find_matches(node, poly, poly_class):
-
-    if node.box.Intersects(poly):
-        if isinstance(node, OcttreeLeaf):
-            intersection = node.box.Intersection(poly)
-            pc_coverage = intersection.GetArea() / node.box.GetArea()
-            yield (node, (poly_class, pc_coverage))
-        else:
-            for child in node.getChildren():
-                for r in find_matches(child, poly, poly_class):
-                    yield r
