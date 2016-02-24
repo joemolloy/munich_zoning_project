@@ -151,7 +151,7 @@ def tabulate_intersection(zone_octtree, shapefile, class_field):
         for c in field_values:
             zones[z][c] = 0
 
-    for feature in features: #need to reload features.
+    for feature in features:
         poly_class = feature.GetField(class_field)
         poly = feature.GetGeometryRef()#.Clone()
 
@@ -161,4 +161,23 @@ def tabulate_intersection(zone_octtree, shapefile, class_field):
             print zone.index, class_name, percentage
             zones[zone][class_name] += percentage
 
-    return zones
+    return (field_values, zones)
+
+def save_intersections(filename, intersections, field_values):
+    driver = ogr.GetDriverByName("ESRI Shapefile")
+    # create the data source
+    data_source = driver.Open(filename, 1)
+
+    layer = data_source.GetLayer()
+    for f in field_values:
+        layer.CreateField(ogr.FieldDefn(f, ogr.OFTReal))
+
+    for zone, classes in intersections.iteritems():
+        feature = layer.GetFeature(zone.index)
+        for c, percentage in classes.iteritems():
+            feature.SetField(c, percentage)
+
+        layer.SetFeature(feature)
+
+
+    #data_source.Destroy()

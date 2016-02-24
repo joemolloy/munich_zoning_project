@@ -27,4 +27,6 @@ result_octtree.save_as_shapefile("zones")
 
 shapefile = r"boundary/test"
 
-intersections = util.tabulate_intersection(result_octtree, shapefile, "type")
+(field_values, intersections) = util.tabulate_intersection(result_octtree, shapefile, "type")
+
+util.save_intersections("zones", intersections, field_values)

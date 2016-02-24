@@ -37,7 +37,7 @@ class Octtree:
     def add_nodes_to_layer(self, layer):
         for node in self.iterate():
             feature = ogr.Feature(layer.GetLayerDefn())
-            feature.SetField("FID", node.index)
+            feature.SetField("fid", node.index)
             feature.SetField("Population", node.value)
             feature.SetGeometry(node.box)
             layer.CreateFeature(feature)
