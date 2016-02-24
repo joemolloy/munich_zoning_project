@@ -4,10 +4,22 @@ from osgeo import osr
 from osgeo import gdal
 import os
 import math
+import itertools
 
 class Octtree:
+    counter = 0
+
     def __init__(self, box):
         self.box = box    # instance variable unique to each instance
+
+
+    def iterate(self):
+        if isinstance(self, OcttreeLeaf):
+            yield self
+        else:
+            for child in self.getChildren():
+                for r in iterate_octtree(child):
+                    yield r
 
 
 class OcttreeLeaf(Octtree):
@@ -19,6 +31,9 @@ class OcttreeLeaf(Octtree):
         self.resolution = resolution
 
         self.box = self.to_polygon()
+
+        self.index = Octtree.counter
+        Octtree.counter += 1
 
     def to_polygon(self):
         (origin_left, origin_bottom) = self.origin
@@ -37,6 +52,8 @@ class OcttreeLeaf(Octtree):
 
     def prune(self, bounding_geo):
         return self.count()
+
+
 
     #TODO: this is current pretty slow (mostly fixed by check for 0 values)
     def trim (self, bounding_geo):
@@ -87,7 +104,7 @@ class OcttreeNode(Octtree):
 
     def trim(self, bounding_geo):
         for child in self.children:
-            if not self.box.Within(bounding_geo)and self.box.Intersects(bounding_geo):
+            if not child.box.Within(bounding_geo)and child.box.Intersects(bounding_geo):
                 #print 'trim children'
                 child.trim(bounding_geo)
             #else:
@@ -145,6 +162,7 @@ def save_octtree_as_shapefile(octtree):
     srs.ImportFromEPSG(3035)
 
     layer = data_source.CreateLayer("zones", srs, ogr.wkbPolygon)
+    layer.CreateField(ogr.FieldDefn("FID", ogr.OFTInteger))
     layer.CreateField(ogr.FieldDefn("Population", ogr.OFTInteger))
     add_nodes_to_layer(layer, octtree)
 
@@ -153,6 +171,7 @@ def save_octtree_as_shapefile(octtree):
 def add_nodes_to_layer(layer, octtree):
     for node in iterate_octtree(octtree):
         feature = ogr.Feature(layer.GetLayerDefn())
+        feature.SetField("FID", node.index)
         feature.SetField("Population", node.value)
         feature.SetGeometry(node.box)
         layer.CreateFeature(feature)
@@ -166,3 +185,40 @@ def iterate_octtree(octtree):
         for child in octtree.getChildren():
             for r in iterate_octtree(child):
                 yield r
+
+def tabulate_intersection(octtree, layer, class_field):
+    #get all distinct class_field values
+    features = [feature.Clone() for feature in layer]
+    field_values = list({f.GetField(class_field) for f in features})
+
+    #set value for each zones and class to zero
+    zones = {node: {} for node in iterate_octtree(octtree)}
+
+    for z in zones.iterkeys():
+        for c in field_values:
+            zones[z][c] = 0
+
+    for feature in features: #need to reload features.
+        poly_class = feature.GetField(class_field)
+        poly = feature.GetGeometryRef()#.Clone()
+
+        matches = find_matches(octtree, poly, poly_class)
+        for x in matches: print x
+
+        for (zone, (class_name, percentage)) in matches:
+            print class_name, percentage
+            zones[zone][class_name] += percentage
+
+    return zones
+
+def find_matches(node, poly, poly_class):
+
+    if node.box.Intersects(poly):
+        if isinstance(node, OcttreeLeaf):
+            intersection = node.box.Intersection(poly)
+            pc_coverage = intersection.GetArea() / node.box.GetArea()
+            yield (node, (poly_class, pc_coverage))
+        else:
+            for child in node.getChildren():
+                for r in find_matches(child, poly, poly_class):
+                    yield r

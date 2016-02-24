@@ -8,17 +8,14 @@ import octtree
 def loadboundaries(shapefile):
     driver = ogr.GetDriverByName("ESRI Shapefile")
     # load shapefile
-    dataSource = driver.Open(shapefile, 0)
+    filename = shapefile.split('/')[-1] + ".shp"
+    dataSource = driver.Open(shapefile +"/" + filename, 0)
 
     if dataSource is None:
         print 'Could not open %s' % (shapefile)
     else:
         print 'Opened %s' % (shapefile)
         layer = dataSource.GetLayer()
-
-
-    # output SpatialReference
-
 
         featureCount = layer.GetFeatureCount()
         print "Number of features in %s: %d" % (os.path.basename(shapefile),featureCount)
@@ -112,7 +109,7 @@ def load_data(array_origin_x, array_origin_y, size, resolution):
     #this metheod only works when total rows = ncols x nrows in database. (IE no missing values)
     print "parameters", (array_origin_x, x_max, array_origin_y, y_max)
     cursor.execute("""SELECT x_mp_100m, y_mp_100m, "Einwohner"
-                        FROM public."Population"
+                        FROM public."population"
                         WHERE x_mp_100m between %s and %s
                         AND   y_mp_100m between %s and %s
                         """, (array_origin_x, x_max, array_origin_y, y_max))
@@ -131,7 +128,7 @@ def load_data(array_origin_x, array_origin_y, size, resolution):
 
 #next step, find the 'power of two' box that best captures the polygonal boundary area.
 resolution = 100
-boundary = loadboundaries(r"boundary/munich_metro_area.shp")
+boundary = loadboundaries(r"boundary/munich_metro_area")
 (min_x, max_x, min_y, max_y) = map(int, boundary.GetEnvelope()) #given boundary, get envelope of polygon, as integers
 print "boundaries", (min_x, max_x, min_y, max_y)
 #calculate max(width, height) in cells, and raise to next power2 number
@@ -146,8 +143,19 @@ array_origin_y = (max_y + min_y - sub_array_size*100)/ 2
 
 pop_array = load_data(array_origin_x, array_origin_y, sub_array_size, resolution)
 
-result_octtree = solve_iteratively(pop_array, (array_origin_x, array_origin_y), resolution, boundary)
+#result_octtree = solve_iteratively(pop_array, (array_origin_x, array_origin_y), resolution, boundary)
+result_octtree = octtree.build(pop_array, (array_origin_x, array_origin_y), resolution, 4882)
 
-result_octtree.trim(boundary)
+#result_octtree.trim(boundary)
 
 octtree.save_octtree_as_shapefile(result_octtree)
+
+driver = ogr.GetDriverByName("ESRI Shapefile")
+dataSource = driver.Open(r"boundary/test/test.shp", 0)
+
+test = dataSource.GetLayer()
+intersections = octtree.tabulate_intersection(result_octtree, test, "type")
+for (k,v) in intersections.iteritems():
+    if v["Residential"] > 0:
+        print (k.index, v["Residential"])
+#print list(intersections)
