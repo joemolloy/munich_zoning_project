@@ -44,20 +44,21 @@ class Octtree:
             feature.Destroy()
 
 
-    def save_as_shapefile(self, filename):
+    def save_as_shapefile(self, shapefile):
+        print "saving to: ", shapefile
         driver = ogr.GetDriverByName("ESRI Shapefile")
         # create the data source
         # Remove output shapefile if it already exists
-        if os.path.exists(filename):
-            driver.DeleteDataSource(filename)
-        data_source = driver.CreateDataSource(filename)
+        if os.path.exists(shapefile):
+            driver.DeleteDataSource(shapefile)
+        data_source = driver.CreateDataSource(shapefile)
 
         # create the spatial reference, WGS84
         srs = osr.SpatialReference()
         srs.ImportFromEPSG(3035)
 
         layer = data_source.CreateLayer("zones", srs, ogr.wkbPolygon)
-        layer.CreateField(ogr.FieldDefn("FID", ogr.OFTInteger))
+        layer.CreateField(ogr.FieldDefn("fid", ogr.OFTInteger))
         layer.CreateField(ogr.FieldDefn("Population", ogr.OFTInteger))
         self.add_nodes_to_layer(layer)
 

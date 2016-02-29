@@ -4,12 +4,11 @@ from osgeo import ogr, osr
 import psycopg2
 import octtree
 
-def loadboundaries(shapefile):
+def loadboundaries(shapefile, baseSpatialRef):
 
     driver = ogr.GetDriverByName("ESRI Shapefile")
     # load shapefile
-    filename = shapefile.split('/')[-1] + ".shp"
-    dataSource = driver.Open(shapefile +"/" + filename, 0)
+    dataSource = driver.Open(shapefile, 0)
 
     layer = load_layer_from_shapefile(dataSource)
     feature = layer.GetFeature(0)
@@ -17,7 +16,7 @@ def loadboundaries(shapefile):
 
     #convert to EPSG:3035
     outSpatialRef = osr.SpatialReference()
-    outSpatialRef.ImportFromEPSG(3035)
+    outSpatialRef.ImportFromEPSG(baseSpatialRef)
 
     geom.TransformTo(outSpatialRef)
 
@@ -46,19 +45,20 @@ def next_power_of_2(n):
     """
     return 2**(n-1).bit_length()
 
-def solve_iteratively(pop_array, (x_min, y_min), resolution, boundary):
+def solve_iteratively(Config, pop_array, (x_min, y_min), resolution, boundary):
     ##
     # if num zones is too large, we need a higher threshold
     # keep a record of the thresholds that result in the nearest low, and nearest high
     # for the next step, take the halfway number between the two
 
-    desired_num_zones = 1000
+    desired_num_zones = Config.getint("Parameters", "population_threshold")
+    best_low = Config.getint("Parameters", "lower_population_threshold")
+    best_high = Config.getint("Parameters", "upper_population_threshold")
+    tolerance =  Config.getfloat("Parameters", "tolerance")
 
     step = 1
     solved = False
     num_zones = 0
-    best_low = 0
-    best_high = 1000000 #TODO: how to pick this initial  upper limit number?
     #TODO: flag to choose whether to include empty zones in counting, and when saving?
 
     pop_threshold = (best_high - best_low) / 2
@@ -72,7 +72,8 @@ def solve_iteratively(pop_array, (x_min, y_min), resolution, boundary):
         print "\tafter pruning to boundary:", num_zones
         print ''
 
-        solved = abs(num_zones - desired_num_zones)/float(desired_num_zones) < 0.10
+
+        solved = abs(num_zones - desired_num_zones)/float(desired_num_zones) < tolerance
         if not solved:
             if num_zones > desired_num_zones:
                 best_low = max (best_low, pop_threshold)
@@ -90,36 +91,33 @@ def solve_iteratively(pop_array, (x_min, y_min), resolution, boundary):
 
 
 
-def load_data(array_origin_x, array_origin_y, size, resolution):
+def load_data(Config, array_origin_x, array_origin_y, size):
 
-    conn = psycopg2.connect(None, "arcgis", "postgres", "postgres")
+    database_string = Config.get("Input", "databaseString")
+    if database_string:
+        conn = psycopg2.connect(None, "arcgis", "postgres", "postgres")
+    else:
+        db = Config.get("Input", "database")
+        user = Config.get("Input", "user")
+        pw = Config.get("Input", "password")
+        host = Config.get("Input", "host")
+
+        conn = psycopg2.connect(database=db, user=user, password=pw, host=host)
     cursor = conn.cursor()
 
+    sql = Config.get("Input", "sql")
 
-    x_max = array_origin_x + size * 100
-    y_max = array_origin_y + size * 100
+    resolution = Config.getint("Input", "resolution")
 
-    #100m x 100m grid.
-    # cursor.execute("""SELECT
-    #             count (distinct x_mp_100m),
-    #             count (distinct y_mp_100m),
-    #             count (*),
-    #             min (y_mp_100m),
-    #             min (x_mp_100m)
-    #         FROM public.muc_population""")
-    #
-    # (table_num_cols, table_num_rows, total, y_min,x_min) = cursor.fetchone()
+    x_max = array_origin_x + size * resolution
+    y_max = array_origin_y + size * resolution
 
     pop_array = numpy.zeros((size, size), dtype=numpy.int)
 
     #cursor.execute("SELECT x_mp_100m, y_mp_100m, \"Einwohner\" FROM public.muc_all_population;")
     #this metheod only works when total rows = ncols x nrows in database. (IE no missing values)
     print "parameters", (array_origin_x, x_max, array_origin_y, y_max)
-    cursor.execute("""SELECT x_mp_100m, y_mp_100m, "Einwohner"
-                        FROM public."population"
-                        WHERE x_mp_100m between %s and %s
-                        AND   y_mp_100m between %s and %s
-                        """, (array_origin_x, x_max, array_origin_y, y_max))
+    cursor.execute(sql, (array_origin_x, x_max, array_origin_y, y_max)) #xmin xmax, ymin, ymax in that order
     #ttes charhra
     for row in cursor:
         if row[2] > 0:
@@ -133,12 +131,11 @@ def load_data(array_origin_x, array_origin_y, size, resolution):
 
     return pop_array
 
-def tabulate_intersection(zone_octtree, shapefile, class_field):
-
+def tabulate_intersection(zone_octtree, octtreeSaptialRef, shapefile, inSpatialEPSGRef, class_field):
+    print "running intersection tabulation"
     driver = ogr.GetDriverByName("ESRI Shapefile")
     # load shapefile
-    filename = shapefile.split('/')[-1] + ".shp"
-    dataSource = driver.Open(shapefile +"/" + filename, 0)
+    dataSource = driver.Open(shapefile, 0)
     layer = load_layer_from_shapefile(dataSource)
 
     #get all distinct class_field values
@@ -158,10 +155,10 @@ def tabulate_intersection(zone_octtree, shapefile, class_field):
         poly = feature.GetGeometryRef().Clone()
 
         inSpatialRef = osr.SpatialReference()
-        inSpatialRef.ImportFromEPSG(31494) #Germany zone 4 for ALKIS data
+        inSpatialRef.ImportFromEPSG(inSpatialEPSGRef) #Germany zone 4 for ALKIS data
 
         outSpatialRef = osr.SpatialReference()
-        outSpatialRef.ImportFromEPSG(3035)
+        outSpatialRef.ImportFromEPSG(octtreeSaptialRef)
         transform = osr.CoordinateTransformation(inSpatialRef, outSpatialRef)
         poly.Transform(transform)
 
