@@ -1,8 +1,11 @@
-import sys
+import sys, os
 import util, octtree
 import ConfigParser
 
 Config = ConfigParser.ConfigParser(allow_no_value=True)
+
+if len(sys.argv) == 1 or not os.path.exists(sys.argv[1]):
+    raise IOError("please supply a configuration file as a program arugment")
 Config.read(sys.argv[1])
 
 #next step, find the 'power of two' box that best captures the polygonal boundary area.
