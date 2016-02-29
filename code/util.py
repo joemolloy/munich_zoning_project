@@ -33,7 +33,8 @@ def load_layer_from_shapefile(dataSource):
         layer = dataSource.GetLayer()
 
         featureCount = layer.GetFeatureCount()
-        print "Number of features: %d" % featureCount
+        fieldCount = layer.GetLayerDefn().GetFieldCount()
+        print "Number of features: %d, Number of fields: %d" % (featureCount, fieldCount)
         return layer
 
 
@@ -142,7 +143,8 @@ def tabulate_intersection(zone_octtree, shapefile, class_field):
 
     #get all distinct class_field values
     features = [feature.Clone() for feature in layer]
-    field_values = list({f.GetField(class_field) for f in features})
+
+    field_values = list({f.GetField(class_field)[:8] for f in features})
 
     #set value for each zones and class to zero
     zones = {node: {} for node in zone_octtree.iterate()}
@@ -152,13 +154,21 @@ def tabulate_intersection(zone_octtree, shapefile, class_field):
             zones[z][c] = 0
 
     for feature in features:
-        poly_class = feature.GetField(class_field)
-        poly = feature.GetGeometryRef()#.Clone()
+        poly_class = feature.GetField(class_field)[:8]
+        poly = feature.GetGeometryRef().Clone()
+
+        inSpatialRef = osr.SpatialReference()
+        inSpatialRef.ImportFromEPSG(31494) #Germany zone 4 for ALKIS data
+
+        outSpatialRef = osr.SpatialReference()
+        outSpatialRef.ImportFromEPSG(3035)
+        transform = osr.CoordinateTransformation(inSpatialRef, outSpatialRef)
+        poly.Transform(transform)
 
         matches = zone_octtree.find_matches(poly, poly_class)
 
         for (zone, (class_name, percentage)) in matches:
-            print zone.index, class_name, percentage
+            #print zone.index, class_name, percentage
             zones[zone][class_name] += percentage
 
     return (field_values, zones)
@@ -181,3 +191,5 @@ def save_intersections(filename, intersections, field_values):
 
 
     #data_source.Destroy()
+
+#split along region borders

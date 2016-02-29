@@ -25,8 +25,8 @@ result_octtree = octtree.build(pop_array, (array_origin_x, array_origin_y), reso
 
 result_octtree.save_as_shapefile("zones")
 
-shapefile = r"boundary/test"
+shapefile = r"boundary/TN_Siedlung"
 
-(field_values, intersections) = util.tabulate_intersection(result_octtree, shapefile, "type")
+(field_values, intersections) = util.tabulate_intersection(result_octtree, shapefile, "OBJART")
 
 util.save_intersections("zones", intersections, field_values)
