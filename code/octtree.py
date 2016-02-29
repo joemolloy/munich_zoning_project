@@ -34,36 +34,6 @@ class Octtree:
                     for r in child.find_matches(poly, poly_class):
                         yield r
 
-    def add_nodes_to_layer(self, layer):
-        for node in self.iterate():
-            feature = ogr.Feature(layer.GetLayerDefn())
-            feature.SetField("fid", node.index)
-            feature.SetField("Population", node.value)
-            feature.SetGeometry(node.box)
-            layer.CreateFeature(feature)
-            feature.Destroy()
-
-
-    def save_as_shapefile(self, shapefile):
-        print "saving to: ", shapefile
-        driver = ogr.GetDriverByName("ESRI Shapefile")
-        # create the data source
-        # Remove output shapefile if it already exists
-        if os.path.exists(shapefile):
-            driver.DeleteDataSource(shapefile)
-        data_source = driver.CreateDataSource(shapefile)
-
-        # create the spatial reference, WGS84
-        srs = osr.SpatialReference()
-        srs.ImportFromEPSG(3035)
-
-        layer = data_source.CreateLayer("zones", srs, ogr.wkbPolygon)
-        layer.CreateField(ogr.FieldDefn("fid", ogr.OFTInteger))
-        layer.CreateField(ogr.FieldDefn("Population", ogr.OFTInteger))
-        self.add_nodes_to_layer(layer)
-
-        data_source.Destroy()
-
 class OcttreeLeaf(Octtree):
     def __init__(self, array, origin, resolution):
         self.value = numpy.sum(array)
@@ -95,7 +65,13 @@ class OcttreeLeaf(Octtree):
     def prune(self, bounding_geo):
         return self.count()
 
+    def to_feature(self, layer):
+        feature = ogr.Feature(layer.GetLayerDefn())
+        feature.SetField("fid", self.index)
+        feature.SetField("Population", self.value)
+        feature.SetGeometry(self.box)
 
+        return feature
 
     #TODO: this is current pretty slow (mostly fixed by check for 0 values)
     def trim (self, bounding_geo):
@@ -139,7 +115,7 @@ class OcttreeNode(Octtree):
         return sum(counts)
 
     def prune(self, bounding_geo):
-        self.children[:] = [child for child in self.children if bounding_geo.Intersects(child.box)]
+        self.children = [child for child in self.children if bounding_geo.Intersects(child.box)]
         for child in self.children:
             child.prune(bounding_geo)
         return self.count()

@@ -72,7 +72,6 @@ def solve_iteratively(Config, pop_array, (x_min, y_min), resolution, boundary):
         print "\tafter pruning to boundary:", num_zones
         print ''
 
-
         solved = abs(num_zones - desired_num_zones)/float(desired_num_zones) < tolerance
         if not solved:
             if num_zones > desired_num_zones:
@@ -170,21 +169,31 @@ def tabulate_intersection(zone_octtree, octtreeSaptialRef, shapefile, inSpatialE
 
     return (field_values, zones)
 
-def save_intersections(filename, intersections, field_values):
+def save(filename, outputSpatialReference, field_values, intersections):
+    print "saving zones to:", filename
     driver = ogr.GetDriverByName("ESRI Shapefile")
     # create the data source
-    data_source = driver.Open(filename, 1)
+    if os.path.exists(filename):
+        driver.DeleteDataSource(filename)
+    data_source = driver.CreateDataSource(filename)
 
-    layer = data_source.GetLayer()
+    outputSRS = osr.SpatialReference()
+    outputSRS.ImportFromEPSG(outputSpatialReference)
+
+    layer = data_source.CreateLayer("zones", outputSRS, ogr.wkbPolygon)
+    layer.CreateField(ogr.FieldDefn("fid", ogr.OFTInteger))
+    layer.CreateField(ogr.FieldDefn("Population", ogr.OFTInteger))
+
     for f in field_values:
         layer.CreateField(ogr.FieldDefn(f, ogr.OFTReal))
 
     for zone, classes in intersections.iteritems():
-        feature = layer.GetFeature(zone.index)
+        feature = zone.to_feature(layer)
         for c, percentage in classes.iteritems():
             feature.SetField(c, percentage)
+        layer.CreateFeature(feature)
 
-        layer.SetFeature(feature)
+        feature.Destroy()
 
 
     #data_source.Destroy()

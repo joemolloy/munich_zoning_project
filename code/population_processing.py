@@ -27,10 +27,9 @@ if Config.getboolean("Parameters", "solve_iteratively"):
 else:
     population_threshold =  Config.getint("Parameters", "population_threshold")
     result_octtree = octtree.build(pop_array, (array_origin_x, array_origin_y), resolution, population_threshold)
+    result_octtree.prune(boundary)
 
 #result_octtree.trim(boundary)
-output_file = Config.get("Output", "filename")
-result_octtree.save_as_shapefile(output_file)
 
 shapefile = Config.get("Land Use", "filename")
 inSpatialReference = Config.getint("Land Use", "EPSGspatialReference")
@@ -39,4 +38,5 @@ class_field = Config.get("Land Use", "class_field")
 (field_values, intersections) \
     = util.tabulate_intersection(result_octtree, zonesSaptialRef, shapefile, inSpatialReference, class_field)
 
-util.save_intersections(output_file, intersections, field_values)
+output_file = Config.get("Output", "filename")
+util.save(output_file, zonesSaptialRef, field_values, intersections)
