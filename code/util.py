@@ -3,6 +3,7 @@ import os
 from osgeo import ogr, osr
 import psycopg2
 import octtree
+import affine
 
 def loadboundaries(shapefile, baseSpatialRef):
 
@@ -111,24 +112,27 @@ def load_data(Config, array_origin_x, array_origin_y, size):
     x_max = array_origin_x + size * resolution
     y_max = array_origin_y + size * resolution
 
-    pop_array = numpy.zeros((size, size), dtype=numpy.int)
+    pop_array = numpy.zeros((size, size), dtype=numpy.int32)
 
     #cursor.execute("SELECT x_mp_100m, y_mp_100m, \"Einwohner\" FROM public.muc_all_population;")
     #this metheod only works when total rows = ncols x nrows in database. (IE no missing values)
     print "parameters", (array_origin_x, x_max, array_origin_y, y_max)
     cursor.execute(sql, (array_origin_x, x_max, array_origin_y, y_max)) #xmin xmax, ymin, ymax in that order
     #ttes charhra
-    for row in cursor:
-        if row[2] > 0:
-            x = (row[0] - array_origin_x) / resolution
-            y = (row[1] - array_origin_y) / resolution
-            pop_array[y,x] = row[2]
+
+    a = affine.Affine(100,0,array_origin_x,0,-100,array_origin_y+size*resolution)
+
+    for line in cursor:
+        if line[2] > 0:
+            (x,y) = (line[0], line[1])
+            (col, row) = ~a * (x,y)
+            pop_array[row, col] = line[2]
         #reference arrays by (row_no , col_no)
         #reference arrays by (   a_y,      a_x   )
 
     print numpy.sum(pop_array)
 
-    return pop_array
+    return (pop_array, a)
 
 def tabulate_intersection(zone_octtree, octtreeSaptialRef, shapefile, inSpatialEPSGRef, class_field):
     print "running intersection tabulation"

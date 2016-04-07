@@ -20,10 +20,13 @@ max_dimension = max(max_x - min_x, max_y - min_y)
 sub_array_size = util.next_power_of_2(max_dimension / resolution)
 print "array will be size: ", sub_array_size
 
+# need to include here
+
+
 array_origin_x = (max_x + min_x - sub_array_size*resolution)/ 2
 array_origin_y = (max_y + min_y - sub_array_size*resolution)/ 2
 
-pop_array = util.load_data(Config, array_origin_x, array_origin_y, sub_array_size)
+(pop_array, transform) = util.load_data(Config, array_origin_x, array_origin_y, sub_array_size)
 
 if Config.getboolean("Parameters", "solve_iteratively"):
     result_octtree = util.solve_iteratively(Config, pop_array, (array_origin_x, array_origin_y), resolution, boundary)
