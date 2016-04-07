@@ -1,16 +1,14 @@
 import numpy
+import util
 from osgeo import ogr
-from osgeo import osr
-from osgeo import gdal
-import os
-import math
-import itertools
+from Queue import Queue
+from rasterstats import zonal_stats
 
 class Octtree:
-    counter = 0
+    fid_counter = 0
 
-    def __init__(self, box):
-        self.box = box    # instance variable unique to each instance
+    def __init__(self, polygon):
+        self.polygon = polygon    # instance variable unique to each instance
 
 
     def iterate(self):
@@ -22,38 +20,48 @@ class Octtree:
                     yield r
 
     def to_geom_wkb_list(self):
-        return [n.box.ExportToWkb() for n in self.iterate()]
+        return [n.polygon.ExportToWkb() for n in self.iterate()]
 
     def find_matches(self, poly, poly_class):
 
-        if self.box.Intersects(poly):
+        if self.polygon.Intersects(poly):
             if isinstance(self, OcttreeLeaf):
-                intersection = self.box.Intersection(poly)
-                pc_coverage = intersection.GetArea() / self.box.GetArea()
+                intersection = self.polygon.Intersection(poly)
+                pc_coverage = intersection.GetArea() / self.polygon.GetArea()
                 yield (self, (poly_class, pc_coverage))
             else:
                 for child in self.getChildren():
                     for r in child.find_matches(poly, poly_class):
                         yield r
 
+    def find_intersecting_children(self, poly):
+        return [child for child in self.getChildren() if child.polygon.Intersects(poly)]
+
+
+    def splice(self, regions, pop_array, transform):
+        nodes_to_delete = []
+        for poly in regions:
+            node_queue = Queue(self)
+            while (node_queue.not_empty()):
+                #for all intersecting nodes, create a new node from the intersection, and mark the old one for deletion
+                for child in self.find_intersecting_children(poly):
+                    if isinstance(child, OcttreeLeaf):
+                        intersection = child.polygon.Intersection(poly)
+                        spliced_node = OcttreeLeaf(intersection)
+                        self.children.append(spliced_node)
+                        nodes_to_delete.append(child)
+
+                    else:
+                        for child2 in child.getChildren():
+                            node_queue.put(child2)
+
 class OcttreeLeaf(Octtree):
-    def __init__(self, array, origin, resolution):
-        self.value = numpy.sum(array)
-        self.array = array
-        self.origin = origin
-        self.size = array.shape
-        self.resolution = resolution
+    def __init__(self, polygon):
+        self.polygon = polygon
+        self.value = 0
 
-        self.box = self.to_polygon()
-
-        self.index = Octtree.counter
-        Octtree.counter += 1
-
-    def to_polygon(self):
-        (origin_left, origin_bottom) = self.origin
-        (num_rows, num_cols) = self.size
-        resolution = self.resolution
-        return coords_to_polygon(origin_left, origin_bottom, num_cols, num_rows, resolution)
+        self.index = Octtree.fid_counter
+        Octtree.fid_counter += 1
 
     def count(self):
         return 1
@@ -71,38 +79,13 @@ class OcttreeLeaf(Octtree):
         feature = ogr.Feature(layer.GetLayerDefn())
         feature.SetField("fid", self.index)
         feature.SetField("Population", self.value)
-        feature.SetGeometry(self.box)
+        feature.SetGeometry(self.polygon)
 
         return feature
 
-    #TODO: this is current pretty slow (mostly fixed by check for 0 values)
-    def trim (self, bounding_geo):
-        (origin_left, origin_bottom) = self.origin #clean these up
-
-        if self.box.Intersects(bounding_geo) and not self.box.Within(bounding_geo):
-            #Trim box
-            self.box = self.box.Intersection(bounding_geo)
-            #recalculate population
-                #convert raster cells to polygons with value
-                #adjust value by percentage of coverage by new box
-                #sum up values
-            value = 0
-            it = numpy.nditer(self.array, flags=['multi_index'])
-            while not it.finished:
-                (y,x) = it.multi_index #'from top, from left'
-                if self.array[y,x] > 0: #dont calculate polygons for empty cells
-                    poly = coords_to_polygon(origin_left + (x*self.resolution), origin_bottom + (y*self.resolution), 1, 1, self.resolution)
-                    original_area = poly.GetArea()
-                    new_area = poly.Intersection(bounding_geo).GetArea()
-                    #print original_area, new_area, self.array[y,x]
-                    value += (new_area / original_area) * self.array[y,x]
-                it.iternext()
-            self.value = math.ceil(value)
-
-
 class OcttreeNode(Octtree):
-    def __init__(self, box, children):
-        self.box = box
+    def __init__(self, polygon, children):
+        self.polygon = polygon
         self.children = children
 
     def getChildren(self):
@@ -117,57 +100,25 @@ class OcttreeNode(Octtree):
         return sum(counts)
 
     def prune(self, bounding_geo):
-        self.children = [child for child in self.children if bounding_geo.Intersects(child.box)]
+        self.children = [child for child in self.children if bounding_geo.Intersects(child.polygon)]
         for child in self.children:
             child.prune(bounding_geo)
         return self.count()
 
-    def trim(self, bounding_geo):
-        for child in self.children:
-            if not child.box.Within(bounding_geo)and child.box.Intersects(bounding_geo):
-                #print 'trim children'
-                child.trim(bounding_geo)
-            #else:
-                #print 'dont trim'
 
-
-
-def build(array, origin, resolution, pop_threshold):
-    if numpy.sum(array) < pop_threshold or array.size == 1: # leaf
-        return OcttreeLeaf(array, origin, resolution)
+def build(box, array, affine, pop_threshold):
+    #run rasterstats with sum and count
+    stats = zonal_stats(box.ExportToWkb(), array, affine=affine, stats="sum count", raster_out=True, nodata=-1)
+    if stats[0]['sum'] < pop_threshold or stats[0]['count'] == 1: # leaf #need the count of valid cells
+        return OcttreeLeaf(box)
 
     else:#if np.sum(array) >= pop_threshold and array.size >= 4: # leaf
-        (origin_left, origin_bottom) = origin
-        (num_cols, num_rows) = array.shape
+        #split box into 4
+        #recurse to leafs for each subpolygon
+        sub_polygons = util.quarter_polygon(box)
+        #maybe use clipped and masked sub array
+        children = [build(sub, array, affine, pop_threshold) for sub in sub_polygons]
 
-        (l,r) = numpy.array_split(array,2, axis=1)
-        (lt,lb) = numpy.array_split(l, 2)
-        (rt,rb) = numpy.array_split(r, 2)
-
-        #coordinate based origins for sub boxes
-        lt_origin =  (origin_left, origin_bottom + lb.shape[1]*resolution)
-        lb_origin =  (origin_left, origin_bottom)
-        rt_origin =  (origin_left + rb.shape[0]*resolution, origin_bottom + rb.shape[1]*resolution)
-        rb_origin =  (origin_left + lb.shape[0]*resolution, origin_bottom)
-
-        box = coords_to_polygon(origin_left, origin_bottom, num_cols, num_rows, resolution)
-        lt = build(lt, lt_origin, resolution, pop_threshold)
-        lb = build(lb, lb_origin, resolution, pop_threshold)
-        rt = build(rt, rt_origin, resolution, pop_threshold)
-        rb = build(rb, rb_origin, resolution, pop_threshold)
-
-        return OcttreeNode(box, [lt,lb,rt,rb])
-
-def coords_to_polygon(origin_left, origin_bottom, num_cols, num_rows, resolution):
-    ring = ogr.Geometry(ogr.wkbLinearRing)
-    ring.AddPoint_2D(origin_left, origin_bottom)
-    ring.AddPoint_2D(origin_left, origin_bottom+num_cols*resolution)
-    ring.AddPoint_2D(origin_left+num_rows*resolution, origin_bottom+num_cols*resolution)
-    ring.AddPoint_2D(origin_left+num_rows*resolution, origin_bottom)
-    ring.AddPoint_2D(origin_left, origin_bottom)
-    poly = ogr.Geometry(ogr.wkbPolygon)
-    poly.AddGeometry(ring)
-    return poly
-
+        return OcttreeNode(box, children)
 
 

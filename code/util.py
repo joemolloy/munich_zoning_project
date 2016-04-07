@@ -46,7 +46,7 @@ def next_power_of_2(n):
     """
     return 2**(n-1).bit_length()
 
-def solve_iteratively(Config, pop_array, (x_min, y_min), resolution, boundary):
+def solve_iteratively(Config, box, pop_array, affine, boundary):
     ##
     # if num zones is too large, we need a higher threshold
     # keep a record of the thresholds that result in the nearest low, and nearest high
@@ -66,7 +66,7 @@ def solve_iteratively(Config, pop_array, (x_min, y_min), resolution, boundary):
 
 
     while not solved: # difference greater than 10%
-        result_octtree = octtree.build(pop_array, (x_min, y_min), resolution, pop_threshold)
+        result_octtree = octtree.build(box, pop_array, affine, pop_threshold)
         print 'step %d with threshold level %d' % (step, pop_threshold)
         print "\toriginal number of cells:", result_octtree.count()
         num_zones = result_octtree.prune(boundary)
@@ -91,7 +91,7 @@ def solve_iteratively(Config, pop_array, (x_min, y_min), resolution, boundary):
 
 
 
-def load_data(Config, array_origin_x, array_origin_y, size):
+def load_data(Config, array_origin_x, array_origin_y, size, inverted=False):
 
     database_string = Config.get("Input", "databaseString")
     if database_string:
@@ -173,7 +173,7 @@ def tabulate_intersection(zone_octtree, octtreeSaptialRef, shapefile, inSpatialE
 
     return (field_values, zones)
 
-def save(filename, outputSpatialReference, field_values, intersections):
+def save(filename, outputSpatialReference, field_values = None, intersections = None):
     print "saving zones to:", filename
     driver = ogr.GetDriverByName("ESRI Shapefile")
     # create the data source
@@ -188,18 +188,86 @@ def save(filename, outputSpatialReference, field_values, intersections):
     layer.CreateField(ogr.FieldDefn("fid", ogr.OFTInteger))
     layer.CreateField(ogr.FieldDefn("Population", ogr.OFTInteger))
 
-    for f in field_values:
-        layer.CreateField(ogr.FieldDefn(f, ogr.OFTReal))
+    if field_values and intersections:
+        for f in field_values:
+            layer.CreateField(ogr.FieldDefn(f, ogr.OFTReal))
 
-    for zone, classes in intersections.iteritems():
-        feature = zone.to_feature(layer)
-        for c, percentage in classes.iteritems():
-            feature.SetField(c, percentage)
-        layer.CreateFeature(feature)
+        for zone, classes in intersections.iteritems():
+            feature = zone.to_feature(layer)
+            for c, percentage in classes.iteritems():
+                feature.SetField(c, percentage)
+            layer.CreateFeature(feature)
 
-        feature.Destroy()
+            feature.Destroy()
 
 
-    #data_source.Destroy()
+    data_source.Destroy()
 
 #split along region borders
+#recalculate
+
+def quarter_polygon(geom_poly):
+    #https://pcjericks.github.io/py-gdalogr-cookbook/geometry.html#quarter-polygon-and-create-centroids
+    geom_poly_envelope = geom_poly.GetEnvelope()
+    minX = geom_poly_envelope[0]
+    minY = geom_poly_envelope[2]
+    maxX = geom_poly_envelope[1]
+    maxY = geom_poly_envelope[3]
+
+    '''
+    coord0----coord1----coord2
+    |           |           |
+    coord3----coord4----coord5
+    |           |           |
+    coord6----coord7----coord8
+    '''
+    coord0 = minX, maxY
+    coord1 = minX+(maxX-minX)/2, maxY
+    coord2 = maxX, maxY
+    coord3 = minX, minY+(maxY-minY)/2
+    coord4 = minX+(maxX-minX)/2, minY+(maxY-minY)/2
+    coord5 = maxX, minY+(maxY-minY)/2
+    coord6 = minX, minY
+    coord7 = minX+(maxX-minX)/2, minY
+    coord8 = maxX, minY
+
+    ringTopLeft = ogr.Geometry(ogr.wkbLinearRing)
+    ringTopLeft.AddPoint_2D(*coord0)
+    ringTopLeft.AddPoint_2D(*coord1)
+    ringTopLeft.AddPoint_2D(*coord4)
+    ringTopLeft.AddPoint_2D(*coord3)
+    ringTopLeft.AddPoint_2D(*coord0)
+    polyTopLeft = ogr.Geometry(ogr.wkbPolygon)
+    polyTopLeft.AddGeometry(ringTopLeft)
+
+
+    ringTopRight = ogr.Geometry(ogr.wkbLinearRing)
+    ringTopRight.AddPoint_2D(*coord1)
+    ringTopRight.AddPoint_2D(*coord2)
+    ringTopRight.AddPoint_2D(*coord5)
+    ringTopRight.AddPoint_2D(*coord4)
+    ringTopRight.AddPoint_2D(*coord1)
+    polyTopRight = ogr.Geometry(ogr.wkbPolygon)
+    polyTopRight.AddGeometry(ringTopRight)
+
+
+    ringBottomLeft = ogr.Geometry(ogr.wkbLinearRing)
+    ringBottomLeft.AddPoint_2D(*coord3)
+    ringBottomLeft.AddPoint_2D(*coord4)
+    ringBottomLeft.AddPoint_2D(*coord7)
+    ringBottomLeft.AddPoint_2D(*coord6)
+    ringBottomLeft.AddPoint_2D(*coord3)
+    polyBottomLeft = ogr.Geometry(ogr.wkbPolygon)
+    polyBottomLeft.AddGeometry(ringBottomLeft)
+
+
+    ringBottomRight = ogr.Geometry(ogr.wkbLinearRing)
+    ringBottomRight.AddPoint_2D(*coord4)
+    ringBottomRight.AddPoint_2D(*coord5)
+    ringBottomRight.AddPoint_2D(*coord8)
+    ringBottomRight.AddPoint_2D(*coord7)
+    ringBottomRight.AddPoint_2D(*coord4)
+    polyBottomRight = ogr.Geometry(ogr.wkbPolygon)
+    polyBottomRight.AddGeometry(ringBottomRight)
+
+    return [polyTopLeft, polyTopRight, polyBottomLeft, polyBottomRight]

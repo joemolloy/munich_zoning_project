@@ -14,6 +14,7 @@ zonesSaptialRef = Config.getint("Input", "EPSGspatialReference")
 boundary_file = Config.get("Boundary", "filename")
 
 boundary = util.loadboundaries(boundary_file, zonesSaptialRef)
+
 (min_x, max_x, min_y, max_y) = map(int, boundary.GetEnvelope()) #given boundary, get envelope of polygon, as integers
 
 max_dimension = max(max_x - min_x, max_y - min_y)
@@ -29,20 +30,30 @@ array_origin_y = (max_y + min_y - sub_array_size*resolution)/ 2
 (pop_array, transform) = util.load_data(Config, array_origin_x, array_origin_y, sub_array_size)
 
 if Config.getboolean("Parameters", "solve_iteratively"):
-    result_octtree = util.solve_iteratively(Config, pop_array, (array_origin_x, array_origin_y), resolution, boundary)
+    result_octtree = util.solve_iteratively(Config, boundary, pop_array, transform, boundary)
 else:
-    population_threshold =  Config.getint("Parameters", "population_threshold")
-    result_octtree = octtree.build(pop_array, (array_origin_x, array_origin_y), resolution, population_threshold)
+    pop_threshold =  Config.getint("Parameters", "population_threshold")
+    result_octtree = octtree.build(boundary, pop_array, transform, pop_threshold)
     result_octtree.prune(boundary)
 
 #result_octtree.trim(boundary)
 
+import rasterstats
+polys = result_octtree.to_geom_wkb_list()
+stats = rasterstats.zonal_stats(polys, pop_array, affine=transform, stats="sum", nodata=-1)
+print stats
+
+
 shapefile = Config.get("Land Use", "filename")
 inSpatialReference = Config.getint("Land Use", "EPSGspatialReference")
-class_field = Config.get("Land Use", "class_field")
-
-(field_values, intersections) \
-    = util.tabulate_intersection(result_octtree, zonesSaptialRef, shapefile, inSpatialReference, class_field)
-
 output_file = Config.get("Output", "filename")
-util.save(output_file, zonesSaptialRef, field_values, intersections)
+
+if Config.getboolean("Land Use", "calculate_land_use"):
+    class_field = Config.get("Land Use", "class_field")
+
+    (field_values, intersections) \
+        = util.tabulate_intersection(result_octtree, zonesSaptialRef, shapefile, inSpatialReference, class_field)
+
+    util.save(output_file, zonesSaptialRef, field_values, intersections)
+else:
+    print "error"
