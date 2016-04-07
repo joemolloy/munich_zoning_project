@@ -117,7 +117,7 @@ def build(box, array, affine, pop_threshold):
         #recurse to leafs for each subpolygon
         sub_polygons = util.quarter_polygon(box)
         #maybe use clipped and masked sub array
-        children = [build(sub, array, affine, pop_threshold) for sub in sub_polygons]
+        children = [build(sub, stats[0]['mini_raster_array'], stats[0]['mini_raster_affine'], pop_threshold) for sub in sub_polygons]
 
         return OcttreeNode(box, children)
 
