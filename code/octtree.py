@@ -21,6 +21,8 @@ class Octtree:
                 for r in child.iterate():
                     yield r
 
+    def to_geom_wkb_list(self):
+        return [n.box.ExportToWkb() for n in self.iterate()]
 
     def find_matches(self, poly, poly_class):
 
@@ -139,8 +141,8 @@ def build(array, origin, resolution, pop_threshold):
         (num_cols, num_rows) = array.shape
 
         (l,r) = numpy.array_split(array,2, axis=1)
-        (lb,lt) = numpy.array_split(l, 2)
-        (rb,rt) = numpy.array_split(r, 2)
+        (lt,lb) = numpy.array_split(l, 2)
+        (rt,rb) = numpy.array_split(r, 2)
 
         #coordinate based origins for sub boxes
         lt_origin =  (origin_left, origin_bottom + lb.shape[1]*resolution)
@@ -166,4 +168,6 @@ def coords_to_polygon(origin_left, origin_bottom, num_cols, num_rows, resolution
     poly = ogr.Geometry(ogr.wkbPolygon)
     poly.AddGeometry(ring)
     return poly
+
+
 
