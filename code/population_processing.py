@@ -11,9 +11,10 @@ Config.read(sys.argv[1])
 #next step, find the 'power of two' box that best captures the polygonal boundary area.
 resolution = Config.getint("Input", "resolution")
 zonesSaptialRef = Config.getint("Input", "EPSGspatialReference")
-boundary_file = Config.get("Boundary", "filename")
+regions_file = Config.get("Regions", "filename")
 
-boundary = util.loadboundaries(boundary_file, zonesSaptialRef)
+regions = util.load_regions(regions_file, zonesSaptialRef)
+boundary = util.merge_polygons(regions)
 
 (min_x, max_x, min_y, max_y) = map(int, boundary.GetEnvelope()) #given boundary, get envelope of polygon, as integers
 
@@ -34,9 +35,9 @@ if Config.getboolean("Parameters", "solve_iteratively"):
 else:
     pop_threshold =  Config.getint("Parameters", "population_threshold")
     result_octtree = octtree.build(boundary, pop_array, transform, pop_threshold)
-    result_octtree.prune(boundary)
+    #result_octtree.prune(boundary)
 
-#result_octtree.trim(boundary)
+result_octtree.splice(regions, pop_array, transform)
 
 import rasterstats
 polys = result_octtree.to_geom_wkb_list()

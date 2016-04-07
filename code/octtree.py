@@ -35,25 +35,38 @@ class Octtree:
                         yield r
 
     def find_intersecting_children(self, poly):
-        return [child for child in self.getChildren() if child.polygon.Intersects(poly)]
+        return [child for child in self.getChildren()
+                if child.polygon.Intersects(poly) and not child.polygon.Touches(poly)]
 
 
     def splice(self, regions, pop_array, transform):
-        nodes_to_delete = []
+        nodes_to_delete = set()
         for poly in regions:
-            node_queue = Queue(self)
-            while (node_queue.not_empty()):
+            node_queue = Queue()
+            node_queue.put(self)
+            while not node_queue.empty():
+                #print node_queue.qsize()
                 #for all intersecting nodes, create a new node from the intersection, and mark the old one for deletion
-                for child in self.find_intersecting_children(poly):
+                new_children = [] #dont want to add the children until we have iterated all the old ones (1.)
+                top = node_queue.get()
+                for child in top.find_intersecting_children(poly):
                     if isinstance(child, OcttreeLeaf):
                         intersection = child.polygon.Intersection(poly)
                         spliced_node = OcttreeLeaf(intersection)
-                        self.children.append(spliced_node)
-                        nodes_to_delete.append(child)
-
+                        spliced_node.parent = child.parent
+                        #calculate new population value
+                        spliced_node.value = util.calculate_pop_value(spliced_node, pop_array, transform)
+                        new_children.append(spliced_node) #see above (1.)
+                        nodes_to_delete.add(child)
                     else:
-                        for child2 in child.getChildren():
-                            node_queue.put(child2)
+                        node_queue.put(child)
+                self.children.extend(new_children)  #see above (1.)
+        for node in nodes_to_delete:
+            if node in node.parent.getChildren():
+                node.parent.remove(node)
+
+
+
 
 class OcttreeLeaf(Octtree):
     def __init__(self, polygon):
@@ -99,6 +112,9 @@ class OcttreeNode(Octtree):
         counts = map(lambda x: x.count_populated(), self.children)
         return sum(counts)
 
+    def remove(self, child):
+        self.children.remove(child)
+
     def prune(self, bounding_geo):
         self.children = [child for child in self.children if bounding_geo.Intersects(child.polygon)]
         for child in self.children:
@@ -110,7 +126,9 @@ def build(box, array, affine, pop_threshold):
     #run rasterstats with sum and count
     stats = zonal_stats(box.ExportToWkb(), array, affine=affine, stats="sum count", raster_out=True, nodata=-1)
     if stats[0]['sum'] < pop_threshold or stats[0]['count'] == 1: # leaf #need the count of valid cells
-        return OcttreeLeaf(box)
+        leaf = OcttreeLeaf(box)
+        leaf.value = stats[0]['sum']
+        return leaf
 
     else:#if np.sum(array) >= pop_threshold and array.size >= 4: # leaf
         #split box into 4
@@ -118,7 +136,9 @@ def build(box, array, affine, pop_threshold):
         sub_polygons = util.quarter_polygon(box)
         #maybe use clipped and masked sub array
         children = [build(sub, stats[0]['mini_raster_array'], stats[0]['mini_raster_affine'], pop_threshold) for sub in sub_polygons]
-
-        return OcttreeNode(box, children)
+        node = OcttreeNode(box, children)
+        for child in node.getChildren():
+            child.parent = node
+        return node
 
 

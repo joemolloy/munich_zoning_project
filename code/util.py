@@ -3,25 +3,27 @@ import os
 from osgeo import ogr, osr
 import psycopg2
 import octtree
+from rasterstats import zonal_stats
 import affine
 
-def loadboundaries(shapefile, baseSpatialRef):
-
+def load_regions(shapefile, baseSpatialRef):
+    polygons = []
     driver = ogr.GetDriverByName("ESRI Shapefile")
     # load shapefile
     dataSource = driver.Open(shapefile, 0)
 
     layer = load_layer_from_shapefile(dataSource)
-    feature = layer.GetFeature(0)
-    geom = feature.GetGeometryRef().Clone()
+    for feature in layer:
+        geom = feature.GetGeometryRef().Clone()
 
-    #convert to EPSG:3035
-    outSpatialRef = osr.SpatialReference()
-    outSpatialRef.ImportFromEPSG(baseSpatialRef)
+        #convert to EPSG:3035
+        outSpatialRef = osr.SpatialReference()
+        outSpatialRef.ImportFromEPSG(baseSpatialRef)
+        geom.TransformTo(outSpatialRef)
 
-    geom.TransformTo(outSpatialRef)
+        polygons.append(geom)
 
-    return geom
+    return polygons
 
 def load_layer_from_shapefile(dataSource):
 
@@ -196,7 +198,8 @@ def save(filename, outputSpatialReference, field_values = None, intersections = 
             feature = zone.to_feature(layer)
             for c, percentage in classes.iteritems():
                 feature.SetField(c, percentage)
-            layer.CreateFeature(feature)
+            if feature.GetGeometryRef().GetGeometryType() == 3: #is a polygon
+                layer.CreateFeature(feature)
 
             feature.Destroy()
 
@@ -271,3 +274,14 @@ def quarter_polygon(geom_poly):
     polyBottomRight.AddGeometry(ringBottomRight)
 
     return [polyTopLeft, polyTopRight, polyBottomLeft, polyBottomRight]
+
+def calculate_pop_value(node, array, transform):
+    stats = zonal_stats(node.polygon.ExportToWkb(), array, affine=transform, stats="sum", nodata=-1)
+    return stats[0]['sum']
+
+def merge_polygons(polygons):
+    unionc = ogr.Geometry(ogr.wkbMultiPolygon)
+    for p in polygons:
+        unionc.AddGeometry(p)
+    union = unionc.UnionCascaded()
+    return union
