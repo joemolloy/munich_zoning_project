@@ -3,6 +3,7 @@ import util
 from osgeo import ogr
 from Queue import Queue
 from rasterstats import zonal_stats
+import octtree
 
 class Octtree:
     fid_counter = 0
@@ -97,9 +98,10 @@ class OcttreeLeaf(Octtree):
         return feature
 
 class OcttreeNode(Octtree):
-    def __init__(self, polygon, children):
+    def __init__(self, polygon, children, parent = None):
         self.polygon = polygon
         self.children = children
+        self.parent = parent
 
     def getChildren(self):
         return self.children
@@ -121,9 +123,18 @@ class OcttreeNode(Octtree):
             child.prune(bounding_geo)
         return self.count()
 
+def build_out_nodes(node_list, array, affine, pop_threshold):
+    octtree.fid_counter = 0
+    for node in node_list:
+        sub_polygons = util.quarter_polygon(node.polygon)
+        node.children = [build(box, array, affine, pop_threshold) for box in sub_polygons]
+        for child in node.children:
+            child.parent = node
 
-def build(box, array, affine, pop_threshold):
+
+def build(box, array, affine, pop_threshold): #list of bottom nodes to work from
     #run rasterstats with sum and count
+
     stats = zonal_stats(box.ExportToWkb(), array, affine=affine, stats="sum count", raster_out=True, nodata=-1)
     if stats[0]['sum'] < pop_threshold or stats[0]['count'] == 1: # leaf #need the count of valid cells
         leaf = OcttreeLeaf(box)

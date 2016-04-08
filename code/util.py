@@ -2,6 +2,7 @@ import numpy
 import os
 from osgeo import ogr, osr
 import psycopg2
+from octtree import OcttreeLeaf, OcttreeNode
 import octtree
 from rasterstats import zonal_stats
 import affine
@@ -39,6 +40,12 @@ def load_layer_from_shapefile(dataSource):
         print "Number of features: %d, Number of fields: %d" % (featureCount, fieldCount)
         return layer
 
+def build_region_octtree(regions):
+    boundary = merge_polygons(regions)
+    ot = None
+    children = [OcttreeNode(region,[], ot) for region in regions]
+    ot = OcttreeNode(boundary, children)
+    return ot
 
 #Round up to next higher power of 2 (return x if it's already a power of 2).
 #from http://stackoverflow.com/questions/1322510
@@ -48,7 +55,7 @@ def next_power_of_2(n):
     """
     return 2**(n-1).bit_length()
 
-def solve_iteratively(Config, box, pop_array, affine, boundary):
+def solve_iteratively(Config, tree, tree_bottom_children, pop_array, affine, boundary):
     ##
     # if num zones is too large, we need a higher threshold
     # keep a record of the thresholds that result in the nearest low, and nearest high
@@ -68,11 +75,10 @@ def solve_iteratively(Config, box, pop_array, affine, boundary):
 
 
     while not solved: # difference greater than 10%
-        result_octtree = octtree.build(box, pop_array, affine, pop_threshold)
-        print 'step %d with threshold level %d' % (step, pop_threshold)
-        print "\toriginal number of cells:", result_octtree.count()
-        num_zones = result_octtree.prune(boundary)
-        print "\tafter pruning to boundary:", num_zones
+        print 'step %d with threshold level %d...' % (step, pop_threshold)
+        octtree.build_out_nodes(tree_bottom_children, pop_array, affine, pop_threshold)
+        num_zones = tree.count()
+        print "\tnumber of cells:", num_zones
         print ''
 
         solved = abs(num_zones - desired_num_zones)/float(desired_num_zones) < tolerance
@@ -88,9 +94,6 @@ def solve_iteratively(Config, box, pop_array, affine, boundary):
     print "Solution found!"
     print "\t%6d zones" % (num_zones)
     print "\t%6d threshold" % (pop_threshold)
-
-    return result_octtree
-
 
 
 def load_data(Config, array_origin_x, array_origin_y, size, inverted=False):
@@ -175,7 +178,37 @@ def tabulate_intersection(zone_octtree, octtreeSaptialRef, shapefile, inSpatialE
 
     return (field_values, zones)
 
-def save(filename, outputSpatialReference, field_values = None, intersections = None):
+def save_with_landuse(filename, outputSpatialReference, field_values, intersections):
+    print "saving zones with land use to:", filename
+    driver = ogr.GetDriverByName("ESRI Shapefile")
+    # create the data source
+    if os.path.exists(filename):
+        driver.DeleteDataSource(filename)
+    data_source = driver.CreateDataSource(filename)
+
+    outputSRS = osr.SpatialReference()
+    outputSRS.ImportFromEPSG(outputSpatialReference)
+
+    layer = data_source.CreateLayer("zones", outputSRS, ogr.wkbPolygon)
+    layer.CreateField(ogr.FieldDefn("fid", ogr.OFTInteger))
+    layer.CreateField(ogr.FieldDefn("Population", ogr.OFTInteger))
+
+    for f in field_values:
+        layer.CreateField(ogr.FieldDefn(f, ogr.OFTReal))
+
+    for zone, classes in intersections.iteritems():
+        feature = zone.to_feature(layer)
+        for c, percentage in classes.iteritems():
+            feature.SetField(c, percentage)
+        if feature.GetGeometryRef().GetGeometryType() == 3: #is a polygon
+            layer.CreateFeature(feature)
+
+        feature.Destroy()
+
+
+    data_source.Destroy()
+
+def save_tree_only(filename, outputSpatialReference, octtree):
     print "saving zones to:", filename
     driver = ogr.GetDriverByName("ESRI Shapefile")
     # create the data source
@@ -190,24 +223,15 @@ def save(filename, outputSpatialReference, field_values = None, intersections = 
     layer.CreateField(ogr.FieldDefn("fid", ogr.OFTInteger))
     layer.CreateField(ogr.FieldDefn("Population", ogr.OFTInteger))
 
-    if field_values and intersections:
-        for f in field_values:
-            layer.CreateField(ogr.FieldDefn(f, ogr.OFTReal))
+    for node in octtree.iterate():
+        feature = node.to_feature(layer)
 
-        for zone, classes in intersections.iteritems():
-            feature = zone.to_feature(layer)
-            for c, percentage in classes.iteritems():
-                feature.SetField(c, percentage)
-            if feature.GetGeometryRef().GetGeometryType() == 3: #is a polygon
-                layer.CreateFeature(feature)
+        layer.CreateFeature(feature)
 
-            feature.Destroy()
+        feature.Destroy()
 
 
     data_source.Destroy()
-
-#split along region borders
-#recalculate
 
 def quarter_polygon(geom_poly):
     #https://pcjericks.github.io/py-gdalogr-cookbook/geometry.html#quarter-polygon-and-create-centroids
@@ -273,7 +297,12 @@ def quarter_polygon(geom_poly):
     polyBottomRight = ogr.Geometry(ogr.wkbPolygon)
     polyBottomRight.AddGeometry(ringBottomRight)
 
-    return [polyTopLeft, polyTopRight, polyBottomLeft, polyBottomRight]
+    quaterPolyTopLeft = polyTopLeft.Intersection(geom_poly)
+    quaterPolyTopRight =  polyTopRight.Intersection(geom_poly)
+    quaterPolyBottomLeft =  polyBottomLeft.Intersection(geom_poly)
+    quaterPolyBottomRight =  polyBottomRight.Intersection(geom_poly)
+
+    return [quaterPolyTopLeft, quaterPolyTopRight, quaterPolyBottomLeft, quaterPolyBottomRight]
 
 def calculate_pop_value(node, array, transform):
     stats = zonal_stats(node.polygon.ExportToWkb(), array, affine=transform, stats="sum", nodata=-1)
