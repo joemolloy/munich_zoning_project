@@ -55,7 +55,7 @@ def next_power_of_2(n):
     """
     return 2**(n-1).bit_length()
 
-def solve_iteratively(Config, tree, tree_bottom_children, pop_array, affine, boundary):
+def solve_iteratively(Config, region_octtree, regions, pop_array, affine, boundary):
     ##
     # if num zones is too large, we need a higher threshold
     # keep a record of the thresholds that result in the nearest low, and nearest high
@@ -76,8 +76,8 @@ def solve_iteratively(Config, tree, tree_bottom_children, pop_array, affine, bou
 
     while not solved: # difference greater than 10%
         print 'step %d with threshold level %d...' % (step, pop_threshold)
-        octtree.build_out_nodes(tree_bottom_children, pop_array, affine, pop_threshold)
-        num_zones = tree.count_populated()
+        octtree.build_out_nodes(region_octtree, regions, pop_array, affine, pop_threshold)
+        num_zones = region_octtree.count_populated()
         print "\tnumber of cells:", num_zones
         print ''
 

@@ -123,19 +123,15 @@ class OcttreeNode(Octtree):
             child.prune(bounding_geo)
         return self.count()
 
-def build_out_nodes(node_list, array, affine, pop_threshold):
+def build_out_nodes(region_node, regions, array, affine, pop_threshold):
     octtree.fid_counter = 0
-    for node in node_list:
-        sub_polygons = util.quarter_polygon(node.polygon)
-        node.children = [build(box, array, affine, pop_threshold)
-                         for box in sub_polygons
-                         if box.GetGeometryName() == 'POLYGON']
 
-        if box.GetGeometryName() != 'POLYGON':
-            print box.GetGeometryName()
+    region_node.children = [build(geom, array, affine, pop_threshold)
+                     for geom in regions]
+                     #if geom.GetGeometryName() == 'POLYGON']
 
-        for child in node.children:
-            child.parent = node
+    for child in region_node.children:
+        child.parent = region_node
 
 
 def build(box, array, affine, pop_threshold): #list of bottom nodes to work from
@@ -153,7 +149,7 @@ def build(box, array, affine, pop_threshold): #list of bottom nodes to work from
         sub_polygons = util.quarter_polygon(box)
         #maybe use clipped and masked sub array
         children = [build(sub, stats[0]['mini_raster_array'], stats[0]['mini_raster_affine'], pop_threshold)
-                    for sub in sub_polygons if sub.GetGeometryType() == 3] #type 3 is polygon
+                    for sub in sub_polygons if sub.GetGeometryName() == 'POLYGON'] #type 3 is polygon
         node = OcttreeNode(box, children)
         for child in node.getChildren():
             child.parent = node

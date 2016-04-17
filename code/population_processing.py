@@ -33,10 +33,10 @@ array_origin_y = (max_y + min_y - sub_array_size*resolution)/ 2
 (pop_array, transform) = util.load_data(Config, array_origin_x, array_origin_y, sub_array_size)
 
 if Config.getboolean("Parameters", "solve_iteratively"):
-    util.solve_iteratively(Config, region_octtree, tree_bottom, pop_array, transform, boundary)
+    util.solve_iteratively(Config, region_octtree, regions, pop_array, transform, boundary)
 else:
     pop_threshold =  Config.getint("Parameters", "population_threshold")
-    octtree.build_out_nodes(tree_bottom, pop_array, transform, pop_threshold)
+    octtree.build_out_nodes(region_octtree, regions, pop_array, transform, pop_threshold)
     #result_octtree.prune(boundary)
 
 #result_octtree.splice(regions, pop_array, transform)
