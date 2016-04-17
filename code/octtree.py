@@ -127,7 +127,13 @@ def build_out_nodes(node_list, array, affine, pop_threshold):
     octtree.fid_counter = 0
     for node in node_list:
         sub_polygons = util.quarter_polygon(node.polygon)
-        node.children = [build(box, array, affine, pop_threshold) for box in sub_polygons]
+        node.children = [build(box, array, affine, pop_threshold)
+                         for box in sub_polygons
+                         if box.GetGeometryName() == 'POLYGON']
+
+        if box.GetGeometryName() != 'POLYGON':
+            print box.GetGeometryName()
+
         for child in node.children:
             child.parent = node
 
@@ -141,7 +147,7 @@ def build(box, array, affine, pop_threshold): #list of bottom nodes to work from
         leaf.value = stats[0]['sum']
         return leaf
 
-    else:#if np.sum(array) >= pop_threshold and array.size >= 4: # leaf
+    else:  #if np.sum(array) >= pop_threshold and array.size >= 4: # leaf
         #split box into 4
         #recurse to leafs for each subpolygon
         sub_polygons = util.quarter_polygon(box)

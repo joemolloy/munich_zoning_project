@@ -77,7 +77,7 @@ def solve_iteratively(Config, tree, tree_bottom_children, pop_array, affine, bou
     while not solved: # difference greater than 10%
         print 'step %d with threshold level %d...' % (step, pop_threshold)
         octtree.build_out_nodes(tree_bottom_children, pop_array, affine, pop_threshold)
-        num_zones = tree.count()
+        num_zones = tree.count_populated()
         print "\tnumber of cells:", num_zones
         print ''
 
@@ -302,7 +302,19 @@ def quarter_polygon(geom_poly):
     quaterPolyBottomLeft =  polyBottomLeft.Intersection(geom_poly)
     quaterPolyBottomRight =  polyBottomRight.Intersection(geom_poly)
 
-    return [quaterPolyTopLeft, quaterPolyTopRight, quaterPolyBottomLeft, quaterPolyBottomRight]
+    multipolys = [quaterPolyTopLeft, quaterPolyTopRight, quaterPolyBottomLeft, quaterPolyBottomRight]
+    polys = []
+
+    for geom in multipolys:
+        if geom.GetGeometryName() in ['MULTIPOLYGON', 'GEOMETRYCOLLECTION'] :
+            for geom_part in geom:
+                if geom_part.GetGeometryName() == 'POLYGON':
+                    polys.append(geom_part.Clone())
+        else:
+            polys.append(geom)
+
+
+    return polys
 
 def calculate_pop_value(node, array, transform):
     stats = zonal_stats(node.polygon.ExportToWkb(), array, affine=transform, stats="sum", nodata=-1)
