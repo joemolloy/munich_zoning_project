@@ -22,7 +22,12 @@ def load_regions(shapefile, baseSpatialRef):
         outSpatialRef.ImportFromEPSG(baseSpatialRef)
         geom.TransformTo(outSpatialRef)
 
-        polygons.append(geom)
+        if geom.GetGeometryName() in ['MULTIPOLYGON', 'GEOMETRYCOLLECTION'] :
+            for geom_part in geom:
+                if geom_part.GetGeometryName() == 'POLYGON':
+                    polygons.append(geom_part.Clone())
+        elif geom.GetGeometryName() == 'POLYGON':
+            polygons.append(geom)
 
     return polygons
 

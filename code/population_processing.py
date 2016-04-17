@@ -16,7 +16,6 @@ regions_file = Config.get("Regions", "filename")
 regions = util.load_regions(regions_file, zonesSaptialRef)
 region_octtree = util.build_region_octtree(regions)
 boundary = region_octtree.polygon
-tree_bottom = region_octtree.children
 
 (min_x, max_x, min_y, max_y) = map(int, boundary.GetEnvelope()) #given boundary, get envelope of polygon, as integers
 
