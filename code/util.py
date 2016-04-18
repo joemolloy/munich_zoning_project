@@ -49,7 +49,7 @@ def build_region_octtree(regions):
     boundary = merge_polygons(regions)
     ot = None
     children = [OcttreeNode(region,[], ot) for region in regions]
-    ot = OcttreeNode(boundary, children)
+    ot = OcttreeNode(boundary, children, None)
     return ot
 
 #Round up to next higher power of 2 (return x if it's already a power of 2).
@@ -81,7 +81,7 @@ def solve_iteratively(Config, region_octtree, regions, pop_array, affine, bounda
 
     while not solved: # difference greater than 10%
         print 'step %d with threshold level %d...' % (step, pop_threshold)
-        octtree.build_out_nodes(region_octtree, regions, pop_array, affine, pop_threshold)
+        region_octtree = octtree.build_out_nodes(region_octtree, regions, pop_array, affine, pop_threshold)
         num_zones = region_octtree.count_populated()
         print "\tnumber of cells:", num_zones
         print ''
@@ -99,6 +99,8 @@ def solve_iteratively(Config, region_octtree, regions, pop_array, affine, bounda
     print "Solution found!"
     print "\t%6d zones" % (num_zones)
     print "\t%6d threshold" % (pop_threshold)
+
+    return region_octtree
 
 
 def load_data(Config, array_origin_x, array_origin_y, size, inverted=False):
@@ -321,9 +323,24 @@ def quarter_polygon(geom_poly):
 
     return polys
 
+def get_geom_parts(geom):
+    parts = []
+    if geom.GetGeometryName() in ['MULTIPOLYGON', 'GEOMETRYCOLLECTION'] :
+        for geom_part in geom:
+            if geom_part.GetGeometryName() == 'POLYGON':
+                parts.append(geom_part.Clone())
+    elif geom.GetGeometryName() == 'POLYGON': #ignore linestrings and multilinestrings
+        parts.append(geom)
+    return parts
+
+
 def calculate_pop_value(node, array, transform):
     stats = zonal_stats(node.polygon.ExportToWkb(), array, affine=transform, stats="sum", nodata=-1)
-    return stats[0]['sum']
+    total = stats[0]['sum']
+    if total:
+        return total
+    else:
+        return 0
 
 def merge_polygons(polygons):
     unionc = ogr.Geometry(ogr.wkbMultiPolygon)
@@ -331,3 +348,8 @@ def merge_polygons(polygons):
         unionc.AddGeometry(p)
     union = unionc.UnionCascaded()
     return union
+
+def find_best_neighbour(node, neighbours):
+    for neighbour in neighbours:
+        if node.polygon.Intersects(neighbour.polygon): #just take the first intersecting for the moment
+            return neighbour
