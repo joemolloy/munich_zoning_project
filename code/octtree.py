@@ -36,50 +36,48 @@ class Octtree:
                     for r in child.find_matches(poly, poly_class):
                         yield r
 
-    def find_intersecting_children_on_boundary(self, poly):
-        bordering = [child for child in self.getChildren()
-                if child.polygon.Intersects(poly) and not child.polygon.Within(poly)]
-        contained = [child for child in self.getChildren()
-                if isinstance(child, OcttreeLeaf) and child.polygon.Within(poly)]
-        return (bordering, contained)
-
+    def find_intersecting_children(self, poly):
+        return [child for child in self.getChildren() if child.polygon.Intersects(poly)]
 
     def splice(self, regions, pop_array, transform):
-        print "running splice and merge algorithm..."
-        region_node_border_dict = defaultdict(list)
-        region_node_all_dict = defaultdict(list)
+        print "running splice algorithm..."
+
+        to_merge = defaultdict(list)
+        region_nodes = defaultdict(list)
         nodes_to_delete = set()
         for region in regions:
             node_queue = Queue()
             node_queue.put(self)
             while not node_queue.empty():
+
                 #print node_queue.qsize()
                 #for all intersecting nodes, create a new node from the intersection, and mark the old one for deletion
-                new_children = [] #dont want to add the children until we have iterated all the old ones (1.)
                 top = node_queue.get()
-                (bordering, contained_leafs) = top.find_intersecting_children_on_boundary(region)
-                region_node_all_dict[region].extend(contained_leafs)
+                nodes_inside_region = top.find_intersecting_children(region)
 
-                for child in bordering:
+                for child in nodes_inside_region:
                     if isinstance(child, OcttreeLeaf):
-                        intersection = child.polygon.Intersection(region) #Check that intersection is a polygon
+                        if child.polygon.Within(region): #inside, so keep and all to list of all nodes
+                            region_nodes[region].append(child)
+                        else: #on the border, split
+                            intersection = child.polygon.Intersection(region) #Check that intersection is a polygon
 
-                        intersections_list = util.get_geom_parts(intersection)
+                            intersections_list = util.get_geom_parts(intersection)
 
-                        for intersection in intersections_list:
-                            spliced_node = OcttreeLeaf(intersection, child.parent)
-                            #calculate new population value
-                            spliced_node.value = util.calculate_pop_value(spliced_node, pop_array, transform)
-                            region_node_all_dict[region].append(spliced_node)
-                            if spliced_node.value > 50:
-                                new_children.append(spliced_node) #see above (1.)
-                            else:
-                                region_node_border_dict[region].append(spliced_node)
+                            for intersection in intersections_list:
+                                spliced_node = OcttreeLeaf(intersection, top)
+                                region_nodes[region].append(spliced_node)
+                                #calculate new population value
+                                spliced_node.value = util.calculate_pop_value(spliced_node, pop_array, transform)
+                                if spliced_node.value > 50:
+                                    top.children.append(spliced_node)
+                                else:
+                                    #need to combine later
+                                    to_merge[region].append(spliced_node)
 
-                            nodes_to_delete.add(child)
+                                nodes_to_delete.add(child)
                     else:
                         node_queue.put(child)
-                self.children.extend(new_children)  #see above (1.)
 
         for node in nodes_to_delete:
             if node in node.parent.getChildren():
@@ -89,22 +87,31 @@ class Octtree:
                 #if area or population too small, find neighbouring cells and shared boundaries
         #max_no_nodes = max([len(l) for l in region_node_border_dict.itervalues()])
         #print "max num nodes:", max_no_nodes
+        print "running merging"
+        for region, node_list in to_merge.iteritems():
 
-        for region, node_list in region_node_border_dict.iteritems():
-
-            (vert_shared, hori_shared) = util.build_geom_line_dict(region_node_all_dict[region])
+            (vert_shared, hori_shared) = util.build_geom_line_dict(region_nodes[region])
 
             for node in node_list:
-                best_neighbour = util.find_best_neighbour(node, region_node_all_dict[region], vert_shared, hori_shared)
-                print best_neighbour
-                if best_neighbour:
-                    best_neighbour.polygon = best_neighbour.polygon.Union(node.polygon)
-                    best_neighbour.value = best_neighbour.value + node.value
-                    if best_neighbour not in best_neighbour.parent.children:
-                       best_neighbour.parent.children.append(best_neighbour)
-                else:
-
+                if len(region_nodes[region]) == 1:
+                    print "no neighbour needed for: ", node.index
                     node.parent.children.append(node)
+                else:
+                    best_neighbour = util.find_best_neighbour(node, region_nodes[region], vert_shared, hori_shared)
+                    if best_neighbour:
+                        best_neighbour.polygon = best_neighbour.polygon.Union(node.polygon)
+                        best_neighbour.value = best_neighbour.value + node.value
+                        node.parent.remove(node)
+                        #need to update our boundary checker
+                        region_nodes[region].remove(node)
+                        (vert_shared, hori_shared) = util.build_geom_line_dict(region_nodes[region])
+
+                        if best_neighbour not in best_neighbour.parent.children:
+                            print "Why wasnt ", best_neighbour.index, "there?"
+                            best_neighbour.parent.children.append(best_neighbour)
+                    else:
+                        print "no neighbour found for: ", node.index, " options were", [n.index for n in region_nodes[region]]
+
 
 
 
@@ -157,8 +164,8 @@ class OcttreeNode(Octtree):
         return sum(counts)
 
     def remove(self, child):
-        print "removing child id:", child.index
-        self.children.remove(child)
+        if child in self.children:
+            self.children.remove(child)
 
     def prune(self, bounding_geo):
         self.children = [child for child in self.children if bounding_geo.Intersects(child.polygon)]
