@@ -45,10 +45,11 @@ class Octtree:
 
 
     def splice(self, regions, pop_array, transform):
+        print "running splice and merge algorithm..."
         region_node_border_dict = defaultdict(list)
-        region_node_contained_dict = defaultdict(list)
+        region_node_all_dict = defaultdict(list)
         nodes_to_delete = set()
-        for poly in regions:
+        for region in regions:
             node_queue = Queue()
             node_queue.put(self)
             while not node_queue.empty():
@@ -56,12 +57,12 @@ class Octtree:
                 #for all intersecting nodes, create a new node from the intersection, and mark the old one for deletion
                 new_children = [] #dont want to add the children until we have iterated all the old ones (1.)
                 top = node_queue.get()
-                (bordering, contained_leafs) = top.find_intersecting_children_on_boundary(poly)
-                region_node_contained_dict[poly].extend(contained_leafs)
+                (bordering, contained_leafs) = top.find_intersecting_children_on_boundary(region)
+                region_node_all_dict[region].extend(contained_leafs)
 
                 for child in bordering:
                     if isinstance(child, OcttreeLeaf):
-                        intersection = child.polygon.Intersection(poly) #Check that intersection is a polygon
+                        intersection = child.polygon.Intersection(region) #Check that intersection is a polygon
 
                         intersections_list = util.get_geom_parts(intersection)
 
@@ -69,12 +70,20 @@ class Octtree:
                             spliced_node = OcttreeLeaf(intersection, child.parent)
                             #calculate new population value
                             spliced_node.value = util.calculate_pop_value(spliced_node, pop_array, transform)
-                            new_children.append(spliced_node) #see above (1.)
-                            region_node_border_dict[poly].append(spliced_node)
+                            region_node_all_dict[region].append(spliced_node)
+                            if spliced_node.value > 50:
+                                new_children.append(spliced_node) #see above (1.)
+                            else:
+                                region_node_border_dict[region].append(spliced_node)
+
                             nodes_to_delete.add(child)
                     else:
                         node_queue.put(child)
                 self.children.extend(new_children)  #see above (1.)
+
+        for node in nodes_to_delete:
+            if node in node.parent.getChildren():
+                node.parent.remove(node)
 
         #need to merge nodes in region that have small area or population size
                 #if area or population too small, find neighbouring cells and shared boundaries
@@ -84,19 +93,17 @@ class Octtree:
         for region, node_list in region_node_border_dict.iteritems():
 
             for node in node_list:
-                #if node is too small, find all neighbours (delaunay triangulation)
-                if node.value < 50:
-                    best_neighbour = util.find_best_neighbour(node, region_node_contained_dict[region])
-                    if best_neighbour:
-                        best_neighbour.polygon = best_neighbour.polygon.Union(node.polygon)
-                        print best_neighbour.value, isinstance(best_neighbour, OcttreeLeaf),\
-                            node.value, isinstance(node, OcttreeLeaf)
-                        best_neighbour.value = best_neighbour.value + node.value
-                        nodes_to_delete.add(node)
+                best_neighbour = util.find_best_neighbour(node, region_node_all_dict[region])
+                print best_neighbour
+                if best_neighbour:
+                    best_neighbour.polygon = best_neighbour.polygon.Union(node.polygon)
+                    best_neighbour.value = best_neighbour.value + node.value
+                    if best_neighbour not in best_neighbour.parent.children:
+                       best_neighbour.parent.children.append(best_neighbour)
+                else:
 
-        for node in nodes_to_delete:
-            if node in node.parent.getChildren():
-                node.parent.remove(node)
+                    node.parent.children.append(node)
+
 
 
 

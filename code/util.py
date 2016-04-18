@@ -350,6 +350,13 @@ def merge_polygons(polygons):
     return union
 
 def find_best_neighbour(node, neighbours):
+    max_area = 0
+    best_neighbour = None
     for neighbour in neighbours:
-        if node.polygon.Intersects(neighbour.polygon): #just take the first intersecting for the moment
-            return neighbour
+        if node.index != neighbour.index:
+            neighbour_area = neighbour.polygon.GetArea()
+            if node.polygon.Intersects(neighbour.polygon) and neighbour_area > max_area:
+                max_area = neighbour_area
+                best_neighbour = neighbour
+
+    return best_neighbour
