@@ -349,14 +349,56 @@ def merge_polygons(polygons):
     union = unionc.UnionCascaded()
     return union
 
-def find_best_neighbour(node, neighbours):
-    max_area = 0
+def find_best_neighbour(node, neighbours, vert_shared, hori_shared):
+    max_length = 0
     best_neighbour = None
     for neighbour in neighbours:
         if node.index != neighbour.index:
-            neighbour_area = neighbour.polygon.GetArea()
-            if node.polygon.Intersects(neighbour.polygon) and neighbour_area > max_area:
-                max_area = neighbour_area
+            #neighbour_area = neighbour.polygon.GetArea()
+            length = get_common_edge_length(node.polygon, neighbour.polygon, vert_shared, hori_shared)
+            if node.polygon.Intersects(neighbour.polygon) and length > max_length:
+                max_length = length
                 best_neighbour = neighbour
 
     return best_neighbour
+
+import shapely
+from shapely.geometry import LineString
+
+def get_common_edge_length(geom1, geom2, geom_vertical_line_parts_map, geom_horizontal_line_parts_map):
+
+    #get all intersecting lines
+    vert_shared = [h1.intersection(h2)
+                   for h1 in geom_vertical_line_parts_map[geom1]
+                   for h2 in geom_vertical_line_parts_map[geom2]]
+
+    hori_shared = [h1.intersection(h2)
+                   for h1 in geom_horizontal_line_parts_map[geom1]
+                   for h2 in geom_horizontal_line_parts_map[geom2]]
+
+    for l in hori_shared+vert_shared:
+        if l.geometryType() == "LineString":
+            print l.geometryType(), l, l.length
+        return l.length
+
+
+
+
+
+def build_geom_line_dict(nodes):
+    hori_map = {}
+    vert_map = {}
+
+
+        # geom in GeoJSON format -> {'type': 'MultiLineString', 'coordinates': (((0.0, 0.0), (1.0, 1.0)), ((-1.0, 0.0), (1.0, 0.0)))}
+        #if geom['type'] == 'MultiLineString':
+           # convert to shapely geometry
+
+    for node in nodes:
+        geom = shapely.wkb.loads(node.polygon.ExportToWkb())
+        lines = zip(geom.exterior.coords[0:-1],geom.exterior.coords[1:])
+        vert_map[node.polygon] = [LineString([(ax,ay),(bx,by)]) for (ax,ay),(bx,by) in lines if ax == bx]
+        hori_map[node.polygon] = [LineString([(ax,ay),(bx,by)]) for (ax,ay),(bx,by) in lines if ay == bx]
+
+
+    return (hori_map, vert_map)

@@ -92,8 +92,10 @@ class Octtree:
 
         for region, node_list in region_node_border_dict.iteritems():
 
+            (vert_shared, hori_shared) = util.build_geom_line_dict(region_node_all_dict[region])
+
             for node in node_list:
-                best_neighbour = util.find_best_neighbour(node, region_node_all_dict[region])
+                best_neighbour = util.find_best_neighbour(node, region_node_all_dict[region], vert_shared, hori_shared)
                 print best_neighbour
                 if best_neighbour:
                     best_neighbour.polygon = best_neighbour.polygon.Union(node.polygon)
