@@ -179,10 +179,9 @@ def splice(Config, tree, regions, pop_array, transform):
         if node in node.parent.getChildren():
             node.parent.remove(node)
 
-    #need to merge nodes in region that have small area or population size
-            #if area or population too small, find neighbouring cells and shared boundaries
-    #max_no_nodes = max([len(l) for l in region_node_border_dict.itervalues()])
-    #print "max num nodes:", max_no_nodes
+    merge(Config, to_merge, region_nodes)
+
+def merge(Config, to_merge, region_nodes):
     print "running merging"
     for region, merge_set in to_merge.iteritems():
 
