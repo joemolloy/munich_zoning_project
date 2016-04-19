@@ -81,7 +81,7 @@ def solve_iteratively(Config, region_octtree, regions, pop_array, affine, bounda
 
     while not solved: # difference greater than 10%
         print 'step %d with threshold level %d...' % (step, pop_threshold)
-        region_octtree = octtree.build_out_nodes(region_octtree, regions, pop_array, affine, pop_threshold)
+        region_octtree = octtree.build_out_nodes(Config, region_octtree, regions, pop_array, affine, pop_threshold)
         num_zones = region_octtree.count_populated()
         print "\tnumber of cells:", num_zones
         print ''
@@ -359,8 +359,8 @@ def find_best_neighbour(node, neighbours, vert_shared, hori_shared):
             if length > max_length:
                 max_length = length
                 best_neighbour = neighbour
-            elif max_length == 0:
-                print "failed for node:", node.index, "against ", neighbour.index
+    if max_length == 0:
+        print "failed for node:", node.index, "against ", [n.index for n in neighbours]
 
     return best_neighbour
 
@@ -391,19 +391,49 @@ def get_common_edge_length(node1, node2, geom_vertical_line_parts_map, geom_hori
 
     return edge_length
 
+def get_common_boundary(node1, node2):
+    geom1 = shapely.wkb.loads(node1.polygon.ExportToWkb())
+    geom2 = shapely.wkb.loads(node2.polygon.ExportToWkb())
+
+    lines1 = zip(geom1.exterior.coords[0:-1],geom1.exterior.coords[1:])
+    lines2 = zip(geom2.exterior.coords[0:-1],geom2.exterior.coords[1:])
+
+    vert1 = [LineString([(ax,ay),(bx,by)]) for (ax,ay),(bx,by) in lines1 if ax == bx]
+    hori1 = [LineString([(ax,ay),(bx,by)]) for (ax,ay),(bx,by) in lines1 if ay == by]
+
+    vert2 = [LineString([(ax,ay),(bx,by)]) for (ax,ay),(bx,by) in lines2 if ax == bx]
+    hori2 = [LineString([(ax,ay),(bx,by)]) for (ax,ay),(bx,by) in lines2 if ay == by]
+
+    edge_length = 0
+
+    #get all intersecting lines
+    vert_shared = [h1.intersection(h2)
+                   for h1 in vert1
+                   for h2 in vert2]
+
+    hori_shared = [h1.intersection(h2)
+                   for h1 in hori1
+                   for h2 in hori2]
+
+    for l in hori_shared+vert_shared:
+        if l.geometryType() == "LineString":
+            #print l.geometryType(), l, l.length
+            edge_length = edge_length + l.length
+
+    return edge_length
 
 
+def find_best_neighbour(node, neighbours):
+    max_length = 0
+    best_neighbour = None
+    for neighbour in neighbours:
+        if node.index != neighbour.index and node.polygon.Touches(neighbour.polygon):
+            #neighbour_area = neighbour.polygon.GetArea()
+            length = get_common_boundary(node, neighbour)
+            if length > max_length:
+                max_length = length
+                best_neighbour = neighbour
+    if max_length == 0:
+        print "failed for node:", node.index, "against ", [n.index for n in neighbours]
 
-
-def build_geom_line_dict(nodes):
-    hori_map = {}
-    vert_map = {}
-
-    for node in nodes:
-        geom = shapely.wkb.loads(node.polygon.ExportToWkb())
-        lines = zip(geom.exterior.coords[0:-1],geom.exterior.coords[1:])
-        vert_map[node] = [LineString([(ax,ay),(bx,by)]) for (ax,ay),(bx,by) in lines if ax == bx]
-        hori_map[node] = [LineString([(ax,ay),(bx,by)]) for (ax,ay),(bx,by) in lines if ay == by]
-
-
-    return (hori_map, vert_map)
+    return best_neighbour

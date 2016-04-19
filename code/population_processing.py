@@ -35,7 +35,7 @@ if Config.getboolean("Parameters", "solve_iteratively"):
     region_octtree = util.solve_iteratively(Config, region_octtree, regions, pop_array, transform, boundary)
 else:
     pop_threshold =  Config.getint("Parameters", "population_threshold")
-    region_octtree = octtree.build_out_nodes(region_octtree, regions, pop_array, transform, pop_threshold)
+    region_octtree = octtree.build_out_nodes(Config, region_octtree, regions, pop_array, transform, pop_threshold)
     #result_octtree.prune(boundary)
 
 #result_octtree.splice(regions, pop_array, transform)
