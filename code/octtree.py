@@ -105,8 +105,9 @@ def build_out_nodes(Config, region_node, regions, array, affine, pop_threshold):
     octtree.fid_counter = 0
 
     octtree_top =  build(region_node.polygon, region_node, array, affine, pop_threshold)
-
+    print "\toriginal number zones: ", octtree_top.count_populated()
     splice(Config, octtree_top, regions, array, affine)
+    print "\tafter split and merge: ", octtree_top.count_populated()
 
     return octtree_top
 
