@@ -66,7 +66,7 @@ def solve_iteratively(Config, region_octtree, regions, pop_array, affine, bounda
     # keep a record of the thresholds that result in the nearest low, and nearest high
     # for the next step, take the halfway number between the two
 
-    desired_num_zones = Config.getint("Parameters", "population_threshold")
+    desired_num_zones = Config.getint("Parameters", "desired_num_zones")
     best_low = Config.getint("Parameters", "lower_population_threshold")
     best_high = Config.getint("Parameters", "upper_population_threshold")
     tolerance =  Config.getfloat("Parameters", "tolerance")
