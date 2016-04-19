@@ -139,6 +139,9 @@ def splice(Config, tree, regions, pop_array, transform):
     to_merge = defaultdict(set)
     region_nodes = defaultdict(set)
     nodes_to_delete = set()
+
+    boundary = util.merge_polygons(regions).Boundary() #need to check against boundary too.
+
     for region in regions:
         node_queue = Queue()
         node_queue.put(tree)
@@ -151,10 +154,11 @@ def splice(Config, tree, regions, pop_array, transform):
 
             for child in nodes_inside_region:
                 if isinstance(child, OcttreeLeaf):
-                    if child.polygon.Within(region): #inside, so keep and all to list of all nodes
+                    if child.polygon.Within(region) and child.polygon.Disjoint(boundary): #inside, so keep and all to list of all nodes (unles on total boundary)
                         region_nodes[region].add(child)
                         child.region = region
-                    else: #on the border, split
+                    else: #on a border, split
+
                         intersection = child.polygon.Intersection(region) #Check that intersection is a polygon
 
                         intersections_list = util.get_geom_parts(intersection)
