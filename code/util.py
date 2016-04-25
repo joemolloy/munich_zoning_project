@@ -230,6 +230,14 @@ def save_tree_only(filename, outputSpatialReference, octtree):
     layer.CreateField(ogr.FieldDefn("fid", ogr.OFTInteger))
     layer.CreateField(ogr.FieldDefn("Population", ogr.OFTInteger))
 
+    fids = [n.index for n in octtree.iterate()]
+    fids.sort()
+    for i in range(1, len(fids)):
+        if fids[i] == fids[i-1]:
+            print "duplicate fid: ", fids[i]
+
+    #assert(len(set(fids)) == len(fids))
+
     for node in octtree.iterate():
         feature = node.to_feature(layer)
 

@@ -195,7 +195,8 @@ def merge(Config, to_merge, region_nodes):
 
             if len(region_nodes[region]) == 1:
                 #only one in region.
-                node.parent.children.append(node)
+                if node not in node.parent.children:
+                    node.parent.children.append(node)
             else:
                 best_neighbour = util.find_best_neighbour(node, region_nodes[region])
                 if best_neighbour:
@@ -206,7 +207,8 @@ def merge(Config, to_merge, region_nodes):
                     region_nodes[region].remove(node)
 
                     if best_neighbour.is_acceptable(Config):
-                        best_neighbour.parent.children.append(best_neighbour)
+                        if best_neighbour not in best_neighbour.parent.children:
+                            best_neighbour.parent.children.append(best_neighbour)
                     else:
                         merge_set.add(best_neighbour)
                 else:
