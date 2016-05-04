@@ -1,6 +1,7 @@
 import numpy
 import os
 import psycopg2
+from collections import defaultdict
 from octtree import OcttreeLeaf, OcttreeNode
 import octtree
 from rasterstats import zonal_stats
@@ -147,6 +148,49 @@ def load_data(Config, array_origin_x, array_origin_y, size, inverted=False):
     print numpy.sum(pop_array)
 
     return (pop_array, a)
+
+
+def tabulate_intersection(zone_octtree, octtree_crs, land_use_folder, land_use_crs, class_field):
+    ags_mapping = build_ags_mapping(zone_octtree)
+
+    #get land use values from config
+
+    print "running intersection tabulation"
+    print land_use_folder
+    for folder in os.listdir(land_use_folder):
+        folder_abs = os.path.join(land_use_folder, folder)
+        if os.path.isdir(folder_abs):
+            #find siedlung shapefile name
+            seidlung_path = [os.path.splitext(filename)[0]
+                             for filename in os.listdir(folder_abs) if 'Siedlung' in filename][0]
+            ags = folder[0:3]
+            #print ags, os.path.join(folder_abs, seidlung_path)
+            #for each lane use shapefile, tabulate intersections for each zone in that shapefile
+            with fiona.open(os.path.join(folder, seidlung_path)) as src:
+
+                #build spatial index
+                from rtree import index
+                idx = index.Index()
+                count = -1
+                for q in src:
+                    count +=1
+                    idx.insert(count, (shape(q['geometry'].bbox)
+
+                for zone in ags_mapping[ags]:
+                    #find all intersecting land parcels of zone (use spatial index)
+                    #intersect each with zone, add area to tabulation based on the class_field
+                    #http://skipperkongen.dk/2013/02/18/trying-a-python-r-tree-implementation/
+                    idx.intersection(zone.polygon)
+
+
+
+def build_ags_mapping(zone_octree):
+    mapping = defaultdict(list)
+    for zone in zone_octree.iterate():
+        mapping[zone.get_ags()] = zone
+
+    return mapping
+
 '''
 def tabulate_intersection(zone_octtree, octtreeSaptialRef, shapefile, inSpatialEPSGRef, class_field):
     print "running intersection tabulation"
