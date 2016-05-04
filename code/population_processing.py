@@ -1,6 +1,8 @@
 import sys, os
 import util, octtree
 import ConfigParser
+from shapely.ops import cascaded_union
+from fiona.crs import from_epsg
 
 Config = ConfigParser.ConfigParser(allow_no_value=True)
 
@@ -10,14 +12,16 @@ Config.read(sys.argv[1])
 
 #next step, find the 'power of two' box that best captures the polygonal boundary area.
 resolution = Config.getint("Input", "resolution")
-zonesSaptialRef = Config.getint("Input", "EPSGspatialReference")
+zonesSaptialRef = from_epsg(Config.getint("Input", "EPSGspatialReference"))
 regions_file = Config.get("Regions", "filename")
 
 regions = util.load_regions(regions_file, zonesSaptialRef)
-region_octtree = util.build_region_octtree(regions)
-boundary = region_octtree.polygon
+boundary = cascaded_union(regions)
+region_octtree = octtree.OcttreeNode(boundary, None, None)
 
-(min_x, max_x, min_y, max_y) = map(int, boundary.GetEnvelope()) #given boundary, get envelope of polygon, as integers
+(min_x, min_y, max_x, max_y) = map(int, boundary.bounds) #given boundary, get envelope of polygon, as integers
+print (min_x, min_y, max_x, max_y)
+
 
 max_dimension = max(max_x - min_x, max_y - min_y)
 sub_array_size = util.next_power_of_2(max_dimension / resolution)
@@ -36,9 +40,6 @@ if Config.getboolean("Parameters", "solve_iteratively"):
 else:
     pop_threshold =  Config.getint("Parameters", "population_threshold")
     region_octtree = octtree.build_out_nodes(Config, region_octtree, regions, pop_array, transform, pop_threshold)
-    #result_octtree.prune(boundary)
-
-#result_octtree.splice(regions, pop_array, transform)
 
 
 shapefile = Config.get("Land Use", "filename")
@@ -51,7 +52,7 @@ if Config.getboolean("Land Use", "calculate_land_use"):
     (field_values, intersections) \
         = util.tabulate_intersection(region_octtree, zonesSaptialRef, shapefile, inSpatialReference, class_field)
 
-    util.save_with_landuse(output_file, zonesSaptialRef, field_values, intersections)
+    util.save(output_file, zonesSaptialRef, region_octtree, field_values, intersections)
 else:
-    util.save_tree_only(output_file, zonesSaptialRef, region_octtree)
+    util.save(output_file, zonesSaptialRef, region_octtree)
 

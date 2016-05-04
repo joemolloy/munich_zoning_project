@@ -1,6 +1,5 @@
 import numpy
 import util
-from osgeo import ogr
 from Queue import Queue
 from rasterstats import zonal_stats
 import octtree
@@ -22,14 +21,14 @@ class Octtree:
                     yield r
 
     def to_geom_wkb_list(self):
-        return [n.polygon.ExportToWkb() for n in self.iterate()]
+        return [n.polygon.wkb for n in self.iterate()]
 
     def find_matches(self, poly, poly_class):
 
-        if self.polygon.Intersects(poly):
+        if self.polygon.intersects(poly):
             if isinstance(self, OcttreeLeaf):
-                intersection = self.polygon.Intersection(poly)
-                pc_coverage = intersection.GetArea() / self.polygon.GetArea()
+                intersection = self.polygon.intersection(poly)
+                pc_coverage = intersection.area / self.polygon.area
                 yield (self, (poly_class, pc_coverage))
             else:
                 for child in self.getChildren():
@@ -37,7 +36,7 @@ class Octtree:
                         yield r
 
     def find_intersecting_children(self, poly):
-        return [child for child in self.getChildren() if child.polygon.Intersects(poly)]
+        return [child for child in self.getChildren() if child.polygon.intersects(poly)]
 
 class OcttreeLeaf(Octtree):
     def __init__(self, polygon, parent):
@@ -64,15 +63,8 @@ class OcttreeLeaf(Octtree):
         min_area = Config.getint("Parameters", "minimum_zone_area")
         min_pop = Config.getint("Parameters", "minimum_zone_population")
 
-        return self.value >= min_pop and self.polygon.GetArea() >= min_area
+        return self.value >= min_pop and self.polygon.area >= min_area
 
-    def to_feature(self, layer):
-        feature = ogr.Feature(layer.GetLayerDefn())
-        feature.SetField("fid", self.index)
-        feature.SetField("Population", self.value)
-        feature.SetGeometry(self.polygon)
-
-        return feature
 
 class OcttreeNode(Octtree):
     def __init__(self, polygon, children, parent):
@@ -96,7 +88,7 @@ class OcttreeNode(Octtree):
             self.children.remove(child)
 
     def prune(self, bounding_geo):
-        self.children = [child for child in self.children if bounding_geo.Intersects(child.polygon)]
+        self.children = [child for child in self.children if bounding_geo.intersects(child.polygon)]
         for child in self.children:
             child.prune(bounding_geo)
         return self.count()
@@ -115,7 +107,7 @@ def build_out_nodes(Config, region_node, regions, array, affine, pop_threshold):
 def build(box, parent_node, array, affine, pop_threshold): #list of bottom nodes to work from
     #run rasterstats with sum and count
 
-    stats = zonal_stats(box.ExportToWkb(), array, affine=affine, stats="sum count", raster_out=True, nodata=-1)
+    stats = zonal_stats(box.wkb, array, affine=affine, stats="sum count", raster_out=True, nodata=-1)
     if stats[0]['sum'] < pop_threshold or stats[0]['count'] == 1: # leaf #need the count of valid cells
         leaf = OcttreeLeaf(box, parent_node)
         leaf.value = stats[0]['sum']
@@ -130,7 +122,7 @@ def build(box, parent_node, array, affine, pop_threshold): #list of bottom nodes
         node = OcttreeNode(box, None, parent_node)
 
         children = [build(sub, node, stats[0]['mini_raster_array'], stats[0]['mini_raster_affine'], pop_threshold)
-                    for sub in sub_polygons if sub.GetGeometryName() == 'POLYGON'] #type 3 is polygon
+                    for sub in sub_polygons if sub.geom_type == 'Polygon'] #type 3 is polygon
         node.children = children
         return node
 
@@ -141,7 +133,7 @@ def splice(Config, tree, regions, pop_array, transform):
     region_nodes = defaultdict(set)
     nodes_to_delete = set()
 
-    boundary = util.merge_polygons(regions).Boundary() #need to check against boundary too.
+    boundary = util.cascaded_union(regions).boundary #need to check against boundary too.
 
     for region in regions:
         node_queue = Queue()
@@ -155,12 +147,12 @@ def splice(Config, tree, regions, pop_array, transform):
 
             for child in nodes_inside_region:
                 if isinstance(child, OcttreeLeaf):
-                    if child.polygon.Within(region) and child.polygon.Disjoint(boundary): #inside, so keep and all to list of all nodes (unles on total boundary)
+                    if child.polygon.within(region) and child.polygon.disjoint(boundary): #inside, so keep and all to list of all nodes (unles on total boundary)
                         region_nodes[region].add(child)
                         child.region = region
                     else: #on a border, split
 
-                        intersection = child.polygon.Intersection(region) #Check that intersection is a polygon
+                        intersection = child.polygon.intersection(region) #Check that intersection is a polygon
 
                         intersections_list = util.get_geom_parts(intersection)
 
@@ -200,7 +192,7 @@ def merge(Config, to_merge, region_nodes):
             else:
                 best_neighbour = util.find_best_neighbour(node, region_nodes[region])
                 if best_neighbour:
-                    best_neighbour.polygon = best_neighbour.polygon.Union(node.polygon)
+                    best_neighbour.polygon = best_neighbour.polygon.union(node.polygon)
                     best_neighbour.value = best_neighbour.value + node.value
 
                     node.parent.remove(node)

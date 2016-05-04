@@ -1,55 +1,49 @@
 import numpy
 import os
-from osgeo import ogr, osr
 import psycopg2
 from octtree import OcttreeLeaf, OcttreeNode
 import octtree
 from rasterstats import zonal_stats
 import affine
 
+import fiona
+from shapely.geometry import mapping, shape
+
+from pyproj import transform, Proj
+from shapely.ops import cascaded_union
+from shapely.geometry import LineString, Polygon
+
+
 def load_regions(shapefile, baseSpatialRef):
     polygons = []
-    driver = ogr.GetDriverByName("ESRI Shapefile")
-    # load shapefile
-    dataSource = driver.Open(shapefile, 0)
 
-    layer = load_layer_from_shapefile(dataSource)
-    for feature in layer:
-        geom = feature.GetGeometryRef().Clone()
+    with fiona.open(shapefile) as src:
+        for f in src:
+            transform_fiona_polygon(f, Proj(src.crs), Proj(baseSpatialRef))
+            g = f['geometry']
+            poly = shape(g)
+            if poly.geom_type != "Polygon":
+                if poly.geom_type in ["MultiPolygon"] :
+                    for geom_part in g:
+                        polygons.append(geom_part)
+            elif poly.geom_type == "Polygon":
+                polygons.append(poly)
 
-        #convert to EPSG:3035
-        outSpatialRef = osr.SpatialReference()
-        outSpatialRef.ImportFromEPSG(baseSpatialRef)
-        geom.TransformTo(outSpatialRef)
-
-        if geom.GetGeometryName() in ['MULTIPOLYGON', 'GEOMETRYCOLLECTION'] :
-            for geom_part in geom:
-                if geom_part.GetGeometryName() == 'POLYGON':
-                    polygons.append(geom_part.Clone())
-        elif geom.GetGeometryName() == 'POLYGON':
-            polygons.append(geom)
 
     return polygons
 
-def load_layer_from_shapefile(dataSource):
+def transform_fiona_polygon(f, p_in, p_out) :
+    new_coords = []
+    for ring in f['geometry']['coordinates']:
+        x2, y2 = transform(p_in, p_out, *zip(*ring))
+        new_coords.append(zip(x2, y2))
+    f['geometry']['coordinates'] = new_coords
 
-    if dataSource is None:
-        print 'Could not open %s' % (dataSource.GetName())
-        return None
-    else:
-        print 'Opened %s' % (dataSource.GetName())
-        layer = dataSource.GetLayer()
-
-        featureCount = layer.GetFeatureCount()
-        fieldCount = layer.GetLayerDefn().GetFieldCount()
-        print "Number of features: %d, Number of fields: %d" % (featureCount, fieldCount)
-        return layer
-
-def build_region_octtree(regions):
-    boundary = merge_polygons(regions)
+def create_octtree(regions):
+    boundary = cascaded_union(regions)
     ot = None
     children = [OcttreeNode(region,[], ot) for region in regions]
-    ot = OcttreeNode(boundary, children, None)
+    ot = OcttreeNode(boundary, None, None)
     return ot
 
 #Round up to next higher power of 2 (return x if it's already a power of 2).
@@ -121,10 +115,15 @@ def load_data(Config, array_origin_x, array_origin_y, size, inverted=False):
 
     resolution = Config.getint("Input", "resolution")
 
+
     x_max = array_origin_x + size * resolution
     y_max = array_origin_y + size * resolution
 
     pop_array = numpy.zeros((size, size), dtype=numpy.int32)
+
+    print cursor.mogrify(sql, (array_origin_x, x_max, array_origin_y, y_max))
+
+
 
     #cursor.execute("SELECT x_mp_100m, y_mp_100m, \"Einwohner\" FROM public.muc_all_population;")
     #this metheod only works when total rows = ncols x nrows in database. (IE no missing values)
@@ -145,7 +144,7 @@ def load_data(Config, array_origin_x, array_origin_y, size, inverted=False):
     print numpy.sum(pop_array)
 
     return (pop_array, a)
-
+'''
 def tabulate_intersection(zone_octtree, octtreeSaptialRef, shapefile, inSpatialEPSGRef, class_field):
     print "running intersection tabulation"
     driver = ogr.GetDriverByName("ESRI Shapefile")
@@ -184,77 +183,51 @@ def tabulate_intersection(zone_octtree, octtreeSaptialRef, shapefile, inSpatialE
             zones[zone][class_name] += percentage
 
     return (field_values, zones)
-
-def save_with_landuse(filename, outputSpatialReference, field_values, intersections):
+'''
+def save(filename, outputSpatialReference, octtree, field_values = None, intersections = None):
     print "saving zones with land use to:", filename
-    driver = ogr.GetDriverByName("ESRI Shapefile")
-    # create the data source
-    if os.path.exists(filename):
-        driver.DeleteDataSource(filename)
-    data_source = driver.CreateDataSource(filename)
 
-    outputSRS = osr.SpatialReference()
-    outputSRS.ImportFromEPSG(outputSpatialReference)
+    schema = {'geometry': 'Polygon',
+                'properties': [('Population', 'int'), ('Area', 'float')]}
 
-    layer = data_source.CreateLayer("zones", outputSRS, ogr.wkbPolygon)
-    layer.CreateField(ogr.FieldDefn("fid", ogr.OFTInteger))
-    layer.CreateField(ogr.FieldDefn("Population", ogr.OFTInteger))
+    with fiona.open(
+         filename, 'w',
+         driver="ESRI Shapefile",
+         crs=outputSpatialReference,
+         schema=schema) as c:
 
-    for f in field_values:
-        layer.CreateField(ogr.FieldDefn(f, ogr.OFTReal))
+        if intersections:
+            for f in field_values:
+                schema['properties'][f] = 'float'
 
-    for zone, classes in intersections.iteritems():
-        feature = zone.to_feature(layer)
-        for c, percentage in classes.iteritems():
-            feature.SetField(c, percentage)
-        if feature.GetGeometryRef().GetGeometryType() == 3: #is a polygon
-            layer.CreateFeature(feature)
+            for zone, classes in intersections.iteritems():
+                properties = {'Population' : zone.value, 'Area' : zone.getArea()}
+                properties.update(classes)
+                c.write({
+                    'geometry': zone.polygon,
+                    'properties': properties
+                })
+        else:
+            fids = [n.index for n in octtree.iterate()]
+            fids.sort()
+            for i in range(1, len(fids)):
+                if fids[i] == fids[i-1]:
+                    print "duplicate fid: ", fids[i]
 
-        feature.Destroy()
+            #assert(len(set(fids)) == len(fids))
 
-
-    data_source.Destroy()
-
-def save_tree_only(filename, outputSpatialReference, octtree):
-    print "saving zones to:", filename
-    driver = ogr.GetDriverByName("ESRI Shapefile")
-    # create the data source
-    if os.path.exists(filename):
-        driver.DeleteDataSource(filename)
-    data_source = driver.CreateDataSource(filename)
-
-    outputSRS = osr.SpatialReference()
-    outputSRS.ImportFromEPSG(outputSpatialReference)
-
-    layer = data_source.CreateLayer("zones", outputSRS, ogr.wkbPolygon)
-    layer.CreateField(ogr.FieldDefn("fid", ogr.OFTInteger))
-    layer.CreateField(ogr.FieldDefn("Population", ogr.OFTInteger))
-
-    fids = [n.index for n in octtree.iterate()]
-    fids.sort()
-    for i in range(1, len(fids)):
-        if fids[i] == fids[i-1]:
-            print "duplicate fid: ", fids[i]
-
-    #assert(len(set(fids)) == len(fids))
-
-    for node in octtree.iterate():
-        feature = node.to_feature(layer)
-
-        layer.CreateFeature(feature)
-
-        feature.Destroy()
+            for zone in octtree.iterate():
+                c.write({
+                    'geometry': mapping(zone.polygon),
+                    'properties': {'Population' : zone.value, 'Area' : zone.polygon.area }
+                })
 
 
-    data_source.Destroy()
+
 
 def quarter_polygon(geom_poly):
     #https://pcjericks.github.io/py-gdalogr-cookbook/geometry.html#quarter-polygon-and-create-centroids
-    geom_poly_envelope = geom_poly.GetEnvelope()
-    minX = geom_poly_envelope[0]
-    minY = geom_poly_envelope[2]
-    maxX = geom_poly_envelope[1]
-    maxY = geom_poly_envelope[3]
+    (min_x, min_y, max_x, max_y) = geom_poly.bounds
 
     '''
     coord0----coord1----coord2
@@ -263,68 +236,34 @@ def quarter_polygon(geom_poly):
     |           |           |
     coord6----coord7----coord8
     '''
-    coord0 = minX, maxY
-    coord1 = minX+(maxX-minX)/2, maxY
-    coord2 = maxX, maxY
-    coord3 = minX, minY+(maxY-minY)/2
-    coord4 = minX+(maxX-minX)/2, minY+(maxY-minY)/2
-    coord5 = maxX, minY+(maxY-minY)/2
-    coord6 = minX, minY
-    coord7 = minX+(maxX-minX)/2, minY
-    coord8 = maxX, minY
+    coord0 = min_x, max_y
+    coord1 = min_x+(max_x-min_x)/2, max_y
+    coord2 = max_x, max_y
+    coord3 = min_x, min_y+(max_y-min_y)/2
+    coord4 = min_x+(max_x-min_x)/2, min_y+(max_y-min_y)/2
+    coord5 = max_x, min_y+(max_y-min_y)/2
+    coord6 = min_x, min_y
+    coord7 = min_x+(max_x-min_x)/2, min_y
+    coord8 = max_x, min_y
 
-    ringTopLeft = ogr.Geometry(ogr.wkbLinearRing)
-    ringTopLeft.AddPoint_2D(*coord0)
-    ringTopLeft.AddPoint_2D(*coord1)
-    ringTopLeft.AddPoint_2D(*coord4)
-    ringTopLeft.AddPoint_2D(*coord3)
-    ringTopLeft.AddPoint_2D(*coord0)
-    polyTopLeft = ogr.Geometry(ogr.wkbPolygon)
-    polyTopLeft.AddGeometry(ringTopLeft)
+    polyTopLeft = Polygon([coord0,coord1,coord2,coord3,coord0])
+    polyTopRight = Polygon([coord1,coord2,coord5,coord4,coord1])
+    polyBottomLeft = Polygon([coord3,coord4,coord7,coord6,coord3])
+    polyBottomRight = Polygon([coord4,coord5,coord8,coord7,coord4])
 
+    quarterPolyTopLeft = polyTopLeft.intersection(geom_poly)
+    quarterPolyTopRight =  polyTopRight.intersection(geom_poly)
+    quarterPolyBottomLeft =  polyBottomLeft.intersection(geom_poly)
+    quarterPolyBottomRight =  polyBottomRight.intersection(geom_poly)
 
-    ringTopRight = ogr.Geometry(ogr.wkbLinearRing)
-    ringTopRight.AddPoint_2D(*coord1)
-    ringTopRight.AddPoint_2D(*coord2)
-    ringTopRight.AddPoint_2D(*coord5)
-    ringTopRight.AddPoint_2D(*coord4)
-    ringTopRight.AddPoint_2D(*coord1)
-    polyTopRight = ogr.Geometry(ogr.wkbPolygon)
-    polyTopRight.AddGeometry(ringTopRight)
-
-
-    ringBottomLeft = ogr.Geometry(ogr.wkbLinearRing)
-    ringBottomLeft.AddPoint_2D(*coord3)
-    ringBottomLeft.AddPoint_2D(*coord4)
-    ringBottomLeft.AddPoint_2D(*coord7)
-    ringBottomLeft.AddPoint_2D(*coord6)
-    ringBottomLeft.AddPoint_2D(*coord3)
-    polyBottomLeft = ogr.Geometry(ogr.wkbPolygon)
-    polyBottomLeft.AddGeometry(ringBottomLeft)
-
-
-    ringBottomRight = ogr.Geometry(ogr.wkbLinearRing)
-    ringBottomRight.AddPoint_2D(*coord4)
-    ringBottomRight.AddPoint_2D(*coord5)
-    ringBottomRight.AddPoint_2D(*coord8)
-    ringBottomRight.AddPoint_2D(*coord7)
-    ringBottomRight.AddPoint_2D(*coord4)
-    polyBottomRight = ogr.Geometry(ogr.wkbPolygon)
-    polyBottomRight.AddGeometry(ringBottomRight)
-
-    quaterPolyTopLeft = polyTopLeft.Intersection(geom_poly)
-    quaterPolyTopRight =  polyTopRight.Intersection(geom_poly)
-    quaterPolyBottomLeft =  polyBottomLeft.Intersection(geom_poly)
-    quaterPolyBottomRight =  polyBottomRight.Intersection(geom_poly)
-
-    multipolys = [quaterPolyTopLeft, quaterPolyTopRight, quaterPolyBottomLeft, quaterPolyBottomRight]
+    multipolys = [quarterPolyTopLeft, quarterPolyTopRight, quarterPolyBottomLeft, quarterPolyBottomRight]
     polys = []
 
     for geom in multipolys:
-        if geom.GetGeometryName() in ['MULTIPOLYGON', 'GEOMETRYCOLLECTION'] :
+        if geom.geom_type in ['MultiPolygon', 'GeometryCollection'] :
             for geom_part in geom:
-                if geom_part.GetGeometryName() == 'POLYGON':
-                    polys.append(geom_part.Clone())
+                if geom_part.geom_type == 'Polygon':
+                    polys.append(geom_part)
         else:
             polys.append(geom)
 
@@ -333,36 +272,28 @@ def quarter_polygon(geom_poly):
 
 def get_geom_parts(geom):
     parts = []
-    if geom.GetGeometryName() in ['MULTIPOLYGON', 'GEOMETRYCOLLECTION'] :
+    if geom.geom_type in ['MultiPolygon', 'GeometryCollection'] :
         for geom_part in geom:
-            if geom_part.GetGeometryName() == 'POLYGON':
-                parts.append(geom_part.Clone())
-    elif geom.GetGeometryName() == 'POLYGON': #ignore linestrings and multilinestrings
+            if geom_part.geom_type == 'Polygon':
+                parts.append(geom_part)
+    elif geom.geom_type == 'Polygon': #ignore linestrings and multilinestrings
         parts.append(geom)
     return parts
 
 
 def calculate_pop_value(node, array, transform):
-    stats = zonal_stats(node.polygon.ExportToWkb(), array, affine=transform, stats="sum", nodata=-1)
+    stats = zonal_stats(node.polygon, array, affine=transform, stats="sum", nodata=-1)
     total = stats[0]['sum']
     if total:
         return total
     else:
         return 0
 
-def merge_polygons(polygons):
-    unionc = ogr.Geometry(ogr.wkbMultiPolygon)
-    for p in polygons:
-        unionc.AddGeometry(p)
-    union = unionc.UnionCascaded()
-    return union
-
 def find_best_neighbour(node, neighbours, vert_shared, hori_shared):
     max_length = 0
     best_neighbour = None
     for neighbour in neighbours:
-        if node.index != neighbour.index and node.polygon.Touches(neighbour.polygon):
-            #neighbour_area = neighbour.polygon.GetArea()
+        if node.index != neighbour.index and node.polygon.touches(neighbour.polygon):
             length = get_common_edge_length(node, neighbour, vert_shared, hori_shared)
             if length > max_length:
                 max_length = length
@@ -372,8 +303,6 @@ def find_best_neighbour(node, neighbours, vert_shared, hori_shared):
 
     return best_neighbour
 
-import shapely
-from shapely.geometry import LineString
 
 def get_common_edge_length(node1, node2, geom_vertical_line_parts_map, geom_horizontal_line_parts_map):
     edge_length = 0
@@ -400,8 +329,8 @@ def get_common_edge_length(node1, node2, geom_vertical_line_parts_map, geom_hori
     return edge_length
 
 def get_common_boundary(node1, node2):
-    geom1 = shapely.wkb.loads(node1.polygon.ExportToWkb())
-    geom2 = shapely.wkb.loads(node2.polygon.ExportToWkb())
+    geom1 = node1.polygon
+    geom2 = node2.polygon
 
     lines1 = zip(geom1.exterior.coords[0:-1],geom1.exterior.coords[1:])
     lines2 = zip(geom2.exterior.coords[0:-1],geom2.exterior.coords[1:])
@@ -435,7 +364,7 @@ def find_best_neighbour(node, neighbours):
     max_length = 0
     best_neighbour = None
     for neighbour in neighbours:
-        if node.index != neighbour.index and node.polygon.Touches(neighbour.polygon):
+        if node.index != neighbour.index and node.polygon.touches(neighbour.polygon):
             #neighbour_area = neighbour.polygon.GetArea()
             length = get_common_boundary(node, neighbour)
             if length > max_length:
