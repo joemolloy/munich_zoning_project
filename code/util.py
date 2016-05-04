@@ -246,7 +246,7 @@ def quarter_polygon(geom_poly):
     coord7 = min_x+(max_x-min_x)/2, min_y
     coord8 = max_x, min_y
 
-    polyTopLeft = Polygon([coord0,coord1,coord2,coord3,coord0])
+    polyTopLeft = Polygon([coord0,coord1,coord4,coord3,coord0])
     polyTopRight = Polygon([coord1,coord2,coord5,coord4,coord1])
     polyBottomLeft = Polygon([coord3,coord4,coord7,coord6,coord3])
     polyBottomRight = Polygon([coord4,coord5,coord8,coord7,coord4])
