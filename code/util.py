@@ -204,10 +204,9 @@ def save(filename, outputSpatialReference, octtree, field_values = None, interse
                 schema['properties'][f] = 'float'
 
             for zone, classes in intersections.iteritems():
-                region = zone.region['properties']['AGS_Int']
                 properties = {'Population' : zone.value,
-                              'Area' : zone.getArea(),
-                              'AGS' : region
+                              'Area' : zone.get_area(),
+                              'AGS' : zone.get_ags()
                               }
                 properties.update(classes)
                 c.write({

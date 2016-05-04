@@ -66,6 +66,12 @@ class OcttreeLeaf(Octtree):
 
         return self.value >= min_pop and self.polygon.area >= min_area
 
+    def get_ags(self):
+        return self.region['properties']['AGS_Int']
+
+    def get_area(self):
+        return self.polygon.area
+
 
 class OcttreeNode(Octtree):
     def __init__(self, polygon, children, parent):
