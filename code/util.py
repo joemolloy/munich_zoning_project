@@ -15,22 +15,25 @@ from shapely.geometry import LineString, Polygon
 
 
 def load_regions(shapefile, baseSpatialRef):
-    polygons = []
+    regions = []
 
     with fiona.open(shapefile) as src:
         for f in src:
             transform_fiona_polygon(f, Proj(src.crs), Proj(baseSpatialRef))
             g = f['geometry']
-            poly = shape(g)
-            if poly.geom_type != "Polygon":
-                if poly.geom_type in ["MultiPolygon"] :
+            if f['geometry']['type'] != "Polygon":
+                if f['geometry']['type']in ["MultiPolygon"] :
                     for geom_part in g:
-                        polygons.append(geom_part)
-            elif poly.geom_type == "Polygon":
-                polygons.append(poly)
+                        f2 = f.clone()
+                        f2['geometry'] = geom_part
+                        regions.append(f2)
+            elif f['geometry']['type'] == "Polygon":
+                regions.append(f)
 
+    return regions
 
-    return polygons
+def get_region_boundary(regions):
+    return cascaded_union([shape(r['geometry']) for r in regions])
 
 def transform_fiona_polygon(f, p_in, p_out) :
     new_coords = []
@@ -188,7 +191,7 @@ def save(filename, outputSpatialReference, octtree, field_values = None, interse
     print "saving zones with land use to:", filename
 
     schema = {'geometry': 'Polygon',
-                'properties': [('Population', 'int'), ('Area', 'float')]}
+                'properties': [('Population', 'int'), ('Area', 'float'), ('AGS', 'int')]}
 
     with fiona.open(
          filename, 'w',
@@ -201,7 +204,11 @@ def save(filename, outputSpatialReference, octtree, field_values = None, interse
                 schema['properties'][f] = 'float'
 
             for zone, classes in intersections.iteritems():
-                properties = {'Population' : zone.value, 'Area' : zone.getArea()}
+                region = zone.region['properties']['AGS_Int']
+                properties = {'Population' : zone.value,
+                              'Area' : zone.getArea(),
+                              'AGS' : region
+                              }
                 properties.update(classes)
                 c.write({
                     'geometry': zone.polygon,
@@ -219,7 +226,10 @@ def save(filename, outputSpatialReference, octtree, field_values = None, interse
             for zone in octtree.iterate():
                 c.write({
                     'geometry': mapping(zone.polygon),
-                    'properties': {'Population' : zone.value, 'Area' : zone.polygon.area }
+                    'properties': {'Population' : zone.value,
+                                   'Area' : zone.polygon.area,
+                                   'AGS' : zone.region['properties']['AGS_Int']
+                                }
                 })
 
 

@@ -1,6 +1,7 @@
 import sys, os
 import util, octtree
 import ConfigParser
+from shapely.geometry import shape
 from shapely.ops import cascaded_union
 from fiona.crs import from_epsg
 
@@ -16,7 +17,7 @@ zonesSaptialRef = from_epsg(Config.getint("Input", "EPSGspatialReference"))
 regions_file = Config.get("Regions", "filename")
 
 regions = util.load_regions(regions_file, zonesSaptialRef)
-boundary = cascaded_union(regions)
+boundary = util.get_region_boundary(regions)
 region_octtree = octtree.OcttreeNode(boundary, None, None)
 
 (min_x, min_y, max_x, max_y) = map(int, boundary.bounds) #given boundary, get envelope of polygon, as integers

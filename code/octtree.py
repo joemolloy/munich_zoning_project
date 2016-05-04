@@ -4,6 +4,7 @@ from Queue import Queue
 from rasterstats import zonal_stats
 import octtree
 from collections import defaultdict
+from shapely.geometry import shape
 
 class Octtree:
     fid_counter = 0
@@ -129,13 +130,14 @@ def build(box, parent_node, array, affine, pop_threshold): #list of bottom nodes
 def splice(Config, tree, regions, pop_array, transform):
     print "running splice algorithm..."
 
-    to_merge = defaultdict(set)
-    region_nodes = defaultdict(set)
+    region_results = []
     nodes_to_delete = set()
 
-    boundary = util.cascaded_union(regions).boundary #need to check against boundary too.
+    boundary = util.get_region_boundary(regions).boundary #need to check against boundary too.
 
     for region in regions:
+        region_results.append({'region':region, 'all':set(), 'to_merge':set()})
+        region_poly = shape(region['geometry'])
         node_queue = Queue()
         node_queue.put(tree)
         while not node_queue.empty():
@@ -143,30 +145,30 @@ def splice(Config, tree, regions, pop_array, transform):
             #print node_queue.qsize()
             #for all intersecting nodes, create a new node from the intersection, and mark the old one for deletion
             top = node_queue.get()
-            nodes_inside_region = top.find_intersecting_children(region)
+            nodes_inside_region = top.find_intersecting_children(region_poly)
 
             for child in nodes_inside_region:
                 if isinstance(child, OcttreeLeaf):
-                    if child.polygon.within(region) and child.polygon.disjoint(boundary): #inside, so keep and all to list of all nodes (unles on total boundary)
-                        region_nodes[region].add(child)
+                    if child.polygon.within(region_poly) and child.polygon.disjoint(boundary): #inside, so keep and all to list of all nodes (unles on total boundary)
+                        region_results[-1]['all'].add(child)
                         child.region = region
                     else: #on a border, split
 
-                        intersection = child.polygon.intersection(region) #Check that intersection is a polygon
+                        intersection = child.polygon.intersection(region_poly) #Check that intersection is a polygon
 
                         intersections_list = util.get_geom_parts(intersection)
 
                         for intersection in intersections_list:
                             spliced_node = OcttreeLeaf(intersection, top)
                             spliced_node.region = region
-                            region_nodes[region].add(spliced_node)
+                            region_results[-1]['all'].add(spliced_node)
                             #calculate new population value
                             spliced_node.value = util.calculate_pop_value(spliced_node, pop_array, transform)
                             if spliced_node.is_acceptable(Config):
                                 top.children.append(spliced_node)
                             else:
                                 #need to combine later
-                                to_merge[region].add(spliced_node)
+                                region_results[-1]['to_merge'].add(spliced_node)
 
                             nodes_to_delete.add(child)
                 else:
@@ -176,27 +178,28 @@ def splice(Config, tree, regions, pop_array, transform):
         if node in node.parent.getChildren():
             node.parent.remove(node)
 
-    merge(Config, to_merge, region_nodes)
+    merge(Config, region_results)
 
-def merge(Config, to_merge, region_nodes):
+def merge(Config, region_results):
     print "running merging"
-    for region, merge_set in to_merge.iteritems():
-
+    for l in region_results:
+        merge_set = l['to_merge']
+        region_nodes = l['all']
         while len(merge_set):
             node = merge_set.pop()
 
-            if len(region_nodes[region]) == 1:
+            if len(region_nodes) == 1:
                 #only one in region.
                 if node not in node.parent.children:
                     node.parent.children.append(node)
             else:
-                best_neighbour = util.find_best_neighbour(node, region_nodes[region])
+                best_neighbour = util.find_best_neighbour(node, region_nodes)
                 if best_neighbour:
                     best_neighbour.polygon = best_neighbour.polygon.union(node.polygon)
                     best_neighbour.value = best_neighbour.value + node.value
 
                     node.parent.remove(node)
-                    region_nodes[region].remove(node)
+                    region_nodes.remove(node)
 
                     if best_neighbour.is_acceptable(Config):
                         if best_neighbour not in best_neighbour.parent.children:
@@ -204,6 +207,6 @@ def merge(Config, to_merge, region_nodes):
                     else:
                         merge_set.add(best_neighbour)
                 else:
-                    print "no neighbour found for: ", node.index, " options were", [n.index for n in region_nodes[region]]
+                    print "no neighbour found for: ", node.index, " options were", [n.index for n in region_nodes]
 
 
