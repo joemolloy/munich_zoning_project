@@ -31,7 +31,7 @@ class Octtree:
                 yield self
             else:
                 for child in self.getChildren():
-                    for r in child.find_matches(poly):
+                    for r in child.find_intersections(poly):
                         yield r
 
     def find_intersecting_children(self, poly):

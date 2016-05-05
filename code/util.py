@@ -154,14 +154,13 @@ def run_tabulate_intersection(zone_octtree, octtree_crs, land_use_folder, land_u
 
     #set value for each zones and class to zero
     for zone in zone_octtree.iterate():
-        zone.landuse = {}
-        for (field, alias) in field_values:
-            zone.landuse_pc[alias] = 0
-            zone.landuse_area[alias] = 0
+        zone.landuse_pc = {}
+        zone.landuse_area = {}
+        for (field, class_alias) in field_values:
+            zone.landuse_pc[class_alias] = 0
+            zone.landuse_area[class_alias] = 0
 
     print "running intersection tabulation"
-
-    field_values = set()
 
     print land_use_folder
     for folder in os.listdir(land_use_folder):
@@ -171,44 +170,39 @@ def run_tabulate_intersection(zone_octtree, octtree_crs, land_use_folder, land_u
             seidlung_path = [os.path.splitext(filename)[0]
                              for filename in os.listdir(folder_abs) if 'Siedlung' in filename][0]
             ags = folder[0:3]
+            if int(ags) in [175, 177, 183, 187]: #only for test config
             #print ags, os.path.join(folder_abs, seidlung_path)
             #for each land use shapefile, tabulate intersections for each zone in that shapefile
-            full_sp_path = os.path.join(folder_abs, seidlung_path + ".shp")
+                full_sp_path = os.path.join(folder_abs, seidlung_path + ".shp")
 
-            tabulate_intersection(zone_octtree, octtree_crs, full_sp_path, land_use_crs, class_field, field_values)
-    for c in field_values:
-        print c
+                tabulate_intersection(zone_octtree, octtree_crs, full_sp_path, land_use_crs, class_field, field_values)
 
 
 
 def tabulate_intersection(zone_octtree, octtreeSaptialRef, shapefile, inSpatialEPSGRef, class_field, field_values):
     #print "running intersection tabulation"
-    (land_types, land_type_aliases) = ([],[]) #zip(*field_values)
+    (land_types, land_type_aliases) = zip(*field_values)
     with fiona.open(shapefile) as src:
         print '\t' , shapefile, '...'
-        for feature in src:
-            field_values.add(feature['properties']['OBJART'])
-
-        '''
 
         for feature in src:
             #get class
-            poly_class = feature['properties']['OBJART']
-            class_alias = land_type_aliases[land_types[poly_class]] #make faster?
-            if poly_class in land_types: #*zip means unzip. Only work with land types we specified
+            poly_class = feature['properties']['OBJART'].lower()
+            if poly_class in land_types: #*zip means unzip. Only work with land types we want
+                class_alias = land_type_aliases[land_types.index(poly_class)] #make faster?
                 #transform
                 transform_fiona_polygon(feature, Proj(inSpatialEPSGRef), Proj(octtreeSaptialRef))
                 poly = shape(feature['geometry'])
 
                 matches = find_intersections(zone_octtree, poly)
 
-                for (zone, percentage) in matches:
+                for zone in matches:
                     #print zone.index, class_name, percentage
                     intersection = zone.polygon.intersection(poly)
-                    pc_coverage = intersection.area / zone.polygon.area
-                    zone.laneuse_pc[class_alias] += pc_coverage
-                    zone.laneuse_area[class_alias] += zone.polygon.area
-        '''
+                    pc_coverage = min(1, intersection.area / zone.polygon.area) #max 100% area
+                    zone.landuse_pc[class_alias] += pc_coverage
+                    zone.landuse_area[class_alias] += zone.polygon.area
+
 def find_intersections(node, poly):
     matches = []
 
@@ -220,11 +214,15 @@ def find_intersections(node, poly):
                 matches.extend(find_intersections(child, poly))
     return matches
 
-def save(filename, outputSpatialReference, octtree, field_values = None, intersections = None):
+def save(filename, outputSpatialReference, octtree, include_land_use = False, field_values = None):
     print "saving zones with land use to:", filename
 
     schema = {'geometry': 'Polygon',
                 'properties': [('Population', 'int'), ('Area', 'float'), ('AGS', 'int')]}
+
+    if include_land_use:
+        for (f, alias) in field_values:
+            schema['properties'].append((alias,'float'))
 
     with fiona.open(
          filename, 'w',
@@ -232,37 +230,20 @@ def save(filename, outputSpatialReference, octtree, field_values = None, interse
          crs=outputSpatialReference,
          schema=schema) as c:
 
-        if intersections:
-            for f in field_values:
-                schema['properties'][f] = 'float'
+        for zone in octtree.iterate():
 
-            for zone, classes in intersections.iteritems():
-                properties = {'Population' : zone.value,
-                              'Area' : zone.get_area(),
-                              'AGS' : zone.get_ags()
-                              }
-                properties.update(classes)
-                c.write({
-                    'geometry': zone.polygon,
-                    'properties': properties
-                })
-        else:
-            fids = [n.index for n in octtree.iterate()]
-            fids.sort()
-            for i in range(1, len(fids)):
-                if fids[i] == fids[i-1]:
-                    print "duplicate fid: ", fids[i]
+            properties = {'Population': zone.value,
+                               'Area': zone.polygon.area,
+                               'AGS': zone.region['properties']['AGS_Int']
+                            }
+            if include_land_use:
+                for (f, alias) in field_values:
+                    properties[alias] = zone.landuse_pc[alias]
 
-            #assert(len(set(fids)) == len(fids))
-
-            for zone in octtree.iterate():
-                c.write({
-                    'geometry': mapping(zone.polygon),
-                    'properties': {'Population' : zone.value,
-                                   'Area' : zone.polygon.area,
-                                   'AGS' : zone.region['properties']['AGS_Int']
-                                }
-                })
+            c.write({
+                'geometry': mapping(zone.polygon),
+                'properties': properties
+            })
 
 
 
