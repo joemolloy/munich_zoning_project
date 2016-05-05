@@ -4,10 +4,11 @@ import psycopg2
 from octtree import OcttreeLeaf, OcttreeNode
 import octtree
 from rasterstats import zonal_stats
-import affine
+from affine import Affine
 
 import fiona
 from shapely.geometry import mapping, shape
+
 
 from pyproj import transform, Proj
 from shapely.ops import cascaded_union
@@ -17,18 +18,19 @@ from shapely.geometry import LineString, Polygon
 def load_regions(shapefile, baseSpatialRef):
     regions = []
 
-    with fiona.open(shapefile) as src:
+    with fiona.open(shapefile) as src:  ##TODO: fix handling of multipolygons
         for f in src:
-            transform_fiona_polygon(f, Proj(src.crs), Proj(baseSpatialRef))
             g = f['geometry']
             if f['geometry']['type'] != "Polygon":
                 #split up mutli_polygon regions
                 if f['geometry']['type']in ["MultiPolygon"] :
-                    for geom_part in g:
-                        f2 = f.clone()
-                        f2['geometry'] = geom_part
+                    for geom_part in g['coordinates']:
+                        f2 = f.copy()
+                        f2['geometry']['coordinates'] = geom_part
+                        transform_fiona_polygon(f2, Proj(src.crs), Proj(baseSpatialRef))
                         regions.append(f2)
             elif f['geometry']['type'] == "Polygon":
+                transform_fiona_polygon(f, Proj(src.crs), Proj(baseSpatialRef))
                 regions.append(f)
 
     return regions
@@ -39,6 +41,7 @@ def get_region_boundary(regions):
 def transform_fiona_polygon(f, p_in, p_out) :
     new_coords = []
     for ring in f['geometry']['coordinates']:
+        print ring
         x2, y2 = transform(p_in, p_out, *zip(*ring))
         new_coords.append(zip(x2, y2))
     f['geometry']['coordinates'] = new_coords
@@ -135,7 +138,7 @@ def load_data(Config, array_origin_x, array_origin_y, size, inverted=False):
     cursor.execute(sql, (array_origin_x, x_max, array_origin_y, y_max)) #xmin xmax, ymin, ymax in that order
     #ttes charhra
 
-    a = affine.Affine(100,0,array_origin_x,0,-100,array_origin_y+size*resolution)
+    a = Affine(100,0,array_origin_x,0,-100,array_origin_y+size*resolution)
 
     for line in cursor:
         if line[2] > 0:
