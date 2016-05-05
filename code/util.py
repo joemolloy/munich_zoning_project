@@ -200,7 +200,7 @@ def tabulate_intersection(zone_octtree, octtreeSaptialRef, shapefile, inSpatialE
                 transform_fiona_polygon(feature, Proj(inSpatialEPSGRef), Proj(octtreeSaptialRef))
                 poly = shape(feature['geometry'])
 
-                matches = zone_octtree.find_matches(poly, poly_class)
+                matches = find_intersections(zone_octtree, poly)
 
                 for (zone, percentage) in matches:
                     #print zone.index, class_name, percentage
@@ -209,6 +209,16 @@ def tabulate_intersection(zone_octtree, octtreeSaptialRef, shapefile, inSpatialE
                     zone.laneuse_pc[class_alias] += pc_coverage
                     zone.laneuse_area[class_alias] += zone.polygon.area
         '''
+def find_intersections(node, poly):
+    matches = []
+
+    if node.polygon.intersects(poly):
+        if isinstance(node, OcttreeLeaf):
+            matches.append(node)
+        else:
+            for child in node.getChildren():
+                matches.extend(find_intersections(child, poly))
+    return matches
 
 def save(filename, outputSpatialReference, octtree, field_values = None, intersections = None):
     print "saving zones with land use to:", filename
