@@ -24,16 +24,14 @@ class Octtree:
     def to_geom_wkb_list(self):
         return [n.polygon.wkb for n in self.iterate()]
 
-    def find_matches(self, poly, poly_class):
+    def find_intersections(self, poly):
 
         if self.polygon.intersects(poly):
             if isinstance(self, OcttreeLeaf):
-                intersection = self.polygon.intersection(poly)
-                pc_coverage = intersection.area / self.polygon.area
-                yield (self, (poly_class, pc_coverage))
+                yield self
             else:
                 for child in self.getChildren():
-                    for r in child.find_matches(poly, poly_class):
+                    for r in child.find_matches(poly):
                         yield r
 
     def find_intersecting_children(self, poly):

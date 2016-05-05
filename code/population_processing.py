@@ -49,10 +49,11 @@ output_file = Config.get("Output", "filename")
 
 if Config.getboolean("Land Use", "calculate_land_use"):
     class_field = Config.get("Land Use", "class_field")
+    #get land use values from config
+    field_values = Config.items("Class Values")
+    util.run_tabulate_intersection(region_octtree, zonesSaptialRef, shapefile, inSpatialReference, class_field, field_values)
+    util.save(output_file, zonesSaptialRef, region_octtree, field_values)
 
-    util.tabulate_intersection(region_octtree, zonesSaptialRef, shapefile, inSpatialReference, class_field)
-
-    #util.save(output_file, zonesSaptialRef, region_octtree, field_values, intersections)
 else:
     util.save(output_file, zonesSaptialRef, region_octtree)
 

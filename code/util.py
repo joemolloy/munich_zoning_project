@@ -1,7 +1,6 @@
 import numpy
 import os
 import psycopg2
-from collections import defaultdict
 from octtree import OcttreeLeaf, OcttreeNode
 import octtree
 from rasterstats import zonal_stats
@@ -23,6 +22,7 @@ def load_regions(shapefile, baseSpatialRef):
             transform_fiona_polygon(f, Proj(src.crs), Proj(baseSpatialRef))
             g = f['geometry']
             if f['geometry']['type'] != "Polygon":
+                #split up mutli_polygon regions
                 if f['geometry']['type']in ["MultiPolygon"] :
                     for geom_part in g:
                         f2 = f.clone()
@@ -150,12 +150,19 @@ def load_data(Config, array_origin_x, array_origin_y, size, inverted=False):
     return (pop_array, a)
 
 
-def tabulate_intersection(zone_octtree, octtree_crs, land_use_folder, land_use_crs, class_field):
-    ags_mapping = build_ags_mapping(zone_octtree)
+def run_tabulate_intersection(zone_octtree, octtree_crs, land_use_folder, land_use_crs, class_field, field_values):
 
-    #get land use values from config
+    #set value for each zones and class to zero
+    for zone in zone_octtree.iterate():
+        zone.landuse = {}
+        for (field, alias) in field_values:
+            zone.landuse_pc[alias] = 0
+            zone.landuse_area[alias] = 0
 
     print "running intersection tabulation"
+
+    field_values = set()
+
     print land_use_folder
     for folder in os.listdir(land_use_folder):
         folder_abs = os.path.join(land_use_folder, folder)
@@ -165,72 +172,44 @@ def tabulate_intersection(zone_octtree, octtree_crs, land_use_folder, land_use_c
                              for filename in os.listdir(folder_abs) if 'Siedlung' in filename][0]
             ags = folder[0:3]
             #print ags, os.path.join(folder_abs, seidlung_path)
-            #for each lane use shapefile, tabulate intersections for each zone in that shapefile
-            with fiona.open(os.path.join(folder, seidlung_path)) as src:
+            #for each land use shapefile, tabulate intersections for each zone in that shapefile
+            full_sp_path = os.path.join(folder_abs, seidlung_path + ".shp")
 
-                #build spatial index
-                from rtree import index
-                idx = index.Index()
-                count = -1
-                for q in src:
-                    count +=1
-                    idx.insert(count, (shape(q['geometry'].bbox)
-
-                for zone in ags_mapping[ags]:
-                    #find all intersecting land parcels of zone (use spatial index)
-                    #intersect each with zone, add area to tabulation based on the class_field
-                    #http://skipperkongen.dk/2013/02/18/trying-a-python-r-tree-implementation/
-                    idx.intersection(zone.polygon)
+            tabulate_intersection(zone_octtree, octtree_crs, full_sp_path, land_use_crs, class_field, field_values)
+    for c in field_values:
+        print c
 
 
 
-def build_ags_mapping(zone_octree):
-    mapping = defaultdict(list)
-    for zone in zone_octree.iterate():
-        mapping[zone.get_ags()] = zone
+def tabulate_intersection(zone_octtree, octtreeSaptialRef, shapefile, inSpatialEPSGRef, class_field, field_values):
+    #print "running intersection tabulation"
+    (land_types, land_type_aliases) = ([],[]) #zip(*field_values)
+    with fiona.open(shapefile) as src:
+        print '\t' , shapefile, '...'
+        for feature in src:
+            field_values.add(feature['properties']['OBJART'])
 
-    return mapping
+        '''
 
-'''
-def tabulate_intersection(zone_octtree, octtreeSaptialRef, shapefile, inSpatialEPSGRef, class_field):
-    print "running intersection tabulation"
-    driver = ogr.GetDriverByName("ESRI Shapefile")
-    # load shapefile
-    dataSource = driver.Open(shapefile, 0)
-    layer = load_layer_from_shapefile(dataSource)
+        for feature in src:
+            #get class
+            poly_class = feature['properties']['OBJART']
+            class_alias = land_type_aliases[land_types[poly_class]] #make faster?
+            if poly_class in land_types: #*zip means unzip. Only work with land types we specified
+                #transform
+                transform_fiona_polygon(feature, Proj(inSpatialEPSGRef), Proj(octtreeSaptialRef))
+                poly = shape(feature['geometry'])
 
-    #get all distinct class_field values
-    features = [feature.Clone() for feature in layer]
+                matches = zone_octtree.find_matches(poly, poly_class)
 
-    field_values = list({f.GetField(class_field)[:8] for f in features})
+                for (zone, percentage) in matches:
+                    #print zone.index, class_name, percentage
+                    intersection = zone.polygon.intersection(poly)
+                    pc_coverage = intersection.area / zone.polygon.area
+                    zone.laneuse_pc[class_alias] += pc_coverage
+                    zone.laneuse_area[class_alias] += zone.polygon.area
+        '''
 
-    #set value for each zones and class to zero
-    zones = {node: {} for node in zone_octtree.iterate()}
-
-    for z in zones.iterkeys():
-        for c in field_values:
-            zones[z][c] = 0
-
-    for feature in features:
-        poly_class = feature.GetField(class_field)[:8]
-        poly = feature.GetGeometryRef().Clone()
-
-        inSpatialRef = osr.SpatialReference()
-        inSpatialRef.ImportFromEPSG(inSpatialEPSGRef) #Germany zone 4 for ALKIS data
-
-        outSpatialRef = osr.SpatialReference()
-        outSpatialRef.ImportFromEPSG(octtreeSaptialRef)
-        transform = osr.CoordinateTransformation(inSpatialRef, outSpatialRef)
-        poly.Transform(transform)
-
-        matches = zone_octtree.find_matches(poly, poly_class)
-
-        for (zone, (class_name, percentage)) in matches:
-            #print zone.index, class_name, percentage
-            zones[zone][class_name] += percentage
-
-    return (field_values, zones)
-'''
 def save(filename, outputSpatialReference, octtree, field_values = None, intersections = None):
     print "saving zones with land use to:", filename
 
