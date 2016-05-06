@@ -23,7 +23,6 @@ def load_regions(shapefile, baseSpatialRef):
             #print f['geometry']['type']
             g = f['geometry']
             if f['geometry']['type'] != "Polygon":
-                print f['properties']['AGS_Int']
                 #split up mutli_polygon regions
                 if f['geometry']['type'] == "MultiPolygon" :
                     for geom_part in shape(f['geometry']):
