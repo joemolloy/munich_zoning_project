@@ -23,12 +23,11 @@ def load_regions(shapefile, baseSpatialRef):
             #print f['geometry']['type']
             g = f['geometry']
             if f['geometry']['type'] != "Polygon":
+                print f['properties']['AGS_Int']
                 #split up mutli_polygon regions
-                if f['geometry']['type']in ["MultiPolygon"] :
-                    for geom_part in g['coordinates']:
-                        f2 = f.copy()
-                        f2['geometry']['coordinates'] = geom_part
-                        f2['geometry']['type'] = 'Polygon'
+                if f['geometry']['type'] == "MultiPolygon" :
+                    for geom_part in shape(f['geometry']):
+                        f2 = {'geometry': mapping(geom_part), 'properties': f['properties'].copy()}
                         transform_fiona_polygon(f2, Proj(src.crs), Proj(baseSpatialRef))
                         regions.append(f2)
             elif f['geometry']['type'] == "Polygon":
