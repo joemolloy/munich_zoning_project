@@ -20,6 +20,7 @@ def load_regions(shapefile, baseSpatialRef):
 
     with fiona.open(shapefile) as src:  ##TODO: fix handling of multipolygons
         for f in src:
+            #print f['geometry']['type']
             g = f['geometry']
             if f['geometry']['type'] != "Polygon":
                 #split up mutli_polygon regions
@@ -27,6 +28,7 @@ def load_regions(shapefile, baseSpatialRef):
                     for geom_part in g['coordinates']:
                         f2 = f.copy()
                         f2['geometry']['coordinates'] = geom_part
+                        f2['geometry']['type'] = 'Polygon'
                         transform_fiona_polygon(f2, Proj(src.crs), Proj(baseSpatialRef))
                         regions.append(f2)
             elif f['geometry']['type'] == "Polygon":
@@ -41,7 +43,7 @@ def get_region_boundary(regions):
 def transform_fiona_polygon(f, p_in, p_out) :
     new_coords = []
     for ring in f['geometry']['coordinates']:
-        print ring
+        #print ring
         x2, y2 = transform(p_in, p_out, *zip(*ring))
         new_coords.append(zip(x2, y2))
     f['geometry']['coordinates'] = new_coords
@@ -173,12 +175,14 @@ def run_tabulate_intersection(zone_octtree, octtree_crs, land_use_folder, land_u
             seidlung_path = [os.path.splitext(filename)[0]
                              for filename in os.listdir(folder_abs) if 'Siedlung' in filename][0]
             ags = folder[0:3]
-            if int(ags) in [175, 177, 183, 187]: #only for test config
+
+            #if int(ags) in [175, 177, 183, 187]: #only for test config
+
             #print ags, os.path.join(folder_abs, seidlung_path)
             #for each land use shapefile, tabulate intersections for each zone in that shapefile
-                full_sp_path = os.path.join(folder_abs, seidlung_path + ".shp")
+            full_sp_path = os.path.join(folder_abs, seidlung_path + ".shp")
 
-                tabulate_intersection(zone_octtree, octtree_crs, full_sp_path, land_use_crs, class_field, field_values)
+            tabulate_intersection(zone_octtree, octtree_crs, full_sp_path, land_use_crs, class_field, field_values)
 
 
 
