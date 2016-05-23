@@ -156,7 +156,7 @@ def splice(Config, tree, regions, pop_array, transform):
 
             for child in nodes_inside_region:
                 if isinstance(child, OcttreeLeaf):
-                    if child.polygon.within(region_poly) and child.polygon.disjoint(area_boundary): #inside, so keep and all to list of all nodes (unles on total boundary)
+                    if child.polygon.within(region_poly): #inside, so keep and all to list of all nodes (unles on total boundary)
                         region_results[-1]['all'].add(child)
                         child.region = region
                     else: #on a border, split
@@ -185,8 +185,7 @@ def splice(Config, tree, regions, pop_array, transform):
 
     #remove any nodes ouside boundary:
     for node in nodes_to_delete:
-        if node in node.parent.getChildren():
-            node.parent.remove(node)
+        node.parent.remove(node)
 
     merge(Config, region_results)
 
