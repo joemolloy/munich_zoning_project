@@ -104,6 +104,7 @@ def build_out_nodes(Config, region_node, regions, array, affine, pop_threshold):
     octtree_top =  build(region_node.polygon, region_node, array, affine, pop_threshold)
     print "\toriginal number zones: ", octtree_top.count_populated()
     splice(Config, octtree_top, regions, array, affine)
+
     print "\tafter split and merge: ", octtree_top.count_populated()
 
     return octtree_top
@@ -137,7 +138,9 @@ def splice(Config, tree, regions, pop_array, transform):
     region_results = []
     nodes_to_delete = set()
 
-    boundary = util.get_region_boundary(regions).boundary #need to check against boundary too.
+    bounding_area = util.get_region_boundary(regions) #need to check against boundary too.
+    area_boundary =  bounding_area.boundary
+
 
     for region in regions:
         region_results.append({'region':region, 'all':set(), 'to_merge':set()})
@@ -153,7 +156,7 @@ def splice(Config, tree, regions, pop_array, transform):
 
             for child in nodes_inside_region:
                 if isinstance(child, OcttreeLeaf):
-                    if child.polygon.within(region_poly) and child.polygon.disjoint(boundary): #inside, so keep and all to list of all nodes (unles on total boundary)
+                    if child.polygon.within(region_poly) and child.polygon.disjoint(area_boundary): #inside, so keep and all to list of all nodes (unles on total boundary)
                         region_results[-1]['all'].add(child)
                         child.region = region
                     else: #on a border, split
@@ -178,11 +181,17 @@ def splice(Config, tree, regions, pop_array, transform):
                 else:
                     node_queue.put(child)
 
+
+
+    #remove any nodes ouside boundary:
     for node in nodes_to_delete:
         if node in node.parent.getChildren():
             node.parent.remove(node)
 
     merge(Config, region_results)
+
+    tree.prune(bounding_area)
+
 
 def merge(Config, region_results):
     print "running merging"

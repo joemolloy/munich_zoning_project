@@ -61,7 +61,7 @@ def next_power_of_2(n):
     """
     return 2**(n-1).bit_length()
 
-def solve_iteratively(Config, region_octtree, regions, pop_array, affine, boundary):
+def solve_iteratively(Config, region_octtree, regions, pop_array, affine):
     ##
     # if num zones is too large, we need a higher threshold
     # keep a record of the thresholds that result in the nearest low, and nearest high
@@ -118,7 +118,21 @@ def load_data(Config, array_origin_x, array_origin_y, size, inverted=False):
         conn = psycopg2.connect(database=db, user=user, password=pw, host=host)
     cursor = conn.cursor()
 
-    sql = Config.get("Input", "sql")
+
+    sql = """SELECT {sql_x}, {sql_y}, {sql_value}
+            FROM {sql_table}
+            WHERE {sql_x} between %s and %s AND {sql_y} between %s and %s
+            """.format(sql_x = Config.get("Sql", "x"),
+                       sql_y = Config.get("Sql", "y"),
+                       sql_value = Config.get("Sql", "value"),
+                       sql_table = Config.get("Sql", "table"))
+
+    sql_mins = """SELECT min({sql_x}),min({sql_y})
+            FROM {sql_table}
+            WHERE {sql_x} between %s and %s AND {sql_y} between %s and %s
+            """.format(sql_x = Config.get("Sql", "x"),
+                       sql_y = Config.get("Sql", "y"),
+                       sql_table = Config.get("Sql", "table"))
 
     resolution = Config.getint("Input", "resolution")
 
@@ -126,10 +140,22 @@ def load_data(Config, array_origin_x, array_origin_y, size, inverted=False):
     x_max = array_origin_x + size * resolution
     y_max = array_origin_y + size * resolution
 
-    pop_array = numpy.zeros((size, size), dtype=numpy.int32)
+    pop_array = numpy.zeros((size+1, size+1), dtype=numpy.int32)
 
     print cursor.mogrify(sql, (array_origin_x, x_max, array_origin_y, y_max))
 
+    cursor.execute(sql_mins, (array_origin_x, x_max, array_origin_y, y_max))
+    (results_min_x, results_min_y) = cursor.fetchone()
+    a = Affine(
+            resolution,
+            0,
+            results_min_x - (resolution/2), #shift from the center marking to bottom left corner
+            0,
+            -resolution,
+            results_min_y+size*resolution - (resolution/2) #shift from the center marking to bottom left corner
+    )
+
+    print (results_min_x, results_min_y)
 
 
     #cursor.execute("SELECT x_mp_100m, y_mp_100m, \"Einwohner\" FROM public.muc_all_population;")
@@ -138,7 +164,6 @@ def load_data(Config, array_origin_x, array_origin_y, size, inverted=False):
     cursor.execute(sql, (array_origin_x, x_max, array_origin_y, y_max)) #xmin xmax, ymin, ymax in that order
     #ttes charhra
 
-    a = Affine(100,0,array_origin_x,0,-100,array_origin_y+size*resolution)
 
     for line in cursor:
         if line[2] > 0:
