@@ -253,6 +253,7 @@ def save(filename, outputSpatialReference, octtree, include_land_use = False, fi
     if include_land_use:
         for (f, alias) in field_values:
             schema['properties'].append((alias,'float'))
+        schema['properties'].append(('remainder', 'float'))
 
     with fiona.open(
          filename, 'w',
@@ -267,8 +268,11 @@ def save(filename, outputSpatialReference, octtree, include_land_use = False, fi
                                'AGS': zone.region['properties']['AGS_Int']
                             }
             if include_land_use:
+                land_use_remainder = 1.0
                 for (f, alias) in field_values:
+                    land_use_remainder -= zone.landuse_pc[alias]
                     properties[alias] = zone.landuse_pc[alias]
+                properties['remainder'] = land_use_remainder
 
             c.write({
                 'geometry': mapping(zone.polygon),
