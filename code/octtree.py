@@ -139,8 +139,6 @@ def splice(Config, tree, regions, pop_array, transform):
     nodes_to_delete = set()
 
     bounding_area = util.get_region_boundary(regions) #need to check against boundary too.
-    area_boundary =  bounding_area.boundary
-
 
     for region in regions:
         region_results.append({'region':region, 'all':set(), 'to_merge':set()})
