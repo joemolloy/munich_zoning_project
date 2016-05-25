@@ -27,9 +27,7 @@ max_dimension = max(max_x - min_x, max_y - min_y)
 sub_array_size = util.next_power_of_2(max_dimension / resolution)
 print "array will be size: ", sub_array_size
 
-# need to include here
-
-
+#use centroid of area to work out array origins
 array_origin_x = (max_x + min_x - sub_array_size*resolution)/ 2
 array_origin_y = (max_y + min_y - sub_array_size*resolution)/ 2
 
