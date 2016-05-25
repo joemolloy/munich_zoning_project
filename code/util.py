@@ -140,35 +140,41 @@ def load_data(Config, array_origin_x, array_origin_y, size, inverted=False):
     x_max = array_origin_x + size * resolution
     y_max = array_origin_y + size * resolution
 
-    pop_array = numpy.zeros((size+1, size+1), dtype=numpy.int32)
+    pop_array = numpy.zeros((size, size), dtype=numpy.int32)
 
     print cursor.mogrify(sql, (array_origin_x, x_max, array_origin_y, y_max))
 
     cursor.execute(sql_mins, (array_origin_x, x_max, array_origin_y, y_max))
     (results_min_x, results_min_y) = cursor.fetchone()
+
     a = Affine(
             resolution,
             0,
-            results_min_x - (resolution/2), #shift from the center marking to bottom left corner
+            results_min_x, #shift from the center marking to bottom left corner
             0,
             -resolution,
-            results_min_y+size*resolution - (resolution/2) #shift from the center marking to bottom left corner
+            results_min_y + size*resolution #shift from the center marking to bottom left corner
     )
 
-    print (results_min_x, results_min_y)
-
+    print "array origins: ", (results_min_x, results_min_y)
+    array_origin_x = results_min_x
+    array_origin_y = results_min_y
+    x_max = results_min_x + size * resolution
+    y_max = results_min_y + size * resolution
 
     #cursor.execute("SELECT x_mp_100m, y_mp_100m, \"Einwohner\" FROM public.muc_all_population;")
     #this metheod only works when total rows = ncols x nrows in database. (IE no missing values)
-    print "parameters", (array_origin_x, x_max, array_origin_y, y_max)
-    cursor.execute(sql, (array_origin_x, x_max, array_origin_y, y_max)) #xmin xmax, ymin, ymax in that order
+    print "parameters", (array_origin_x, (x_max-1), (array_origin_y+1), y_max)
+    cursor.execute(sql, (array_origin_x, (x_max-1), (array_origin_y+1), y_max)) #xmin xmax, ymin, ymax in that order
     #ttes charhra
 
 
     for line in cursor:
         if line[2] > 0:
             (x,y) = (line[0], line[1])
+            #print "(x,y): ", (x,y)
             (col, row) = ~a * (x,y)
+            #print "(col,row): ", (col, row)
             pop_array[row, col] = line[2]
         #reference arrays by (row_no , col_no)
         #reference arrays by (   a_y,      a_x   )
