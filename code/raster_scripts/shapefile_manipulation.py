@@ -73,6 +73,9 @@ def create_rasters(land_use_folder, raster_output_folder):
             with fiona.open(full_sp_path, 'r') as vector_f:
                 (minx, miny, maxx, maxy) = map(lambda a:int(a - a % 50), vector_f.bounds)
 
+            seidlung_path = [os.path.splitext(filename)[0]
+                             for filename in os.listdir(folder_abs) if 'Siedlung' in filename][0]
+
             cmd = ["gdal_rasterize",
                               "-a_srs",
                               to_string(from_epsg(31468)),
@@ -93,6 +96,34 @@ def create_rasters(land_use_folder, raster_output_folder):
 
             subprocess.Popen(cmd)
 
+def create_ags_code_raster(regions_shapefile, out_filename, resolution):
+
+    with fiona.open(regions_shapefile, 'r') as vector_f:
+        (minx, miny, maxx, maxy) = map(lambda a:int(a - a % 50), vector_f.bounds)
+
+        layername = os.path.splitext(os.path.split(regions_shapefile)[-1])[0]
+
+        cmd = ["gdal_rasterize",
+                                  "-a_srs",
+                                  to_string(from_epsg(31468)),
+                                  "-a",
+                                  "AGS_Int",
+                                  "-a_nodata", "0",
+                                  "-te",
+                                  str(minx - 100), str(miny - 100), str(maxx+100), str(maxy+100),
+                                  "-tr",
+                                  str(resolution),
+                                  str(resolution),
+                                  "-ot", "Int32",
+                                  "-l",
+                                  layername,
+                                  regions_shapefile,
+                                  os.path.join(out_filename)]
+
+        print(cmd)
+
+        subprocess.Popen(cmd)
+
 land_use_folder = "../TN_7_Landkreise_Stadt_Muenchen_TUM_Herrn"
 new_land_use_folder = "../TN_7_modified"
 raster_output_folder= "../TN_7_rasters2"
@@ -103,6 +134,6 @@ raster_output_folder= "../TN_7_rasters2"
 create_rasters(new_land_use_folder, raster_output_folder)
 
 
-
+#create_ags_code_raster("../../data/regional/regions/regions.shp", "../../output/regions.tif", 100)
 
 
