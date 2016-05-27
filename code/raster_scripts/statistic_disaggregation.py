@@ -117,16 +117,18 @@ def distribute_region_statistics(land_use_raster_file, region_raster_file, regio
                 #remove remaining column
                 REMAINDER_COL = 0
                 lu_without_remainder = np.delete(lu_array_bands_last,REMAINDER_COL, axis=2)
-                #expand summed area value so that the divison against each band will work
+                #repeat summed area value so that the divison against each band will work
                 lu_agg = lu_without_remainder.astype(float) / np.atleast_3d(np.sum(lu_without_remainder, axis=2))
-
+                lu_agg = np.nan_to_num(lu_agg)
 
                 (region_code_array,) = region_raster.read()
                 print "region code array shape: ", region_code_array.shape
                 print "region height:", region_raster.profile['height']
 
-                land_use_region_raster_percentages = np.zeros(lu_agg.shape)
+                regional_land_use_array = np.zeros(lu_agg.shape)
+                region_population = np.zeros(region_code_array.shape)
 
+                #for each land use band
                 for (row,col,z), v in np.ndenumerate(lu_agg):
                     total_cell_land_use = v
                     if not math.isnan(v):
@@ -134,13 +136,24 @@ def distribute_region_statistics(land_use_raster_file, region_raster_file, regio
                         #location region_id from region_raster
                         region_id = region_code_array[row,col]
 
+                        #pull the regional land use percentage for each region
                         if region_id:
                             region_id = int(region_id)
                             value = region_land_use_percentages[region_id][z+1] #TODO: more robust than just +1 to shift to number
                             #print (row, col), z, int(region_id), value
-                            land_use_region_raster_percentages[row, col, z] = value
+                            regional_land_use_array[row, col, z] = value
+                            #assign population value
+                            region_population[row, col] = region_land_use_percentages[region_id]['Population']
 
-                print land_use_region_raster_percentages
+                #print lu_agg
+                # grid_percentage * regional_percentage * regional_population_value * scalar
+                result = (np.sum(lu_agg * regional_land_use_array, axis=2) / 5.0) * region_population
+
+                for (row,col), v in np.ndenumerate(result):
+                    if v > 0:
+                        print (row, col), v
+
+
 
 
 def build_region_land_use_dict(region_features, land_use_categories):
@@ -151,6 +164,7 @@ def build_region_land_use_dict(region_features, land_use_categories):
         region_lu_percentages[region_id] = {}
         for (i, name) in land_use_categories:
             region_lu_percentages[region_id][i] = region['properties'][name]
+        region_lu_percentages[region_id]['Population'] = 10000 #TODO: real value
 
     print region_lu_percentages
     return region_lu_percentages
