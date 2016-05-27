@@ -3,16 +3,22 @@
   <title></title>
   <layer-tree-group expanded="1" checked="Qt::PartiallyChecked" name="">
     <customproperties/>
-    <layer-tree-layer expanded="1" checked="Qt::Checked" id="Auspendler_in_Kernregion_25Proz_geglaettet20160418122212903" name="Auspendler_in_Kernregion_25Proz_geglaettet">
+    <layer-tree-layer expanded="1" checked="Qt::Checked" id="land_use_100m20160526115506352" name="land_use_100m">
       <customproperties/>
     </layer-tree-layer>
-    <layer-tree-layer expanded="1" checked="Qt::Checked" id="combined_rasters20160525190707521" name="combined_rasters">
+    <layer-tree-layer expanded="1" checked="Qt::Unchecked" id="162_TN_Muenchen_Stadt_11695823_TN_Siedlung20160525205704611" name="162_TN_Muenchen_Stadt_11695823_TN_Siedlung">
+      <customproperties/>
+    </layer-tree-layer>
+    <layer-tree-layer expanded="1" checked="Qt::Checked" id="161_Stadt_Ingolstadt_21884403_TN_Siedlung20160525205210073" name="161_Stadt_Ingolstadt_21884403_TN_Siedlung">
+      <customproperties/>
+    </layer-tree-layer>
+    <layer-tree-layer expanded="1" checked="Qt::Checked" id="Auspendler_in_Kernregion_25Proz_geglaettet20160418122212903" name="Auspendler_in_Kernregion_25Proz_geglaettet">
       <customproperties/>
     </layer-tree-layer>
     <layer-tree-layer expanded="1" checked="Qt::Unchecked" id="boundary20160506134207474" name="boundary">
       <customproperties/>
     </layer-tree-layer>
-    <layer-tree-layer expanded="1" checked="Qt::Checked" id="zones20160506133106689" name="zones">
+    <layer-tree-layer expanded="1" checked="Qt::Unchecked" id="zones20160506133106689" name="zones">
       <customproperties>
         <property key="showFeatureCount" value="1"/>
       </customproperties>
@@ -22,10 +28,10 @@
   <mapcanvas>
     <units>meters</units>
     <extent>
-      <xmin>4386798.05972884222865105</xmin>
-      <ymin>2761912.28616185858845711</ymin>
-      <xmax>4503142.72479740902781487</xmax>
-      <ymax>2849136.9348173625767231</ymax>
+      <xmin>4392378.21862877439707518</xmin>
+      <ymin>2738044.66120907524600625</ymin>
+      <xmax>4499286.89770592283457518</xmax>
+      <ymax>2852888.23864742973819375</ymax>
     </extent>
     <rotation>0</rotation>
     <projections>1</projections>
@@ -49,13 +55,18 @@
       <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="no_sliver220160418115832932"/>
       <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="zones20160506133052285"/>
       <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="no_sliver20160418115534498"/>
+      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:31468" srcDatumTransform="-1" destDatumTransform="-1" layerid="land_use_100m20160526114501028"/>
       <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="zones20160419145305778"/>
       <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:31468" srcDatumTransform="-1" destDatumTransform="-1" layerid="21884403_TN_Siedlung20160504191613187"/>
       <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="test_polygon20160418165507539"/>
       <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="example_total20160407100251546"/>
+      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="population_raster20160526092028019"/>
+      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:31468" srcDatumTransform="-1" destDatumTransform="-1" layerid="population_100m20160526112841106"/>
       <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="boundary20160506134207474"/>
       <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="munich_metro_area20160407091224844"/>
       <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="zones_delaunay20160418120732859"/>
+      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:31468" srcDatumTransform="-1" destDatumTransform="-1" layerid="161_Stadt_Ingolstadt_21884403_TN_Siedlung20160525205210073"/>
+      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:31468" srcDatumTransform="-1" destDatumTransform="-1" layerid="population_100m20160526103847499"/>
       <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="zones20160229182048713"/>
       <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="zones20160418213838222"/>
       <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="example_total20160407094847080"/>
@@ -64,47 +75,68 @@
       <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="zones_test20160505211256488"/>
       <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="zones20160419144044434"/>
       <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="zones20160418143441544"/>
+      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:31468" srcDatumTransform="-1" destDatumTransform="-1" layerid="combined_rasters20160525205506152"/>
       <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="zones20160418204604987"/>
       <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:31494" srcDatumTransform="-1" destDatumTransform="-1" layerid="combined_rasters20160525190707521"/>
       <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="test_polygons_two20160418171358910"/>
       <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="no_sliver220160418115647546"/>
+      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:31468" srcDatumTransform="-1" destDatumTransform="-1" layerid="combined_rasters20160526091824616"/>
       <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="zones20160407141751949"/>
       <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:31468" srcDatumTransform="-1" destDatumTransform="-1" layerid="11695837_TN_Vegetation20160505211510477"/>
       <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="zones20160418203713746"/>
       <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="population_raster20160525184738994"/>
+      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:31468" srcDatumTransform="-1" destDatumTransform="-1" layerid="land_use_100m20160526115506352"/>
       <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="zones_test20160504171122472"/>
+      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="population_raster20160526092205246"/>
       <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:31468" srcDatumTransform="-1" destDatumTransform="-1" layerid="Untitled20160419135357767"/>
       <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:31468" srcDatumTransform="-1" destDatumTransform="-1" layerid="Auspendler_in_Kernregion_25Proz_geglaettet20160418122212903"/>
       <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:31468" srcDatumTransform="-1" destDatumTransform="-1" layerid="11695837_TN_Gewaesser20160505211701485"/>
+      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:31468" srcDatumTransform="-1" destDatumTransform="-1" layerid="population_merged20160526092705401"/>
       <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="zones20160407101824896"/>
       <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="Untitled20160407184752864"/>
       <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="zones_test20160504160941803"/>
+      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:31468" srcDatumTransform="-1" destDatumTransform="-1" layerid="land_use_100m20160526113833391"/>
       <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:31468" srcDatumTransform="-1" destDatumTransform="-1" layerid="11695837_TN_Siedlung20160505211344502"/>
       <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="zones20160418135922426"/>
+      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:31468" srcDatumTransform="-1" destDatumTransform="-1" layerid="population_100m20160526113118139"/>
       <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:31468" srcDatumTransform="-1" destDatumTransform="-1" layerid="auspendler_filtered_small_test20160419140127911"/>
       <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="regions20160407162501963"/>
+      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:31468" srcDatumTransform="-1" destDatumTransform="-1" layerid="land_use_100m20160526115123755"/>
       <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="example_total20160407100220996"/>
+      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:31468" srcDatumTransform="-1" destDatumTransform="-1" layerid="162_TN_Muenchen_Stadt_11695823_TN_Siedlung20160525205704611"/>
       <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="example_total20160407090223250"/>
     </layer_coordinate_transform_info>
   </mapcanvas>
   <visibility-presets/>
   <layer-tree-canvas>
     <custom-order enabled="0">
-      <item>boundary20160506134207474</item>
       <item>Auspendler_in_Kernregion_25Proz_geglaettet20160418122212903</item>
+      <item>boundary20160506134207474</item>
       <item>zones20160506133106689</item>
-      <item>combined_rasters20160525190707521</item>
+      <item>161_Stadt_Ingolstadt_21884403_TN_Siedlung20160525205210073</item>
+      <item>162_TN_Muenchen_Stadt_11695823_TN_Siedlung20160525205704611</item>
+      <item>land_use_100m20160526115506352</item>
     </custom-order>
   </layer-tree-canvas>
   <legend updateDrawingOrder="true">
+    <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="land_use_100m" showFeatureCount="0">
+      <filegroup open="true" hidden="false">
+        <legendlayerfile isInOverview="0" layerid="land_use_100m20160526115506352" visible="1"/>
+      </filegroup>
+    </legendlayer>
+    <legendlayer drawingOrder="-1" open="true" checked="Qt::Unchecked" name="162_TN_Muenchen_Stadt_11695823_TN_Siedlung" showFeatureCount="0">
+      <filegroup open="true" hidden="false">
+        <legendlayerfile isInOverview="0" layerid="162_TN_Muenchen_Stadt_11695823_TN_Siedlung20160525205704611" visible="0"/>
+      </filegroup>
+    </legendlayer>
+    <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="161_Stadt_Ingolstadt_21884403_TN_Siedlung" showFeatureCount="0">
+      <filegroup open="true" hidden="false">
+        <legendlayerfile isInOverview="0" layerid="161_Stadt_Ingolstadt_21884403_TN_Siedlung20160525205210073" visible="1"/>
+      </filegroup>
+    </legendlayer>
     <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="Auspendler_in_Kernregion_25Proz_geglaettet" showFeatureCount="0">
       <filegroup open="true" hidden="false">
         <legendlayerfile isInOverview="0" layerid="Auspendler_in_Kernregion_25Proz_geglaettet20160418122212903" visible="1"/>
-      </filegroup>
-    </legendlayer>
-    <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="combined_rasters" showFeatureCount="0">
-      <filegroup open="true" hidden="false">
-        <legendlayerfile isInOverview="0" layerid="combined_rasters20160525190707521" visible="1"/>
       </filegroup>
     </legendlayer>
     <legendlayer drawingOrder="-1" open="true" checked="Qt::Unchecked" name="boundary" showFeatureCount="0">
@@ -112,16 +144,108 @@
         <legendlayerfile isInOverview="0" layerid="boundary20160506134207474" visible="0"/>
       </filegroup>
     </legendlayer>
-    <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="zones" showFeatureCount="1">
+    <legendlayer drawingOrder="-1" open="true" checked="Qt::Unchecked" name="zones" showFeatureCount="1">
       <filegroup open="true" hidden="false">
-        <legendlayerfile isInOverview="0" layerid="zones20160506133106689" visible="1"/>
+        <legendlayerfile isInOverview="0" layerid="zones20160506133106689" visible="0"/>
       </filegroup>
     </legendlayer>
   </legend>
-  <projectlayers layercount="4">
+  <projectlayers layercount="6">
+    <maplayer minimumScale="0" maximumScale="1e+08" type="raster" hasScaleBasedVisibilityFlag="0">
+      <id>161_Stadt_Ingolstadt_21884403_TN_Siedlung20160525205210073</id>
+      <datasource>/Users/joemolloy/Projects/munich_zoning_project/TN_7_rasters2/161_Stadt_Ingolstadt_21884403_TN_Siedlung.tif</datasource>
+      <title></title>
+      <abstract></abstract>
+      <keywordList>
+        <value></value>
+      </keywordList>
+      <layername>161_Stadt_Ingolstadt_21884403_TN_Siedlung</layername>
+      <srs>
+        <spatialrefsys>
+          <proj4>+proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=4500000 +y_0=0 +ellps=bessel +towgs84=598.1,73.7,418.2,0.202,0.045,-2.455,6.7 +units=m +no_defs</proj4>
+          <srsid>2648</srsid>
+          <srid>31468</srid>
+          <authid>EPSG:31468</authid>
+          <description>DHDN / Gauss-Kruger zone 4</description>
+          <projectionacronym>tmerc</projectionacronym>
+          <ellipsoidacronym>bessel</ellipsoidacronym>
+          <geographicflag>false</geographicflag>
+        </spatialrefsys>
+      </srs>
+      <customproperties>
+        <property key="identify/format" value="Value"/>
+      </customproperties>
+      <provider>gdal</provider>
+      <noData>
+        <noDataList bandNo="1" useSrcNoData="0"/>
+      </noData>
+      <map-layer-style-manager current="">
+        <map-layer-style name=""/>
+      </map-layer-style-manager>
+      <pipe>
+        <rasterrenderer gradient="BlackToWhite" opacity="1" alphaBand="-1" type="singlebandgray" grayBand="1">
+          <rasterTransparency/>
+          <contrastEnhancement>
+            <minValue>0</minValue>
+            <maxValue>5</maxValue>
+            <algorithm>StretchToMinimumMaximum</algorithm>
+          </contrastEnhancement>
+        </rasterrenderer>
+        <brightnesscontrast brightness="0" contrast="0"/>
+        <huesaturation colorizeGreen="128" colorizeOn="0" colorizeRed="255" colorizeBlue="128" grayscaleMode="0" saturation="0" colorizeStrength="100"/>
+        <rasterresampler maxOversampling="2"/>
+      </pipe>
+      <blendMode>0</blendMode>
+    </maplayer>
+    <maplayer minimumScale="0" maximumScale="1e+08" type="raster" hasScaleBasedVisibilityFlag="0">
+      <id>162_TN_Muenchen_Stadt_11695823_TN_Siedlung20160525205704611</id>
+      <datasource>/Users/joemolloy/Projects/munich_zoning_project/TN_7_rasters2/162_TN_Muenchen_Stadt_11695823_TN_Siedlung.tif</datasource>
+      <title></title>
+      <abstract></abstract>
+      <keywordList>
+        <value></value>
+      </keywordList>
+      <layername>162_TN_Muenchen_Stadt_11695823_TN_Siedlung</layername>
+      <srs>
+        <spatialrefsys>
+          <proj4>+proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=4500000 +y_0=0 +ellps=bessel +towgs84=598.1,73.7,418.2,0.202,0.045,-2.455,6.7 +units=m +no_defs</proj4>
+          <srsid>2648</srsid>
+          <srid>31468</srid>
+          <authid>EPSG:31468</authid>
+          <description>DHDN / Gauss-Kruger zone 4</description>
+          <projectionacronym>tmerc</projectionacronym>
+          <ellipsoidacronym>bessel</ellipsoidacronym>
+          <geographicflag>false</geographicflag>
+        </spatialrefsys>
+      </srs>
+      <customproperties>
+        <property key="identify/format" value="Value"/>
+      </customproperties>
+      <provider>gdal</provider>
+      <noData>
+        <noDataList bandNo="1" useSrcNoData="0"/>
+      </noData>
+      <map-layer-style-manager current="">
+        <map-layer-style name=""/>
+      </map-layer-style-manager>
+      <pipe>
+        <rasterrenderer gradient="BlackToWhite" opacity="1" alphaBand="-1" type="singlebandgray" grayBand="1">
+          <rasterTransparency/>
+          <contrastEnhancement>
+            <minValue>0</minValue>
+            <maxValue>5</maxValue>
+            <algorithm>StretchToMinimumMaximum</algorithm>
+          </contrastEnhancement>
+        </rasterrenderer>
+        <brightnesscontrast brightness="0" contrast="0"/>
+        <huesaturation colorizeGreen="128" colorizeOn="0" colorizeRed="255" colorizeBlue="128" grayscaleMode="0" saturation="0" colorizeStrength="100"/>
+        <rasterresampler maxOversampling="2"/>
+      </pipe>
+      <blendMode>0</blendMode>
+    </maplayer>
     <maplayer minimumScale="-4.65661e-10" maximumScale="1e+08" simplifyDrawingHints="1" minLabelScale="0" maxLabelScale="1e+08" simplifyDrawingTol="1" geometry="Polygon" simplifyMaxScale="1" type="vector" hasScaleBasedVisibilityFlag="0" simplifyLocal="1" scaleBasedLabelVisibilityFlag="0">
       <id>Auspendler_in_Kernregion_25Proz_geglaettet20160418122212903</id>
-      <datasource>./code/boundary/Auspendler_in_Kernregion_25Proz_geglaettet/Auspendler_in_Kernregion_25Proz_geglaettet.shp</datasource>
+      <datasource>/Users/joemolloy/Projects/munich_zoning_project/code/boundary/Auspendler_in_Kernregion_25Proz_geglaettet/Auspendler_in_Kernregion_25Proz_geglaettet.shp</datasource>
       <title></title>
       <abstract></abstract>
       <keywordList>
@@ -477,7 +601,7 @@
     </maplayer>
     <maplayer minimumScale="0" maximumScale="1e+08" simplifyDrawingHints="1" minLabelScale="0" maxLabelScale="1e+08" simplifyDrawingTol="1" geometry="Polygon" simplifyMaxScale="1" type="vector" hasScaleBasedVisibilityFlag="0" simplifyLocal="1" scaleBasedLabelVisibilityFlag="0">
       <id>boundary20160506134207474</id>
-      <datasource>./code/boundary/boundary.shp</datasource>
+      <datasource>/Users/joemolloy/Projects/munich_zoning_project/code/boundary/boundary.shp</datasource>
       <title></title>
       <abstract></abstract>
       <keywordList>
@@ -570,21 +694,21 @@
       </edittypes>
     </maplayer>
     <maplayer minimumScale="0" maximumScale="1e+08" type="raster" hasScaleBasedVisibilityFlag="0">
-      <id>combined_rasters20160525190707521</id>
-      <datasource>./combined_rasters.tif</datasource>
+      <id>land_use_100m20160526115506352</id>
+      <datasource>/Users/joemolloy/Projects/munich_zoning_project/land_use_100m.tif</datasource>
       <title></title>
       <abstract></abstract>
       <keywordList>
         <value></value>
       </keywordList>
-      <layername>combined_rasters</layername>
+      <layername>land_use_100m</layername>
       <srs>
         <spatialrefsys>
-          <proj4>+proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=4500000 +y_0=0 +ellps=bessel +units=m +no_defs</proj4>
-          <srsid>28206</srsid>
-          <srid>31494</srid>
-          <authid>EPSG:31494</authid>
-          <description>Germany_Zone_4</description>
+          <proj4>+proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=4500000 +y_0=0 +ellps=bessel +towgs84=598.1,73.7,418.2,0.202,0.045,-2.455,6.7 +units=m +no_defs</proj4>
+          <srsid>2648</srsid>
+          <srid>31468</srid>
+          <authid>EPSG:31468</authid>
+          <description>DHDN / Gauss-Kruger zone 4</description>
           <projectionacronym>tmerc</projectionacronym>
           <ellipsoidacronym>bessel</ellipsoidacronym>
           <geographicflag>false</geographicflag>
@@ -596,18 +720,26 @@
       <provider>gdal</provider>
       <noData>
         <noDataList bandNo="1" useSrcNoData="1"/>
+        <noDataList bandNo="2" useSrcNoData="1"/>
+        <noDataList bandNo="3" useSrcNoData="1"/>
+        <noDataList bandNo="4" useSrcNoData="1"/>
+        <noDataList bandNo="5" useSrcNoData="1"/>
       </noData>
       <map-layer-style-manager current="">
         <map-layer-style name=""/>
       </map-layer-style-manager>
       <pipe>
-        <rasterrenderer gradient="BlackToWhite" opacity="1" alphaBand="-1" type="singlebandgray" grayBand="1">
+        <rasterrenderer opacity="1" alphaBand="-1" classificationMax="90" classificationMinMaxOrigin="CumulativeCutFullExtentEstimated" band="1" classificationMin="1" type="singlebandpseudocolor">
           <rasterTransparency/>
-          <contrastEnhancement>
-            <minValue>1</minValue>
-            <maxValue>4.996</maxValue>
-            <algorithm>StretchToMinimumMaximum</algorithm>
-          </contrastEnhancement>
+          <rastershader>
+            <colorrampshader colorRampType="INTERPOLATED" clip="0">
+              <item alpha="255" value="1" label="1.000000" color="#d7191c"/>
+              <item alpha="255" value="23.25" label="23.250000" color="#fdae61"/>
+              <item alpha="255" value="45.5" label="45.500000" color="#ffffbf"/>
+              <item alpha="255" value="67.75" label="67.750000" color="#abd9e9"/>
+              <item alpha="255" value="90" label="90.000000" color="#2c7bb6"/>
+            </colorrampshader>
+          </rastershader>
         </rasterrenderer>
         <brightnesscontrast brightness="0" contrast="0"/>
         <huesaturation colorizeGreen="128" colorizeOn="0" colorizeRed="255" colorizeBlue="128" grayscaleMode="0" saturation="0" colorizeStrength="100"/>
@@ -617,7 +749,7 @@
     </maplayer>
     <maplayer minimumScale="0" maximumScale="1e+08" simplifyDrawingHints="1" minLabelScale="0" maxLabelScale="1e+08" simplifyDrawingTol="1" geometry="Polygon" simplifyMaxScale="1" type="vector" hasScaleBasedVisibilityFlag="0" simplifyLocal="1" scaleBasedLabelVisibilityFlag="0">
       <id>zones20160506133106689</id>
-      <datasource>./code/zones/zones.shp</datasource>
+      <datasource>/Users/joemolloy/Projects/munich_zoning_project/code/zones/zones.shp</datasource>
       <title></title>
       <abstract></abstract>
       <keywordList>
