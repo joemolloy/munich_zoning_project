@@ -16,7 +16,7 @@ import rasterstats
 import ConfigParser
 import sys, os
 from itertools import repeat
-from shapely.geometry import shape
+from shapely.geometry import Point
 import numpy as np
 
 #CASE WHEN OBJART  = 'AX_Wohnbauflaeche' THEN 1
@@ -94,16 +94,19 @@ def calculate_region_land_use(region_shapefile, output_shapefile, land_use_raste
 # {region : {key : value} }
 import math
 import rasterio
-def distribute_region_statistics(land_use_raster_file, region_raster_file, region_shapefile):
+def distribute_region_statistics(land_use_raster_file, region_raster_file, region_shapefile, land_use_categories):
     with rasterio.open(land_use_raster_file, 'r') as land_use_raster:
         with rasterio.open(region_raster_file, 'r') as region_raster:
-            with fiona.open(region_shapefile, 'r'):
+            with fiona.open(region_shapefile, 'r') as region_features:
+                region_land_use_percentages = build_region_land_use_dict(region_features, land_use_categories)
+
+                #get region_raster_bounds
+
+                #trim land
 
 
-                affine_fine = land_use_raster.profile['affine']
-                height = land_use_raster.profile['height']
-                width = land_use_raster.profile['width']
-                profile = land_use_raster.profile
+                affine_LU = land_use_raster.profile['affine']
+                affine_regions = region_raster.profile['affine']
 
                 lu_array = land_use_raster.read()
 
@@ -117,33 +120,63 @@ def distribute_region_statistics(land_use_raster_file, region_raster_file, regio
                 #expand summed area value so that the divison against each band will work
                 lu_agg = lu_without_remainder.astype(float) / np.atleast_3d(np.sum(lu_without_remainder, axis=2))
 
-                for (y,x,z), v in np.ndenumerate(lu_agg):
+
+                (region_code_array,) = region_raster.read()
+                print "region code array shape: ", region_code_array.shape
+                print "region height:", region_raster.profile['height']
+
+                land_use_region_raster_percentages = np.zeros(lu_agg.shape)
+
+                for (row,col,z), v in np.ndenumerate(lu_agg):
                     total_cell_land_use = v
                     if not math.isnan(v):
-                        print (y,x), z, total_cell_land_use
+                        #TODO: auto clip land-use raster to region raster
+                        #location region_id from region_raster
+                        region_id = region_code_array[row,col]
+
+                        if region_id:
+                            region_id = int(region_id)
+                            value = region_land_use_percentages[region_id][z+1] #TODO: more robust than just +1 to shift to number
+                            #print (row, col), z, int(region_id), value
+                            land_use_region_raster_percentages[row, col, z] = value
+
+                print land_use_region_raster_percentages
+
+
+def build_region_land_use_dict(region_features, land_use_categories):
+    region_lu_percentages = {}
+
+    for region in region_features:
+        region_id = region['properties']['AGS_Int']
+        region_lu_percentages[region_id] = {}
+        for (i, name) in land_use_categories:
+            region_lu_percentages[region_id][i] = region['properties'][name]
+
+    print region_lu_percentages
+    return region_lu_percentages
+
+
+
+Config = ConfigParser.ConfigParser(allow_no_value=True)
+
+if len(sys.argv) == 1 or not os.path.exists(sys.argv[1]):
+    raise IOError("please supply a configuration file as a program arugment")
+Config.read(sys.argv[1])
+
+cmap = [(float(k), v) for k,v in
+            [tuple(Config.get("Class Values", c).split(',')) for c in Config.options("Class Values")]
+        ]
+
+
+distribute_region_statistics("../../data/land_use/land_use_100m_clipped.tif",
+                             "../../data/regional/region_raster.tif",
+                             "../../output/regions_with_land_use",
+                             cmap)
 
 
 
 
-
-
-
-#distribute_region_statistics("../../output/land_use_100m.tif", None)
-
-
-
-
-def run_calculate_region_land_use():
-
-    Config = ConfigParser.ConfigParser(allow_no_value=True)
-
-    if len(sys.argv) == 1 or not os.path.exists(sys.argv[1]):
-        raise IOError("please supply a configuration file as a program arugment")
-    Config.read(sys.argv[1])
-
-    cmap = [(float(k), v) for k,v in
-                [tuple(Config.get("Class Values", c).split(',')) for c in Config.options("Class Values")]
-            ]
+def run_calculate_region_land_use(cmap):
 
     print cmap
 
@@ -152,7 +185,7 @@ def run_calculate_region_land_use():
                               "../../data/land_use/land_use_merged_10m.tif", cmap)
 
 
-run_calculate_region_land_use()
+#run_calculate_region_land_use()
 
 
 #
