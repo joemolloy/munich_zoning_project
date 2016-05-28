@@ -115,25 +115,29 @@ def distribute_region_statistics(land_use_raster_file, region_raster_file, regio
                 lu_array = land_use_raster.read()
 
                 #move the bands to the third dimension to make calculations easier to work with
-                lu_array_bands_last = np.rollaxis(lu_array, 0, 3)
-                print lu_array_bands_last.shape
+                #lu_array is the 100m raster of land use separated by bands. must be x100 to get land use in area.
+                cell_land_use_m2 = np.rollaxis(lu_array, 0, 3) * 100
+                print cell_land_use_m2.shape
 
                 #remove remaining column
                 REMAINDER_COL = 0
-                lu_without_remainder = np.delete(lu_array_bands_last,REMAINDER_COL, axis=2)
+                cell_land_use_m2 = np.delete(cell_land_use_m2,REMAINDER_COL, axis=2)
                 #repeat summed area value so that the divison against each band will work
-                lu_agg = lu_without_remainder.astype(float) / np.atleast_3d(np.sum(lu_without_remainder, axis=2))
-                lu_agg = np.nan_to_num(lu_agg)
+                cell_land_use_m2 = np.true_divide(
+                        cell_land_use_m2,
+                        np.atleast_3d(np.sum(cell_land_use_m2, axis=2))
+                )
+                cell_land_use_m2 = np.nan_to_num(cell_land_use_m2)
 
                 (region_code_array,) = region_raster.read()
                 print "region code array shape: ", region_code_array.shape
                 print "region height:", region_raster.profile['height']
 
-                regional_land_use_array = np.zeros(lu_agg.shape)
-                region_population = np.zeros(region_code_array.shape)
+                region_land_use_m2 = np.zeros(cell_land_use_m2.shape)
+                region_population = np.zeros(cell_land_use_m2.shape)
 
                 #for each land use band
-                for (row,col,z), v in np.ndenumerate(lu_agg):
+                for (row,col,z), v in np.ndenumerate(cell_land_use_m2):
                     total_cell_land_use = v
                     if not math.isnan(v):
                         #TODO: auto clip land-use raster to region raster
@@ -144,28 +148,63 @@ def distribute_region_statistics(land_use_raster_file, region_raster_file, regio
                         if region_id and z > 0:
                             region_id = int(region_id)
                             land_use_type = land_use_categories[z]
-                            value = region_stats[region_id][land_use_type] #TODO: more robust than just +1 to shift to number
-                            #print region_id, land_use_type, value
+                            pc_landuse = region_stats[region_id][land_use_type]
+                            area_landuse = region_stats[region_id]["Area_cover"]
+                            try:
+                                value = pc_landuse / area_landuse
+                            except ZeroDivisionError:
+                                value = 0
                             #print (row, col), z, int(region_id), value
-                            regional_land_use_array[row, col, z] = value
+
+                            region_land_use_m2[row, col, z] = value
                             #assign population value
                             try:
                                 region_population[row, col] = region_stats[region_id]['pop_2008']
+                                #region_population[row, col] = 1000
                             except KeyError:
                                 print region_id, region_stats[region_id]['GEN'], "not in pop/emp dataset"
                                 region_population[row, col] = 0
 
+
                 #print lu_agg
+                scale_factors = [0.7,0.05,0,0.0,0]
+                #scale_factors = [1,1,1,1,1]
+
+                scaling_vector = np.array(scale_factors) / sum(scale_factors)
+                print "calculating population raster with scale vector:", scaling_vector
+                distributed_population = np.atleast_3d(region_population) * scaling_vector
+
+                with np.errstate(divide='ignore', invalid='ignore'):
+                    cell_lu_pc = np.true_divide(cell_land_use_m2,region_land_use_m2)
+                    cell_lu_pc[cell_lu_pc == np.inf] = 0
+                    cell_lu_pc = np.nan_to_num(cell_lu_pc)
+
+                cell_lu_population = cell_lu_pc * distributed_population
+
+                summed_population = np.sum(cell_lu_population, axis=2)
+
+                result_int = summed_population.astype(np.uint32)
+                print "result shape:", result_int.shape
+
+                for x in np.nditer(result_int):
+                    if x != 0:
+                        print x
+
+                #result = np.ones(result.shape, dtype=np.float64)
+
                 # grid_percentage * regional_percentage * regional_population_value * scalar
-                result = (np.sum(lu_agg * regional_land_use_array, axis=2) / 5.0) * region_population
 
                 #for (row,col), v in np.ndenumerate(result):
                 #    if v > 0:
                 #        print (row, col), v
 
                 profile = region_raster.profile
-                with rasterio.open("output_file", 'w', **profile) as out:
-                    out.write(result, indexes=1)
+                profile.update(dtype=rasterio.uint32)
+                #profile.update(dtype=rasterio.ubyte)
+                print "Writing to: ", output_file
+                print profile
+                with rasterio.open(output_file, 'w', **profile) as out:
+                    out.write(result_int, indexes=1)
 
 
 def build_region_stats_lookup_table(region_shapefile):
@@ -173,9 +212,9 @@ def build_region_stats_lookup_table(region_shapefile):
     with fiona.open(region_shapefile, 'r') as region_features:
 
         #print list(region['properties'])[0], list(region['properties'])[1:]
-        print region_features[0]['properties']
+        #print region_features[0]['properties']
         region_attrs = [region['properties'].items() for region in region_features]
-        print region_attrs
+        #print region_attrs
         stat_dict = {attrs[0][1] : OrderedDict(attrs[1:]) for attrs in region_attrs}
 
         #print stat_dict
@@ -227,6 +266,7 @@ print land_use_categories
 distribute_region_statistics("../../data/land_use/land_use_100m_clipped.tif",
                              "../../data/regional/region_raster.tif",
                              "../../data/regional/regions_lu_pop_emp.geojson",
+                             "../../output/population_100m.tif",
                              land_use_categories)
 
 #build_region_lu_dataframe("../../output/regions_with_land_use")
