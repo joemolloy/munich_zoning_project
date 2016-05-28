@@ -38,7 +38,11 @@ values = ["remainder",
 #land_use_categories: (band, name)
 
 #
-def calculate_region_land_use(region_shapefile, land_use_raster_single_band, output_shapefile, land_use_categories):
+def calculate_region_land_use(region_shapefile, land_use_raster_single_band,
+                              region_statistics_file, output_shapefile, land_use_categories):
+
+    (headers, region_stats) = csv_to_dict(region_statistics_file, ',', 'utf-8')
+
     with fiona.open(region_shapefile, 'r') as region_shapes:
         #for (band, lu_category) in land_use_categories:
         #    zs = rasterstats.zonal_stats(region_shapefile, land_use_raster,
@@ -59,37 +63,38 @@ def calculate_region_land_use(region_shapefile, land_use_raster_single_band, out
         print schema
 
         with fiona.open(
-         output_shapefile, 'w',
-         driver=region_shapes.driver,
-         crs=region_shapes.crs,
-         schema=schema) as c:
-                for region in zs:
-                    old_properties = region['properties']
+                     output_shapefile, 'w',
+                     driver=region_shapes.driver,
+                     crs=region_shapes.crs,
+                     schema=schema) as c:
+            for region in zs:
+                old_properties = region['properties']
 
-                    new_properties = {
-                        'GEN': old_properties['GEN'],
-                        'Area': old_properties['Shape_Area'],
-                        'AGS_Int': old_properties['AGS_Int'],
-                    }
+                new_properties = {
+                    'GEN': old_properties['GEN'],
+                    'Area': old_properties['Shape_Area'],
+                    'AGS_Int': old_properties['AGS_Int'],
+                }
 
-                    total_land_used = sum([old_properties[key]
-                                           for key in indexed_land_use_categories
-                                           if key[1] != "Remainder" and key in old_properties])
+                total_land_used = sum([old_properties[key]
+                                       for key in indexed_land_use_categories
+                                       if key[1] != "Remainder" and key in old_properties])
 
-                    for cat_name in land_use_categories:
-                        if cat_name in old_properties and cat_name != "Remainder":
-                            value = old_properties[cat_name]
-                            new_properties[cat_name] = value
-                            print "\t", old_properties[cat_name] ,"\t", value
-                        else:
-                            new_properties[cat_name] = 0
+                for (k, cat_name) in indexed_land_use_categories:
+                    if (k,cat_name) in old_properties and cat_name != "Remainder":
+                        value = old_properties[(k, cat_name)]
+                        new_properties[cat_name] = value * 100
+                        print new_properties[cat_name]
+                    else:
+                        new_properties[cat_name] = 0
 
-                    new_properties['Area_covered'] = total_land_used*100
-                    new_properties['Remainder'] = new_properties['Area'] - new_properties['Area_covered']
+                new_properties['Area_covered'] = total_land_used * 100
+                new_properties['Remainder'] = new_properties['Area'] - new_properties['Area_covered']
 
-                    region['properties'] = new_properties
+                region['properties'] = new_properties
 
-                    c.write(region)
+                c.write(region)
+
 
 
 #given a land_use array + transformation, mapping from region to land-uses and values, bounds of new array,
@@ -205,6 +210,17 @@ def distribute_region_statistics(land_use_raster_file, region_raster_file, regio
                 with rasterio.open(output_file, 'w', **profile) as out:
                     out.write(result_int, indexes=1)
 
+def check_raster_output(region_shapefile, population_raster):
+    zs = rasterstats.zonal_stats(region_shapefile, population_raster, stats=['sum'])
+    with fiona.open(region_shapefile) as regions:
+        for (region, stat) in zip(regions, zs):
+            try:
+                actual = float(region['properties']['pop_2008'])
+                calcd = float(stat['sum'])
+                print region['properties']['AGS_Int'], actual, calcd, actual-calcd, float(actual-calcd)/actual
+            except TypeError:
+                print "no value for ", region['properties']['AGS_Int']
+
 
 def build_region_stats_lookup_table(region_shapefile):
 
@@ -220,36 +236,27 @@ def build_region_stats_lookup_table(region_shapefile):
     return stat_dict
 
 def csv_to_dict(csv_file, delimiter, encoding):
-    land_use_stats = csv.reader(open(csv_file, 'rb'), delimiter=delimiter)
+    land_use_stats = csv.reader(open(csv_file, 'rb'), dialect=csv.excel)
     headers = land_use_stats.next()
     csv_dict = {}
 
+    AGS_LEN = 7
+
     for row in land_use_stats:
-        unicode_row = [x.encode(encoding) for x in row]
+        unicode_row = [unicode(x, 'utf-8') for x in row]
         row_w_headers = izip(headers, unicode_row)
-        index = row_w_headers.next()[1]
-        csv_dict[index] = dict(row_w_headers)
+        index_str = str(row_w_headers.next()[1])
+        index = index_str + '0'*(AGS_LEN - len(index_str))
+        print index
+        csv_dict[index] = {}
+        for (header, col) in row_w_headers:
+            try:
+                csv_dict[index][header] = float(col)
+            except ValueError:
+                csv_dict[index][header] = col
 
-
-        #print land_use_stats.fieldnames
-
-        print index, csv_dict[index]
-    return csv_dict
-
-import pandas as pd
-def build_region_lu_dataframe(region_shapefile):
-
-    with fiona.open(region_shapefile, 'r') as region_features:
-
-        region_rows = [{k:v for (k,v) in region['properties'].iteritems()}
-                for region in region_features]
-
-
-        df = pd.DataFrame(region_rows).set_index("AGS_Int")
-
-        print df
-        df.to_csv("../../data/regional/region_land_use_stats.csv", encoding='utf-8')
-
+        #print index, csv_dict[index]["Ort"]
+    return (headers, csv_dict)
 
 Config = ConfigParser.ConfigParser(allow_no_value=True)
 
@@ -269,7 +276,9 @@ RUN_CHECKING = False
 if RUN_CALC_REGION_LU:
     calculate_region_land_use("../../data/regional/Auspendler_in_Kernregion_25Proz_geglaettet",
                               "../../data/land_use/land_use_merged_10m.tif",
-                              "../../output/regions_with_land_use", land_use_categories)
+                              "../../data/regional/region_pop_employment_data_clean.csv",
+                              "../../output/regions_with_land_use",
+                              land_use_categories)
 
 if RUN_DISTRIBUTE:
     distribute_region_statistics("../../data/land_use/land_use_100m_clipped.tif",
