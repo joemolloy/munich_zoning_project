@@ -1,3 +1,5 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 
 '''
     distribute regional statistic by land use and area
@@ -18,7 +20,7 @@ import sys, os
 from itertools import repeat
 from shapely.geometry import Point
 import numpy as np
-import pandas as pd
+from collections import OrderedDict
 
 #CASE WHEN OBJART  = 'AX_Wohnbauflaeche' THEN 1
 #	WHEN OBJART  =  'AX_FlaecheBesondererFunktionalerPraegung' THEN 2
@@ -40,9 +42,10 @@ def calculate_region_land_use(region_shapefile, output_shapefile, land_use_raste
         #for (band, lu_category) in land_use_categories:
         #    zs = rasterstats.zonal_stats(region_shapefile, land_use_raster,
         #                                      band = band, stats=['sum'])
+        cmap = [(float(i), x) for (i,x) in enumerate(land_use_categories)]
 
         zs = rasterstats.zonal_stats(region_shapefile, land_use_raster_single_band,
-                                            categorical=True, category_map=land_use_categories, geojson_out=True)
+                                            categorical=True, category_map=cmap, geojson_out=True)
 
         print zs[1]
 
@@ -95,22 +98,23 @@ def calculate_region_land_use(region_shapefile, output_shapefile, land_use_raste
 # {region : {key : value} }
 import math
 import rasterio
-def distribute_region_statistics(land_use_raster_file, region_raster_file, region_shapefile, land_use_categories):
+import csv, codecs
+from itertools import izip
+
+
+def distribute_region_statistics(land_use_raster_file, region_raster_file, region_shapefile, output_file, cmap):
     with rasterio.open(land_use_raster_file, 'r') as land_use_raster:
         with rasterio.open(region_raster_file, 'r') as region_raster:
-                region_land_use_percentages = build_region_land_use_dict(region_features, land_use_categories)
+                region_stats = build_region_stats_lookup_table(region_shapefile)
 
-                #get region_raster_bounds
 
                 #trim land
-
-
                 affine_LU = land_use_raster.profile['affine']
                 affine_regions = region_raster.profile['affine']
 
                 lu_array = land_use_raster.read()
 
-                #move the bands to the third dimension to make calculations easier to read
+                #move the bands to the third dimension to make calculations easier to work with
                 lu_array_bands_last = np.rollaxis(lu_array, 0, 3)
                 print lu_array_bands_last.shape
 
@@ -136,27 +140,66 @@ def distribute_region_statistics(land_use_raster_file, region_raster_file, regio
                         #location region_id from region_raster
                         region_id = region_code_array[row,col]
 
-                        #pull the regional land use percentage for each region
-                        if region_id:
+                        #pull the regional land use percentage for each region, #0 index is the remainder
+                        if region_id and z > 0:
                             region_id = int(region_id)
-                            value = region_land_use_percentages[region_id][z+1] #TODO: more robust than just +1 to shift to number
+                            land_use_type = land_use_categories[z]
+                            value = region_stats[region_id][land_use_type] #TODO: more robust than just +1 to shift to number
+                            #print region_id, land_use_type, value
                             #print (row, col), z, int(region_id), value
                             regional_land_use_array[row, col, z] = value
                             #assign population value
-                            region_population[row, col] = region_land_use_percentages[region_id]['Population']
+                            try:
+                                region_population[row, col] = region_stats[region_id]['pop_2008']
+                            except KeyError:
+                                print region_id, region_stats[region_id]['GEN'], "not in pop/emp dataset"
+                                region_population[row, col] = 0
 
                 #print lu_agg
                 # grid_percentage * regional_percentage * regional_population_value * scalar
                 result = (np.sum(lu_agg * regional_land_use_array, axis=2) / 5.0) * region_population
 
-                for (row,col), v in np.ndenumerate(result):
-                    if v > 0:
-                        print (row, col), v
+                #for (row,col), v in np.ndenumerate(result):
+                #    if v > 0:
+                #        print (row, col), v
+
+                profile = region_raster.profile
+                with rasterio.open("output_file", 'w', **profile) as out:
+                    out.write(result, indexes=1)
 
 
+def build_region_stats_lookup_table(region_shapefile):
+
+    with fiona.open(region_shapefile, 'r') as region_features:
+
+        #print list(region['properties'])[0], list(region['properties'])[1:]
+        print region_features[0]['properties']
+        region_attrs = [region['properties'].items() for region in region_features]
+        print region_attrs
+        stat_dict = {attrs[0][1] : OrderedDict(attrs[1:]) for attrs in region_attrs}
+
+        #print stat_dict
+    return stat_dict
+
+def csv_to_dict(csv_file, delimiter, encoding):
+    land_use_stats = csv.reader(open(csv_file, 'rb'), delimiter=delimiter)
+    headers = land_use_stats.next()
+    csv_dict = {}
+
+    for row in land_use_stats:
+        unicode_row = [x.encode(encoding) for x in row]
+        row_w_headers = izip(headers, unicode_row)
+        index = row_w_headers.next()[1]
+        csv_dict[index] = dict(row_w_headers)
 
 
-def build_region_lu_dataframe(region_shapefile, land_use_categories):
+        #print land_use_stats.fieldnames
+
+        print index, csv_dict[index]
+    return csv_dict
+
+import pandas as pd
+def build_region_lu_dataframe(region_shapefile):
 
     with fiona.open(region_shapefile, 'r') as region_features:
 
@@ -164,7 +207,7 @@ def build_region_lu_dataframe(region_shapefile, land_use_categories):
                 for region in region_features]
 
 
-        df = pd.DataFrame(region_rows)
+        df = pd.DataFrame(region_rows).set_index("AGS_Int")
 
         print df
         df.to_csv("../../data/regional/region_land_use_stats.csv", encoding='utf-8')
@@ -176,17 +219,17 @@ if len(sys.argv) == 1 or not os.path.exists(sys.argv[1]):
     raise IOError("please supply a configuration file as a program arugment")
 Config.read(sys.argv[1])
 
-cmap = [(float(k), v) for k,v in
-            [tuple(Config.get("Class Values", c).split(',')) for c in Config.options("Class Values")]
-        ]
+land_use_categories = [Config.get("Class Values", c).split(',')[1] for c in Config.options("Class Values")]
+
+print land_use_categories
 
 
-#distribute_region_statistics("../../data/land_use/land_use_100m_clipped.tif",
-#                             "../../data/regional/region_raster.tif",
-#                             "../../output/regions_with_land_use",
-#                             cmap)
+distribute_region_statistics("../../data/land_use/land_use_100m_clipped.tif",
+                             "../../data/regional/region_raster.tif",
+                             "../../data/regional/regions_lu_pop_emp.geojson",
+                             land_use_categories)
 
-build_region_lu_dataframe("../../output/regions_with_land_use", cmap)
+#build_region_lu_dataframe("../../output/regions_with_land_use")
 
 
 
@@ -196,7 +239,7 @@ def run_calculate_region_land_use(cmap):
 
     calculate_region_land_use("../../data/regional/Auspendler_in_Kernregion_25Proz_geglaettet",
                               "../../output/regions_with_land_use",
-                              "../../data/land_use/land_use_merged_10m.tif", cmap)
+                              "../../data/land_use/land_use_merged_10m.tif", land_use_categories)
 
 
 #run_calculate_region_land_use()
