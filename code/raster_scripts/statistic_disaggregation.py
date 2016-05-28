@@ -37,23 +37,22 @@ values = ["remainder",
 
 #land_use_categories: (band, name)
 
-def calculate_region_land_use(region_shapefile, output_shapefile, land_use_raster_single_band, land_use_categories):
+#
+def calculate_region_land_use(region_shapefile, land_use_raster_single_band, output_shapefile, land_use_categories):
     with fiona.open(region_shapefile, 'r') as region_shapes:
         #for (band, lu_category) in land_use_categories:
         #    zs = rasterstats.zonal_stats(region_shapefile, land_use_raster,
         #                                      band = band, stats=['sum'])
-        cmap = [(float(i), x) for (i,x) in enumerate(land_use_categories)]
+        indexed_land_use_categories = [(float(i), x) for (i,x) in enumerate(land_use_categories)]
 
         zs = rasterstats.zonal_stats(region_shapefile, land_use_raster_single_band,
-                                            categorical=True, category_map=cmap, geojson_out=True)
-
-        print zs[1]
+                                            categorical=True, category_map=indexed_land_use_categories, geojson_out=True)
 
         schema = {'geometry': 'Polygon',
                 'properties': [ ('AGS_Int', 'int'), ('GEN', 'str'), ('Area', 'float'), ('Area_covered', 'float')]}
 
         #create land use properties for new schema (will be percentages)
-        land_use_properties = zip(zip(*land_use_categories)[1], repeat('float'))
+        land_use_properties = zip(land_use_categories, repeat('float'))
         print land_use_properties
         schema['properties'].extend(land_use_properties)
 
@@ -74,14 +73,14 @@ def calculate_region_land_use(region_shapefile, output_shapefile, land_use_raste
                     }
 
                     total_land_used = sum([old_properties[key]
-                                           for key in land_use_categories
-                                           if key[0] != 0 and key in old_properties])
-                    print total_land_used
-                    for (k,cat_name) in land_use_categories:
-                        if (k, cat_name) in old_properties and k != 0:
-                            value = float(old_properties[(k,cat_name)]) / total_land_used
+                                           for key in indexed_land_use_categories
+                                           if key[1] != "Remainder" and key in old_properties])
+
+                    for cat_name in land_use_categories:
+                        if cat_name in old_properties and cat_name != "Remainder":
+                            value = old_properties[cat_name]
                             new_properties[cat_name] = value
-                            print "\t", old_properties[(k,cat_name)] ,"\t", value
+                            print "\t", old_properties[cat_name] ,"\t", value
                         else:
                             new_properties[cat_name] = 0
 
