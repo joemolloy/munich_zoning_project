@@ -260,29 +260,27 @@ Config.read(sys.argv[1])
 
 land_use_categories = [Config.get("Class Values", c).split(',')[1] for c in Config.options("Class Values")]
 
-print land_use_categories
+print "Working with land use categories:", land_use_categories
+
+RUN_CALC_REGION_LU = True
+RUN_DISTRIBUTE = False
+RUN_CHECKING = False
 
 
-distribute_region_statistics("../../data/land_use/land_use_100m_clipped.tif",
+if RUN_CALC_REGION_LU:
+    calculate_region_land_use("../../data/regional/Auspendler_in_Kernregion_25Proz_geglaettet",
+                              "../../data/land_use/land_use_merged_10m.tif",
+                              "../../output/regions_with_land_use", land_use_categories)
+
+if RUN_DISTRIBUTE:
+    distribute_region_statistics("../../data/land_use/land_use_100m_clipped.tif",
                              "../../data/regional/region_raster.tif",
                              "../../data/regional/regions_lu_pop_emp.geojson",
                              "../../output/population_100m.tif",
                              land_use_categories)
+if RUN_CHECKING:
+    check_raster_output("../../data/regional/regions_lu_pop_emp.geojson", "../../output/population_100m.tif")
 
-#build_region_lu_dataframe("../../output/regions_with_land_use")
-
-
-
-def run_calculate_region_land_use(cmap):
-
-    print cmap
-
-    calculate_region_land_use("../../data/regional/Auspendler_in_Kernregion_25Proz_geglaettet",
-                              "../../output/regions_with_land_use",
-                              "../../data/land_use/land_use_merged_10m.tif", land_use_categories)
-
-
-#run_calculate_region_land_use()
 
 
 #
