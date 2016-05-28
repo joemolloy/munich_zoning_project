@@ -18,6 +18,7 @@ import sys, os
 from itertools import repeat
 from shapely.geometry import Point
 import numpy as np
+import pandas as pd
 
 #CASE WHEN OBJART  = 'AX_Wohnbauflaeche' THEN 1
 #	WHEN OBJART  =  'AX_FlaecheBesondererFunktionalerPraegung' THEN 2
@@ -97,7 +98,6 @@ import rasterio
 def distribute_region_statistics(land_use_raster_file, region_raster_file, region_shapefile, land_use_categories):
     with rasterio.open(land_use_raster_file, 'r') as land_use_raster:
         with rasterio.open(region_raster_file, 'r') as region_raster:
-            with fiona.open(region_shapefile, 'r') as region_features:
                 region_land_use_percentages = build_region_land_use_dict(region_features, land_use_categories)
 
                 #get region_raster_bounds
@@ -156,19 +156,18 @@ def distribute_region_statistics(land_use_raster_file, region_raster_file, regio
 
 
 
-def build_region_land_use_dict(region_features, land_use_categories):
-    region_lu_percentages = {}
+def build_region_lu_dataframe(region_shapefile, land_use_categories):
 
-    for region in region_features:
-        region_id = region['properties']['AGS_Int']
-        region_lu_percentages[region_id] = {}
-        for (i, name) in land_use_categories:
-            region_lu_percentages[region_id][i] = region['properties'][name]
-        region_lu_percentages[region_id]['Population'] = 10000 #TODO: real value
+    with fiona.open(region_shapefile, 'r') as region_features:
 
-    print region_lu_percentages
-    return region_lu_percentages
+        region_rows = [{k:v for (k,v) in region['properties'].iteritems()}
+                for region in region_features]
 
+
+        df = pd.DataFrame(region_rows)
+
+        print df
+        df.to_csv("../../data/regional/region_land_use_stats.csv", encoding='utf-8')
 
 
 Config = ConfigParser.ConfigParser(allow_no_value=True)
@@ -182,11 +181,12 @@ cmap = [(float(k), v) for k,v in
         ]
 
 
-distribute_region_statistics("../../data/land_use/land_use_100m_clipped.tif",
-                             "../../data/regional/region_raster.tif",
-                             "../../output/regions_with_land_use",
-                             cmap)
+#distribute_region_statistics("../../data/land_use/land_use_100m_clipped.tif",
+#                             "../../data/regional/region_raster.tif",
+#                             "../../output/regions_with_land_use",
+#                             cmap)
 
+build_region_lu_dataframe("../../output/regions_with_land_use", cmap)
 
 
 
