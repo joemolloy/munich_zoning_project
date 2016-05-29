@@ -450,4 +450,8 @@ def load_config(arg_num, error_message):
 
 def load_land_use_mapping():
     Config = load_config(2, "please supply a land use mapping")
-    return [Config.get("Class Values", c).split(',')[1] for c in Config.options("Class Values")]
+    return [Config.get("Class Values", c) for c in Config.options("Class Values")]
+
+def load_land_use_encodings():
+    Config = load_config(2, "please supply a land use mapping")
+    return {c : i for (i,c) in enumerate(Config.options("Class Values"))}
