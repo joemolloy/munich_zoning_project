@@ -1,10 +1,14 @@
 import fiona
 from fiona.crs import from_epsg, to_string
 import os, subprocess
+from src import util
 
+#new shapefile with landuse types coverted to integer codes (needed for gdal_rasterize
 def codify_shapefile_landuse(shapefile, new_folder_path_abs, seidlung_path):
     os.mkdir(new_folder_path_abs)
     full_new_path = os.path.join(new_folder_path_abs, seidlung_path + ".shp")
+
+    land_use_mapping = util.load_land_use_encodings()
 
     with fiona.open(shapefile, 'r') as src:
         source_driver = src.driver
@@ -20,21 +24,12 @@ def codify_shapefile_landuse(shapefile, new_folder_path_abs, seidlung_path):
 
             for feature in src:
                 category = feature['properties']['OBJART']
-                feature['properties']['objart_int'] = get_cat_code(category)
+                feature['properties']['objart_int'] = land_use_mapping[category]
                 out.write(feature)
 
     return full_new_path
 
-def get_cat_code(category):
-    ret = 0
-    if category == 'AX_Wohnbauflaeche': ret = 1
-    elif category == 'AX_FlaecheBesondererFunktionalerPraegung': ret = 2
-    elif category == 'AX_FlaecheGemischterNutzung': ret = 3
-    elif category == 'AX_IndustrieUndGewerbeflaeche': ret = 4
-    elif category == 'AX_SportFreizeitUndErholungsflaeche': ret = 5
-
-    return ret
-
+#go through land use shapefiles, and codify each one. #TODO: can be skipped
 def process_shapefiles(land_use_folder, new_land_use_folder):
     for ags_district in os.listdir(land_use_folder):
         folder_abs = os.path.join(land_use_folder, ags_district)
@@ -54,7 +49,7 @@ def process_shapefiles(land_use_folder, new_land_use_folder):
 
             codify_shapefile_landuse(full_sp_path, new_folder_path_abs, seidlung_path)
 
-
+#for each land use shapefile, create a raster, save to a folder
 def create_rasters(land_use_folder, raster_output_folder):
     for ags_district in os.listdir(land_use_folder):
         folder_abs = os.path.join(land_use_folder, ags_district)
@@ -96,6 +91,7 @@ def create_rasters(land_use_folder, raster_output_folder):
 
             subprocess.Popen(cmd)
 
+#create region_id raster
 def create_ags_code_raster(regions_shapefile, out_filename, resolution):
 
     with fiona.open(regions_shapefile, 'r') as vector_f:
@@ -124,16 +120,17 @@ def create_ags_code_raster(regions_shapefile, out_filename, resolution):
 
         subprocess.Popen(cmd)
 
-land_use_folder = "../TN_7_Landkreise_Stadt_Muenchen_TUM_Herrn"
-new_land_use_folder = "../TN_7_modified"
-raster_output_folder= "../TN_7_rasters2"
+if __name__ == "__main__":
+    land_use_folder = "../TN_7_Landkreise_Stadt_Muenchen_TUM_Herrn"
+    new_land_use_folder = "../TN_7_modified"
+    raster_output_folder= "../TN_7_rasters2"
 
-#os.mkdir(new_land_use_folder)
-#os.mkdir(raster_output_folder)
-#process_shapefiles(land_use_folder, new_land_use_folder)
-create_rasters(new_land_use_folder, raster_output_folder)
+    #os.mkdir(new_land_use_folder)
+    #os.mkdir(raster_output_folder)
+    #process_shapefiles(land_use_folder, new_land_use_folder)
+    create_rasters(new_land_use_folder, raster_output_folder)
 
 
-#create_ags_code_raster("../../data/regional/regions/regions.shp", "../../output/regions.tif", 100)
+    #create_ags_code_raster("../../data/regional/regions/regions.shp", "../../output/regions.tif", 100)
 
 
