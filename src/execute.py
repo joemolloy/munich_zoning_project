@@ -51,7 +51,7 @@ CLIP_LAND_USE_RASTERS = False
 BUILD_REGION_ID_RASTER = False
 
 CALC_REGION_LAND_USE_STATS = False
-RUN_BUILD_STAT_RASTERS = False
+RUN_BUILD_STAT_RASTERS = True
 MERGE_POP_EMP_RASTERS = True
 RUN_CHECKING = True
 
@@ -97,7 +97,7 @@ if BUILD_REGION_ID_RASTER:
 if CALC_REGION_LAND_USE_STATS:
     #calc region land_use stats
     print("\ncalc region land_use stats")
-    calc_lu.calculate_region_land_use(region_shapefile, merged_lu_raster, region_stats_file, regions_with_land_use, landuse_mapping)
+    calc_lu.calculate_region_land_use(region_shapefile, land_use_clipped, region_stats_file, regions_with_land_use, landuse_mapping)
 
 #build pop and employment rasters -> to output folder
 
