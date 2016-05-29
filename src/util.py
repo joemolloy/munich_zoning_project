@@ -1,8 +1,7 @@
 import numpy
 import os
 import psycopg2
-from octtree import OcttreeLeaf, OcttreeNode
-import octtree
+from zoning_algorithm.octtree import OcttreeLeaf, OcttreeNode, build_out_nodes
 from rasterstats import zonal_stats
 from affine import Affine
 
@@ -81,7 +80,7 @@ def solve_iteratively(Config, region_octtree, regions, pop_array, affine):
 
     while not solved: # difference greater than 10%
         print 'step %d with threshold level %d...' % (step, pop_threshold)
-        region_octtree = octtree.build_out_nodes(Config, region_octtree, regions, pop_array, affine, pop_threshold)
+        region_octtree = build_out_nodes(Config, region_octtree, regions, pop_array, affine, pop_threshold)
         num_zones = region_octtree.count_populated()
         print "\tnumber of cells:", num_zones
         print ''
@@ -435,3 +434,20 @@ def find_best_neighbour(node, neighbours):
         print "failed for node:", node.index, "against ", [n.index for n in neighbours]
 
     return best_neighbour
+
+
+def load_program_config():
+    return load_config(1, "please supply a configuration file as a program arugment")
+
+def load_config(arg_num, error_message):
+    import ConfigParser, sys
+    Config = ConfigParser.ConfigParser(allow_no_value=True)
+
+    if len(sys.argv) == 1 or not os.path.exists(sys.argv[arg_num]):
+        raise IOError(error_message)
+    Config.read(sys.argv[arg_num])
+    return Config
+
+def load_land_use_mapping():
+    Config = load_config(2, "please supply a land use mapping")
+    return [Config.get("Class Values", c).split(',')[1] for c in Config.options("Class Values")]
