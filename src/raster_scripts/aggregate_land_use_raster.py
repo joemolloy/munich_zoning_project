@@ -67,44 +67,52 @@ bands = 6
 input_file = "../land_use_merged.tif"
 output_file = "../land_use_100m.tif"
 
-with rasterio.open(input_file, 'r') as land_use_raster:
+def run_land_use_aggregation(input_file, bands, output_file, output_resolution):
+    with rasterio.open(input_file, 'r') as land_use_raster:
 
-    affine_fine = land_use_raster.profile['affine']
-    height = land_use_raster.profile['height']
-    width = land_use_raster.profile['width']
-    profile = land_use_raster.profile
+        affine_fine = land_use_raster.profile['affine']
+        height = land_use_raster.profile['height']
+        width = land_use_raster.profile['width']
+        profile = land_use_raster.profile
 
-    m10_data, = land_use_raster.read()
+        m10_data, = land_use_raster.read()
 
-    #it = np.nditer(m10_data, flags=['multi_index'])
-    #while not it.finished:
-    #     if it[0] != 0:
-    #        print "%d <%s>" % (it[0], it.multi_index)
-    #     it.iternext()
+        #it = np.nditer(m10_data, flags=['multi_index'])
+        #while not it.finished:
+        #     if it[0] != 0:
+        #        print "%d <%s>" % (it[0], it.multi_index)
+        #     it.iternext()
 
-    print affine_fine
-    ratio = int(output_resolution / affine_fine.a)
+        print affine_fine
+        ratio = int(output_resolution / affine_fine.a)
 
-    affine_gross = affine_fine * Affine.scale(ratio)
-    print affine_gross
-
-
-    land_use_array = disaggregate(m10_data, ratio, bands)
-    (num_bands, new_array_height, new_array_width) = land_use_array.shape
-
-    profile.update(dtype=land_use_array.dtype,
-                   count=num_bands,
-                   transform=affine_gross,
-                   nodata = 0,
-                   height = new_array_height,
-                   width = new_array_width)
-
-    with rasterio.open(output_file, 'w', **profile) as out:
-        print land_use_array.shape , "->", (out.height, out.width)
-        for k in xrange(0,num_bands):
-            out.write(land_use_array[k], indexes=k+1)
+        affine_gross = affine_fine * Affine.scale(ratio)
+        print affine_gross
 
 
-        #a = np.ones((new_array_height, new_array_width), dtype=rasterio.ubyte) * 127
-        #out.write(a, indexes=1)
+        land_use_array = disaggregate(m10_data, ratio, bands)
+        (num_bands, new_array_height, new_array_width) = land_use_array.shape
 
+        profile.update(dtype=land_use_array.dtype,
+                       count=num_bands,
+                       transform=affine_gross,
+                       nodata = 0,
+                       height = new_array_height,
+                       width = new_array_width)
+
+        with rasterio.open(output_file, 'w', **profile) as out:
+            print land_use_array.shape , "->", (out.height, out.width)
+            for k in xrange(0,num_bands):
+                out.write(land_use_array[k], indexes=k+1)
+
+
+            #a = np.ones((new_array_height, new_array_width), dtype=rasterio.ubyte) * 127
+            #out.write(a, indexes=1)
+
+if __name__ == "__main__":
+    output_resolution = 100
+    bands = 6
+    input_file = "../land_use_merged.tif"
+    output_file = "../land_use_100m.tif"
+
+    run_land_use_aggregation(input_file, bands, output_file, output_resolution)
