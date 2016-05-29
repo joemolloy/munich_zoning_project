@@ -120,6 +120,23 @@ def create_ags_code_raster(regions_shapefile, out_filename, resolution):
 
         subprocess.Popen(cmd)
 
+#merge rasters from folder into a single raster. #TODO: apply the raster bounds here?
+def merge_rasters(raster_input_folder, output_raster):
+    cmd = ["gdal_merge.py",
+                                  "-o",
+                                  output_raster,
+                                  "-n",
+                                  "0"]
+    input_files = [os.path.join(raster_input_folder, f)
+                   for f in os.listdir(raster_input_folder)
+                   if os.path.isfile(os.path.join(raster_input_folder, f))]
+
+    cmd.extend(input_files)
+
+    print(cmd)
+
+    subprocess.Popen(cmd)
+
 if __name__ == "__main__":
     land_use_folder = "../TN_7_Landkreise_Stadt_Muenchen_TUM_Herrn"
     new_land_use_folder = "../TN_7_modified"
