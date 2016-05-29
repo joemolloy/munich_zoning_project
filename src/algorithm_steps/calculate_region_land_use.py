@@ -41,6 +41,8 @@ def calculate_region_land_use(region_shapefile, land_use_raster_single_band,
         #                                      band = band, stats=['sum'])
         indexed_land_use_categories = [(float(i), x) for (i,x) in enumerate(land_use_categories)]
 
+        print indexed_land_use_categories
+        print land_use_raster_single_band
         zs = rasterstats.zonal_stats(region_shapefile, land_use_raster_single_band,
                                             categorical=True, category_map=indexed_land_use_categories, geojson_out=True)
 
@@ -97,20 +99,6 @@ def calculate_region_land_use(region_shapefile, land_use_raster_single_band,
                 c.write(region)
 
 
-
-
-def check_raster_output(region_shapefile, population_raster):
-    zs = rasterstats.zonal_stats(region_shapefile, population_raster, stats=['sum'])
-    with fiona.open(region_shapefile) as regions:
-        for (region, stat) in zip(regions, zs):
-            try:
-                actual = float(region['properties']['pop_2008'])
-                calcd = float(stat['sum'])
-                print region['properties']['AGS_Int'], actual, calcd, actual-calcd, float(actual-calcd)/actual
-            except TypeError:
-                print "no value for ", region['properties']['AGS_Int']
-
-
 def build_region_stats_lookup_table(region_shapefile):
 
     with fiona.open(region_shapefile, 'r') as region_features:
@@ -125,6 +113,7 @@ def build_region_stats_lookup_table(region_shapefile):
     return stat_dict
 
 def csv_to_dict_utf8(csv_file, delimiter, include_fields):
+    print "open csv file:", csv_file
     land_use_stats = csv.reader(open(csv_file, 'rb'), dialect=csv.excel)
     headers = [unicode(x, 'utf-8') for x in land_use_stats.next()[1:]] #ignore index header (AGS_Int)
     filtered_headers = [x for x in headers if x in include_fields]
@@ -167,9 +156,6 @@ if __name__ == "__main__":
                                   "../../data/regional/region_pop_employment_data_clean.csv",
                                   "../../output/regions_with_land_use",
                                   land_use_categories)
-
-    if RUN_CHECKING:
-        check_raster_output("../../data/regional/regions_lu_pop_emp.geojson", "../../output/population_100m.tif")
 
 
 

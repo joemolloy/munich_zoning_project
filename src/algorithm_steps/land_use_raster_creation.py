@@ -118,6 +118,19 @@ def create_ags_code_raster(regions_shapefile, out_filename, resolution):
 
         subprocess.check_call(cmd)
 
+def clip_land_use_raster(land_use_raster, region_shapefile, output_file):
+    cmd = ["gdalwarp",
+           "-dstnodata", "0",
+           "-q",
+           "-cutline",
+           region_shapefile,
+           "-crop_to_cutline",
+           land_use_raster,
+           output_file]
+
+    print cmd
+    subprocess.check_call(cmd)
+
 #merge rasters from folder into a single raster. #TODO: apply the raster bounds here?
 def merge_rasters(raster_input_folder, output_raster):
     cmd = ["gdal_merge.py",
