@@ -61,9 +61,6 @@ def distribute_region_statistics(region_shapefile, land_use_raster_file, region_
                 print "region_land_use_split_m2:", region_land_use_split_m2.shape, region_land_use_split_m2.dtype
                 print "region_population:", region_population.shape, region_population.dtype
 
-                for k in region_stats.keys():
-                    region_stats[k]["cell_area"] = 0
-
                 #for each land use band
                 for (row,col,z), v in np.ndenumerate(cell_land_use_m2):
                     #if not math.isnan(v):
@@ -78,8 +75,6 @@ def distribute_region_statistics(region_shapefile, land_use_raster_file, region_
                         if region_id and region_id in region_stats:
                             land_use_type = land_use_categories[z+1] #row 0 is now land use type 1
                             landuse_area = region_stats[region_id][land_use_type]
-
-                            region_stats[region_id]["cell_area"] += v
 
                         #    if row in xrange(13,30) and col in xrange(790,800):
                         #        print (row, col), z, int(region_id), pc_landuse, area_landuse, "=", value
