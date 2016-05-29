@@ -3,163 +3,130 @@
   <title></title>
   <layer-tree-group expanded="1" checked="Qt::PartiallyChecked" name="">
     <customproperties/>
-    <layer-tree-layer expanded="1" checked="Qt::Checked" id="land_use_100m20160526115506352" name="land_use_100m">
+    <layer-tree-layer expanded="1" checked="Qt::Checked" id="land_use_100m_clipped20160529180837933" name="land_use_100m_clipped">
       <customproperties/>
     </layer-tree-layer>
-    <layer-tree-layer expanded="1" checked="Qt::Unchecked" id="162_TN_Muenchen_Stadt_11695823_TN_Siedlung20160525205704611" name="162_TN_Muenchen_Stadt_11695823_TN_Siedlung">
+    <layer-tree-layer expanded="1" checked="Qt::Checked" id="merged_land_use_10m20160529174348310" name="merged_land_use_10m">
       <customproperties/>
     </layer-tree-layer>
-    <layer-tree-layer expanded="1" checked="Qt::Checked" id="161_Stadt_Ingolstadt_21884403_TN_Siedlung20160525205210073" name="161_Stadt_Ingolstadt_21884403_TN_Siedlung">
+    <layer-tree-layer expanded="0" checked="Qt::Unchecked" id="population_100m20160529172213552" name="population_100m">
       <customproperties/>
     </layer-tree-layer>
-    <layer-tree-layer expanded="1" checked="Qt::Checked" id="Auspendler_in_Kernregion_25Proz_geglaettet20160418122212903" name="Auspendler_in_Kernregion_25Proz_geglaettet">
+    <layer-tree-layer expanded="1" checked="Qt::Checked" id="regions_with_land_use20160529133918506" name="regions_with_land_use">
       <customproperties/>
     </layer-tree-layer>
-    <layer-tree-layer expanded="1" checked="Qt::Unchecked" id="boundary20160506134207474" name="boundary">
+    <layer-tree-layer expanded="1" checked="Qt::Checked" id="region_id_100m20160529135401336" name="region_id_100m">
       <customproperties/>
     </layer-tree-layer>
-    <layer-tree-layer expanded="1" checked="Qt::Unchecked" id="zones20160506133106689" name="zones">
-      <customproperties>
-        <property key="showFeatureCount" value="1"/>
-      </customproperties>
+    <layer-tree-layer expanded="1" checked="Qt::Checked" id="regions_lu_pop_emp20160529133802047" name="regions_lu_pop_emp">
+      <customproperties/>
+    </layer-tree-layer>
+    <layer-tree-layer expanded="1" checked="Qt::Checked" id="land_use_100m_wrong20160529135355462" name="land_use_100m_wrong">
+      <customproperties/>
+    </layer-tree-layer>
+    <layer-tree-layer expanded="1" checked="Qt::Checked" id="regions_with_land_use20160529132656166" name="regions_with_land_use">
+      <customproperties/>
+    </layer-tree-layer>
+    <layer-tree-layer expanded="1" checked="Qt::Checked" id="regions20160529132436265" name="regions">
+      <customproperties/>
     </layer-tree-layer>
   </layer-tree-group>
   <relations/>
   <mapcanvas>
     <units>meters</units>
     <extent>
-      <xmin>4392378.21862877439707518</xmin>
-      <ymin>2738044.66120907524600625</ymin>
-      <xmax>4499286.89770592283457518</xmax>
-      <ymax>2852888.23864742973819375</ymax>
+      <xmin>4436850.70271916501224041</xmin>
+      <ymin>5326886.26149609126150608</ymin>
+      <xmax>4476628.50141286663711071</xmax>
+      <ymax>5370572.79048441909253597</ymax>
     </extent>
     <rotation>0</rotation>
-    <projections>1</projections>
+    <projections>0</projections>
     <destinationsrs>
       <spatialrefsys>
-        <proj4>+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs</proj4>
-        <srsid>1000</srsid>
-        <srid>3035</srid>
-        <authid>EPSG:3035</authid>
-        <description>ETRS89 / ETRS-LAEA</description>
-        <projectionacronym>laea</projectionacronym>
-        <ellipsoidacronym>GRS80</ellipsoidacronym>
+        <proj4>+proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=4500000 +y_0=0 +ellps=bessel +towgs84=598.1,73.7,418.2,0.202,0.045,-2.455,6.7 +units=m +no_defs</proj4>
+        <srsid>2648</srsid>
+        <srid>31468</srid>
+        <authid>EPSG:31468</authid>
+        <description>DHDN / Gauss-Kruger zone 4</description>
+        <projectionacronym>tmerc</projectionacronym>
+        <ellipsoidacronym>bessel</ellipsoidacronym>
         <geographicflag>false</geographicflag>
       </spatialrefsys>
     </destinationsrs>
-    <layer_coordinate_transform_info>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="zones20160408180312320"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="zones_test20160505205456597"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="zones_centroids20160418120637693"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="zones_test20160505210851165"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="no_sliver220160418115832932"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="zones20160506133052285"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="no_sliver20160418115534498"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:31468" srcDatumTransform="-1" destDatumTransform="-1" layerid="land_use_100m20160526114501028"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="zones20160419145305778"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:31468" srcDatumTransform="-1" destDatumTransform="-1" layerid="21884403_TN_Siedlung20160504191613187"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="test_polygon20160418165507539"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="example_total20160407100251546"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="population_raster20160526092028019"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:31468" srcDatumTransform="-1" destDatumTransform="-1" layerid="population_100m20160526112841106"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="boundary20160506134207474"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="munich_metro_area20160407091224844"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="zones_delaunay20160418120732859"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:31468" srcDatumTransform="-1" destDatumTransform="-1" layerid="161_Stadt_Ingolstadt_21884403_TN_Siedlung20160525205210073"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:31468" srcDatumTransform="-1" destDatumTransform="-1" layerid="population_100m20160526103847499"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="zones20160229182048713"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="zones20160418213838222"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="example_total20160407094847080"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="zones20160506133106689"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:31494" srcDatumTransform="-1" destDatumTransform="-1" layerid="TN_Siedlung20160302174654280"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="zones_test20160505211256488"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="zones20160419144044434"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="zones20160418143441544"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:31468" srcDatumTransform="-1" destDatumTransform="-1" layerid="combined_rasters20160525205506152"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="zones20160418204604987"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:31494" srcDatumTransform="-1" destDatumTransform="-1" layerid="combined_rasters20160525190707521"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="test_polygons_two20160418171358910"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="no_sliver220160418115647546"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:31468" srcDatumTransform="-1" destDatumTransform="-1" layerid="combined_rasters20160526091824616"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="zones20160407141751949"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:31468" srcDatumTransform="-1" destDatumTransform="-1" layerid="11695837_TN_Vegetation20160505211510477"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="zones20160418203713746"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="population_raster20160525184738994"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:31468" srcDatumTransform="-1" destDatumTransform="-1" layerid="land_use_100m20160526115506352"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="zones_test20160504171122472"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="population_raster20160526092205246"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:31468" srcDatumTransform="-1" destDatumTransform="-1" layerid="Untitled20160419135357767"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:31468" srcDatumTransform="-1" destDatumTransform="-1" layerid="Auspendler_in_Kernregion_25Proz_geglaettet20160418122212903"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:31468" srcDatumTransform="-1" destDatumTransform="-1" layerid="11695837_TN_Gewaesser20160505211701485"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:31468" srcDatumTransform="-1" destDatumTransform="-1" layerid="population_merged20160526092705401"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="zones20160407101824896"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="Untitled20160407184752864"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="zones_test20160504160941803"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:31468" srcDatumTransform="-1" destDatumTransform="-1" layerid="land_use_100m20160526113833391"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:31468" srcDatumTransform="-1" destDatumTransform="-1" layerid="11695837_TN_Siedlung20160505211344502"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="zones20160418135922426"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:31468" srcDatumTransform="-1" destDatumTransform="-1" layerid="population_100m20160526113118139"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:31468" srcDatumTransform="-1" destDatumTransform="-1" layerid="auspendler_filtered_small_test20160419140127911"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="regions20160407162501963"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:31468" srcDatumTransform="-1" destDatumTransform="-1" layerid="land_use_100m20160526115123755"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="example_total20160407100220996"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:31468" srcDatumTransform="-1" destDatumTransform="-1" layerid="162_TN_Muenchen_Stadt_11695823_TN_Siedlung20160525205704611"/>
-      <layer_coordinate_transform destAuthId="EPSG:3035" srcAuthId="EPSG:3035" srcDatumTransform="-1" destDatumTransform="-1" layerid="example_total20160407090223250"/>
-    </layer_coordinate_transform_info>
+    <layer_coordinate_transform_info/>
   </mapcanvas>
   <visibility-presets/>
   <layer-tree-canvas>
     <custom-order enabled="0">
-      <item>Auspendler_in_Kernregion_25Proz_geglaettet20160418122212903</item>
-      <item>boundary20160506134207474</item>
-      <item>zones20160506133106689</item>
-      <item>161_Stadt_Ingolstadt_21884403_TN_Siedlung20160525205210073</item>
-      <item>162_TN_Muenchen_Stadt_11695823_TN_Siedlung20160525205704611</item>
-      <item>land_use_100m20160526115506352</item>
+      <item>regions20160529132436265</item>
+      <item>regions_with_land_use20160529132656166</item>
+      <item>regions_lu_pop_emp20160529133802047</item>
+      <item>regions_with_land_use20160529133918506</item>
+      <item>land_use_100m_wrong20160529135355462</item>
+      <item>region_id_100m20160529135401336</item>
+      <item>population_100m20160529172213552</item>
+      <item>merged_land_use_10m20160529174348310</item>
+      <item>land_use_100m_clipped20160529180837933</item>
     </custom-order>
   </layer-tree-canvas>
   <legend updateDrawingOrder="true">
-    <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="land_use_100m" showFeatureCount="0">
+    <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="land_use_100m_clipped" showFeatureCount="0">
       <filegroup open="true" hidden="false">
-        <legendlayerfile isInOverview="0" layerid="land_use_100m20160526115506352" visible="1"/>
+        <legendlayerfile isInOverview="0" layerid="land_use_100m_clipped20160529180837933" visible="1"/>
       </filegroup>
     </legendlayer>
-    <legendlayer drawingOrder="-1" open="true" checked="Qt::Unchecked" name="162_TN_Muenchen_Stadt_11695823_TN_Siedlung" showFeatureCount="0">
+    <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="merged_land_use_10m" showFeatureCount="0">
       <filegroup open="true" hidden="false">
-        <legendlayerfile isInOverview="0" layerid="162_TN_Muenchen_Stadt_11695823_TN_Siedlung20160525205704611" visible="0"/>
+        <legendlayerfile isInOverview="0" layerid="merged_land_use_10m20160529174348310" visible="1"/>
       </filegroup>
     </legendlayer>
-    <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="161_Stadt_Ingolstadt_21884403_TN_Siedlung" showFeatureCount="0">
-      <filegroup open="true" hidden="false">
-        <legendlayerfile isInOverview="0" layerid="161_Stadt_Ingolstadt_21884403_TN_Siedlung20160525205210073" visible="1"/>
+    <legendlayer drawingOrder="-1" open="false" checked="Qt::Unchecked" name="population_100m" showFeatureCount="0">
+      <filegroup open="false" hidden="false">
+        <legendlayerfile isInOverview="0" layerid="population_100m20160529172213552" visible="0"/>
       </filegroup>
     </legendlayer>
-    <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="Auspendler_in_Kernregion_25Proz_geglaettet" showFeatureCount="0">
+    <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="regions_with_land_use" showFeatureCount="0">
       <filegroup open="true" hidden="false">
-        <legendlayerfile isInOverview="0" layerid="Auspendler_in_Kernregion_25Proz_geglaettet20160418122212903" visible="1"/>
+        <legendlayerfile isInOverview="0" layerid="regions_with_land_use20160529133918506" visible="1"/>
       </filegroup>
     </legendlayer>
-    <legendlayer drawingOrder="-1" open="true" checked="Qt::Unchecked" name="boundary" showFeatureCount="0">
+    <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="region_id_100m" showFeatureCount="0">
       <filegroup open="true" hidden="false">
-        <legendlayerfile isInOverview="0" layerid="boundary20160506134207474" visible="0"/>
+        <legendlayerfile isInOverview="0" layerid="region_id_100m20160529135401336" visible="1"/>
       </filegroup>
     </legendlayer>
-    <legendlayer drawingOrder="-1" open="true" checked="Qt::Unchecked" name="zones" showFeatureCount="1">
+    <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="regions_lu_pop_emp" showFeatureCount="0">
       <filegroup open="true" hidden="false">
-        <legendlayerfile isInOverview="0" layerid="zones20160506133106689" visible="0"/>
+        <legendlayerfile isInOverview="0" layerid="regions_lu_pop_emp20160529133802047" visible="1"/>
+      </filegroup>
+    </legendlayer>
+    <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="land_use_100m_wrong" showFeatureCount="0">
+      <filegroup open="true" hidden="false">
+        <legendlayerfile isInOverview="0" layerid="land_use_100m_wrong20160529135355462" visible="1"/>
+      </filegroup>
+    </legendlayer>
+    <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="regions_with_land_use" showFeatureCount="0">
+      <filegroup open="true" hidden="false">
+        <legendlayerfile isInOverview="0" layerid="regions_with_land_use20160529132656166" visible="1"/>
+      </filegroup>
+    </legendlayer>
+    <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="regions" showFeatureCount="0">
+      <filegroup open="true" hidden="false">
+        <legendlayerfile isInOverview="0" layerid="regions20160529132436265" visible="1"/>
       </filegroup>
     </legendlayer>
   </legend>
-  <projectlayers layercount="6">
-    <maplayer minimumScale="0" maximumScale="1e+08" type="raster" hasScaleBasedVisibilityFlag="0">
-      <id>161_Stadt_Ingolstadt_21884403_TN_Siedlung20160525205210073</id>
-      <datasource>/Users/joemolloy/Projects/munich_zoning_project/TN_7_rasters2/161_Stadt_Ingolstadt_21884403_TN_Siedlung.tif</datasource>
+  <projectlayers layercount="9">
+    <maplayer minimumScale="-4.65661e-10" maximumScale="1e+08" type="raster" hasScaleBasedVisibilityFlag="0">
+      <id>land_use_100m_clipped20160529180837933</id>
+      <datasource>./data/temp/land_use_100m_clipped.tif</datasource>
       <title></title>
       <abstract></abstract>
       <keywordList>
         <value></value>
       </keywordList>
-      <layername>161_Stadt_Ingolstadt_21884403_TN_Siedlung</layername>
+      <layername>land_use_100m_clipped</layername>
       <srs>
         <spatialrefsys>
           <proj4>+proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=4500000 +y_0=0 +ellps=bessel +towgs84=598.1,73.7,418.2,0.202,0.045,-2.455,6.7 +units=m +no_defs</proj4>
@@ -177,18 +144,23 @@
       </customproperties>
       <provider>gdal</provider>
       <noData>
-        <noDataList bandNo="1" useSrcNoData="0"/>
+        <noDataList bandNo="1" useSrcNoData="1"/>
+        <noDataList bandNo="2" useSrcNoData="1"/>
+        <noDataList bandNo="3" useSrcNoData="1"/>
+        <noDataList bandNo="4" useSrcNoData="1"/>
+        <noDataList bandNo="5" useSrcNoData="1"/>
+        <noDataList bandNo="6" useSrcNoData="1"/>
       </noData>
       <map-layer-style-manager current="">
         <map-layer-style name=""/>
       </map-layer-style-manager>
       <pipe>
-        <rasterrenderer gradient="BlackToWhite" opacity="1" alphaBand="-1" type="singlebandgray" grayBand="1">
+        <rasterrenderer gradient="BlackToWhite" opacity="1" alphaBand="0" type="singlebandgray" grayBand="4">
           <rasterTransparency/>
           <contrastEnhancement>
             <minValue>0</minValue>
-            <maxValue>5</maxValue>
-            <algorithm>StretchToMinimumMaximum</algorithm>
+            <maxValue>2</maxValue>
+            <algorithm>NoEnhancement</algorithm>
           </contrastEnhancement>
         </rasterrenderer>
         <brightnesscontrast brightness="0" contrast="0"/>
@@ -198,14 +170,14 @@
       <blendMode>0</blendMode>
     </maplayer>
     <maplayer minimumScale="0" maximumScale="1e+08" type="raster" hasScaleBasedVisibilityFlag="0">
-      <id>162_TN_Muenchen_Stadt_11695823_TN_Siedlung20160525205704611</id>
-      <datasource>/Users/joemolloy/Projects/munich_zoning_project/TN_7_rasters2/162_TN_Muenchen_Stadt_11695823_TN_Siedlung.tif</datasource>
+      <id>land_use_100m_wrong20160529135355462</id>
+      <datasource>/Users/joemolloy/Projects/munich_zoning_project/data/temp/land_use_100m_wrong.tif</datasource>
       <title></title>
       <abstract></abstract>
       <keywordList>
         <value></value>
       </keywordList>
-      <layername>162_TN_Muenchen_Stadt_11695823_TN_Siedlung</layername>
+      <layername>land_use_100m_wrong</layername>
       <srs>
         <spatialrefsys>
           <proj4>+proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=4500000 +y_0=0 +ellps=bessel +towgs84=598.1,73.7,418.2,0.202,0.045,-2.455,6.7 +units=m +no_defs</proj4>
@@ -223,7 +195,55 @@
       </customproperties>
       <provider>gdal</provider>
       <noData>
-        <noDataList bandNo="1" useSrcNoData="0"/>
+        <noDataList bandNo="1" useSrcNoData="1"/>
+        <noDataList bandNo="2" useSrcNoData="1"/>
+        <noDataList bandNo="3" useSrcNoData="1"/>
+        <noDataList bandNo="4" useSrcNoData="1"/>
+        <noDataList bandNo="5" useSrcNoData="1"/>
+        <noDataList bandNo="6" useSrcNoData="1"/>
+      </noData>
+      <map-layer-style-manager current="">
+        <map-layer-style name=""/>
+      </map-layer-style-manager>
+      <pipe>
+        <rasterrenderer opacity="1" alphaBand="-1" blueBand="3" greenBand="2" type="multibandcolor" redBand="1">
+          <rasterTransparency/>
+        </rasterrenderer>
+        <brightnesscontrast brightness="0" contrast="0"/>
+        <huesaturation colorizeGreen="128" colorizeOn="0" colorizeRed="255" colorizeBlue="128" grayscaleMode="0" saturation="0" colorizeStrength="100"/>
+        <rasterresampler maxOversampling="2"/>
+      </pipe>
+      <blendMode>0</blendMode>
+    </maplayer>
+    <maplayer minimumScale="0" maximumScale="1e+08" type="raster" hasScaleBasedVisibilityFlag="0">
+      <id>merged_land_use_10m20160529174348310</id>
+      <datasource>./data/temp/merged_land_use_10m.tif</datasource>
+      <title></title>
+      <abstract></abstract>
+      <keywordList>
+        <value></value>
+      </keywordList>
+      <layername>merged_land_use_10m</layername>
+      <srs>
+        <spatialrefsys>
+          <proj4>+proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=4500000 +y_0=0 +ellps=bessel +towgs84=598.1,73.7,418.2,0.202,0.045,-2.455,6.7 +units=m +no_defs</proj4>
+          <srsid>2648</srsid>
+          <srid>31468</srid>
+          <authid>EPSG:31468</authid>
+          <description>DHDN / Gauss-Kruger zone 4</description>
+          <projectionacronym>tmerc</projectionacronym>
+          <ellipsoidacronym>bessel</ellipsoidacronym>
+          <geographicflag>false</geographicflag>
+        </spatialrefsys>
+      </srs>
+      <customproperties>
+        <property key="identify/format" value="Value"/>
+      </customproperties>
+      <provider>gdal</provider>
+      <noData>
+        <noDataList bandNo="1" useSrcNoData="0">
+          <noDataRange min="0" max="0"/>
+        </noDataList>
       </noData>
       <map-layer-style-manager current="">
         <map-layer-style name=""/>
@@ -232,7 +252,7 @@
         <rasterrenderer gradient="BlackToWhite" opacity="1" alphaBand="-1" type="singlebandgray" grayBand="1">
           <rasterTransparency/>
           <contrastEnhancement>
-            <minValue>0</minValue>
+            <minValue>1</minValue>
             <maxValue>5</maxValue>
             <algorithm>StretchToMinimumMaximum</algorithm>
           </contrastEnhancement>
@@ -243,15 +263,107 @@
       </pipe>
       <blendMode>0</blendMode>
     </maplayer>
-    <maplayer minimumScale="-4.65661e-10" maximumScale="1e+08" simplifyDrawingHints="1" minLabelScale="0" maxLabelScale="1e+08" simplifyDrawingTol="1" geometry="Polygon" simplifyMaxScale="1" type="vector" hasScaleBasedVisibilityFlag="0" simplifyLocal="1" scaleBasedLabelVisibilityFlag="0">
-      <id>Auspendler_in_Kernregion_25Proz_geglaettet20160418122212903</id>
-      <datasource>/Users/joemolloy/Projects/munich_zoning_project/code/boundary/Auspendler_in_Kernregion_25Proz_geglaettet/Auspendler_in_Kernregion_25Proz_geglaettet.shp</datasource>
+    <maplayer minimumScale="0" maximumScale="1e+08" type="raster" hasScaleBasedVisibilityFlag="0">
+      <id>population_100m20160529172213552</id>
+      <datasource>./data/test_output/population_100m.tif</datasource>
       <title></title>
       <abstract></abstract>
       <keywordList>
         <value></value>
       </keywordList>
-      <layername>Auspendler_in_Kernregion_25Proz_geglaettet</layername>
+      <layername>population_100m</layername>
+      <srs>
+        <spatialrefsys>
+          <proj4>+proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=4500000 +y_0=0 +ellps=bessel +towgs84=598.1,73.7,418.2,0.202,0.045,-2.455,6.7 +units=m +no_defs</proj4>
+          <srsid>2648</srsid>
+          <srid>31468</srid>
+          <authid>EPSG:31468</authid>
+          <description>DHDN / Gauss-Kruger zone 4</description>
+          <projectionacronym>tmerc</projectionacronym>
+          <ellipsoidacronym>bessel</ellipsoidacronym>
+          <geographicflag>false</geographicflag>
+        </spatialrefsys>
+      </srs>
+      <customproperties>
+        <property key="identify/format" value="Value"/>
+      </customproperties>
+      <provider>gdal</provider>
+      <noData>
+        <noDataList bandNo="1" useSrcNoData="1"/>
+      </noData>
+      <map-layer-style-manager current="">
+        <map-layer-style name=""/>
+      </map-layer-style-manager>
+      <pipe>
+        <rasterrenderer gradient="BlackToWhite" opacity="1" alphaBand="-1" type="singlebandgray" grayBand="1">
+          <rasterTransparency/>
+          <contrastEnhancement>
+            <minValue>0.466561</minValue>
+            <maxValue>45.9251</maxValue>
+            <algorithm>StretchToMinimumMaximum</algorithm>
+          </contrastEnhancement>
+        </rasterrenderer>
+        <brightnesscontrast brightness="0" contrast="0"/>
+        <huesaturation colorizeGreen="128" colorizeOn="0" colorizeRed="255" colorizeBlue="128" grayscaleMode="0" saturation="0" colorizeStrength="100"/>
+        <rasterresampler maxOversampling="2"/>
+      </pipe>
+      <blendMode>0</blendMode>
+    </maplayer>
+    <maplayer minimumScale="0" maximumScale="1e+08" type="raster" hasScaleBasedVisibilityFlag="0">
+      <id>region_id_100m20160529135401336</id>
+      <datasource>./data/temp/region_id_100m.tif</datasource>
+      <title></title>
+      <abstract></abstract>
+      <keywordList>
+        <value></value>
+      </keywordList>
+      <layername>region_id_100m</layername>
+      <srs>
+        <spatialrefsys>
+          <proj4>+proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=4500000 +y_0=0 +ellps=bessel +towgs84=598.1,73.7,418.2,0.202,0.045,-2.455,6.7 +units=m +no_defs</proj4>
+          <srsid>2648</srsid>
+          <srid>31468</srid>
+          <authid>EPSG:31468</authid>
+          <description>DHDN / Gauss-Kruger zone 4</description>
+          <projectionacronym>tmerc</projectionacronym>
+          <ellipsoidacronym>bessel</ellipsoidacronym>
+          <geographicflag>false</geographicflag>
+        </spatialrefsys>
+      </srs>
+      <customproperties>
+        <property key="identify/format" value="Value"/>
+      </customproperties>
+      <provider>gdal</provider>
+      <noData>
+        <noDataList bandNo="1" useSrcNoData="1"/>
+      </noData>
+      <map-layer-style-manager current="">
+        <map-layer-style name=""/>
+      </map-layer-style-manager>
+      <pipe>
+        <rasterrenderer gradient="BlackToWhite" opacity="1" alphaBand="-1" type="singlebandgray" grayBand="1">
+          <rasterTransparency/>
+          <contrastEnhancement>
+            <minValue>9.16224e+06</minValue>
+            <maxValue>9.77141e+06</maxValue>
+            <algorithm>StretchToMinimumMaximum</algorithm>
+          </contrastEnhancement>
+        </rasterrenderer>
+        <brightnesscontrast brightness="0" contrast="0"/>
+        <huesaturation colorizeGreen="128" colorizeOn="0" colorizeRed="255" colorizeBlue="128" grayscaleMode="0" saturation="0" colorizeStrength="100"/>
+        <rasterresampler maxOversampling="2"/>
+      </pipe>
+      <blendMode>0</blendMode>
+    </maplayer>
+    <maplayer minimumScale="0" maximumScale="1e+08" simplifyDrawingHints="1" minLabelScale="0" maxLabelScale="1e+08" simplifyDrawingTol="1" geometry="Polygon" simplifyMaxScale="1" type="vector" hasScaleBasedVisibilityFlag="0" simplifyLocal="1" scaleBasedLabelVisibilityFlag="0">
+      <id>regions20160529132436265</id>
+      <datasource>./data/regional/regions/regions.shp</datasource>
+      <title></title>
+      <abstract></abstract>
+      <keywordList>
+        <value></value>
+      </keywordList>
+      <layername>regions</layername>
       <srs>
         <spatialrefsys>
           <proj4>+proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=4500000 +y_0=0 +ellps=bessel +towgs84=598.1,73.7,418.2,0.202,0.045,-2.455,6.7 +units=m +no_defs</proj4>
@@ -341,14 +453,14 @@
           <symbol alpha="1" type="fill" name="0">
             <layer pass="0" class="SimpleFill" locked="0">
               <prop k="border_width_map_unit_scale" v="0,0"/>
-              <prop k="color" v="0,0,0,0"/>
+              <prop k="color" v="148,48,205,255"/>
               <prop k="joinstyle" v="bevel"/>
               <prop k="offset" v="0,0"/>
               <prop k="offset_map_unit_scale" v="0,0"/>
               <prop k="offset_unit" v="MM"/>
-              <prop k="outline_color" v="255,234,0,255"/>
+              <prop k="outline_color" v="0,0,0,255"/>
               <prop k="outline_style" v="solid"/>
-              <prop k="outline_width" v="0.46"/>
+              <prop k="outline_width" v="0.26"/>
               <prop k="outline_width_unit" v="MM"/>
               <prop k="style" v="solid"/>
             </layer>
@@ -357,149 +469,7 @@
         <rotation/>
         <sizescale scalemethod="area"/>
       </renderer-v2>
-      <customproperties>
-        <property key="labeling" value="pal"/>
-        <property key="labeling/addDirectionSymbol" value="false"/>
-        <property key="labeling/angleOffset" value="0"/>
-        <property key="labeling/blendMode" value="0"/>
-        <property key="labeling/bufferBlendMode" value="0"/>
-        <property key="labeling/bufferColorA" value="255"/>
-        <property key="labeling/bufferColorB" value="255"/>
-        <property key="labeling/bufferColorG" value="255"/>
-        <property key="labeling/bufferColorR" value="255"/>
-        <property key="labeling/bufferDraw" value="false"/>
-        <property key="labeling/bufferJoinStyle" value="64"/>
-        <property key="labeling/bufferNoFill" value="false"/>
-        <property key="labeling/bufferSize" value="1"/>
-        <property key="labeling/bufferSizeInMapUnits" value="false"/>
-        <property key="labeling/bufferSizeMapUnitMaxScale" value="0"/>
-        <property key="labeling/bufferSizeMapUnitMinScale" value="0"/>
-        <property key="labeling/bufferTransp" value="0"/>
-        <property key="labeling/centroidInside" value="false"/>
-        <property key="labeling/centroidWhole" value="false"/>
-        <property key="labeling/decimals" value="3"/>
-        <property key="labeling/displayAll" value="false"/>
-        <property key="labeling/dist" value="0"/>
-        <property key="labeling/distInMapUnits" value="false"/>
-        <property key="labeling/distMapUnitMaxScale" value="0"/>
-        <property key="labeling/distMapUnitMinScale" value="0"/>
-        <property key="labeling/enabled" value="false"/>
-        <property key="labeling/fieldName" value=""/>
-        <property key="labeling/fontBold" value="false"/>
-        <property key="labeling/fontCapitals" value="0"/>
-        <property key="labeling/fontFamily" value=".Helvetica Neue DeskInterface"/>
-        <property key="labeling/fontItalic" value="false"/>
-        <property key="labeling/fontLetterSpacing" value="0"/>
-        <property key="labeling/fontLimitPixelSize" value="false"/>
-        <property key="labeling/fontMaxPixelSize" value="10000"/>
-        <property key="labeling/fontMinPixelSize" value="3"/>
-        <property key="labeling/fontSize" value="13"/>
-        <property key="labeling/fontSizeInMapUnits" value="false"/>
-        <property key="labeling/fontSizeMapUnitMaxScale" value="0"/>
-        <property key="labeling/fontSizeMapUnitMinScale" value="0"/>
-        <property key="labeling/fontStrikeout" value="false"/>
-        <property key="labeling/fontUnderline" value="false"/>
-        <property key="labeling/fontWeight" value="50"/>
-        <property key="labeling/fontWordSpacing" value="0"/>
-        <property key="labeling/formatNumbers" value="false"/>
-        <property key="labeling/isExpression" value="true"/>
-        <property key="labeling/labelOffsetInMapUnits" value="true"/>
-        <property key="labeling/labelOffsetMapUnitMaxScale" value="0"/>
-        <property key="labeling/labelOffsetMapUnitMinScale" value="0"/>
-        <property key="labeling/labelPerPart" value="false"/>
-        <property key="labeling/leftDirectionSymbol" value="&lt;"/>
-        <property key="labeling/limitNumLabels" value="false"/>
-        <property key="labeling/maxCurvedCharAngleIn" value="20"/>
-        <property key="labeling/maxCurvedCharAngleOut" value="-20"/>
-        <property key="labeling/maxNumLabels" value="2000"/>
-        <property key="labeling/mergeLines" value="false"/>
-        <property key="labeling/minFeatureSize" value="0"/>
-        <property key="labeling/multilineAlign" value="0"/>
-        <property key="labeling/multilineHeight" value="1"/>
-        <property key="labeling/namedStyle" value=""/>
-        <property key="labeling/obstacle" value="true"/>
-        <property key="labeling/placeDirectionSymbol" value="0"/>
-        <property key="labeling/placement" value="1"/>
-        <property key="labeling/placementFlags" value="0"/>
-        <property key="labeling/plussign" value="false"/>
-        <property key="labeling/preserveRotation" value="true"/>
-        <property key="labeling/previewBkgrdColor" value="#ffffff"/>
-        <property key="labeling/priority" value="5"/>
-        <property key="labeling/quadOffset" value="4"/>
-        <property key="labeling/repeatDistance" value="0"/>
-        <property key="labeling/repeatDistanceMapUnitMaxScale" value="0"/>
-        <property key="labeling/repeatDistanceMapUnitMinScale" value="0"/>
-        <property key="labeling/repeatDistanceUnit" value="1"/>
-        <property key="labeling/reverseDirectionSymbol" value="false"/>
-        <property key="labeling/rightDirectionSymbol" value=">"/>
-        <property key="labeling/scaleMax" value="10000000"/>
-        <property key="labeling/scaleMin" value="1"/>
-        <property key="labeling/scaleVisibility" value="false"/>
-        <property key="labeling/shadowBlendMode" value="6"/>
-        <property key="labeling/shadowColorB" value="0"/>
-        <property key="labeling/shadowColorG" value="0"/>
-        <property key="labeling/shadowColorR" value="0"/>
-        <property key="labeling/shadowDraw" value="false"/>
-        <property key="labeling/shadowOffsetAngle" value="135"/>
-        <property key="labeling/shadowOffsetDist" value="1"/>
-        <property key="labeling/shadowOffsetGlobal" value="true"/>
-        <property key="labeling/shadowOffsetMapUnitMaxScale" value="0"/>
-        <property key="labeling/shadowOffsetMapUnitMinScale" value="0"/>
-        <property key="labeling/shadowOffsetUnits" value="1"/>
-        <property key="labeling/shadowRadius" value="1.5"/>
-        <property key="labeling/shadowRadiusAlphaOnly" value="false"/>
-        <property key="labeling/shadowRadiusMapUnitMaxScale" value="0"/>
-        <property key="labeling/shadowRadiusMapUnitMinScale" value="0"/>
-        <property key="labeling/shadowRadiusUnits" value="1"/>
-        <property key="labeling/shadowScale" value="100"/>
-        <property key="labeling/shadowTransparency" value="30"/>
-        <property key="labeling/shadowUnder" value="0"/>
-        <property key="labeling/shapeBlendMode" value="0"/>
-        <property key="labeling/shapeBorderColorA" value="255"/>
-        <property key="labeling/shapeBorderColorB" value="128"/>
-        <property key="labeling/shapeBorderColorG" value="128"/>
-        <property key="labeling/shapeBorderColorR" value="128"/>
-        <property key="labeling/shapeBorderWidth" value="0"/>
-        <property key="labeling/shapeBorderWidthMapUnitMaxScale" value="0"/>
-        <property key="labeling/shapeBorderWidthMapUnitMinScale" value="0"/>
-        <property key="labeling/shapeBorderWidthUnits" value="1"/>
-        <property key="labeling/shapeDraw" value="false"/>
-        <property key="labeling/shapeFillColorA" value="255"/>
-        <property key="labeling/shapeFillColorB" value="255"/>
-        <property key="labeling/shapeFillColorG" value="255"/>
-        <property key="labeling/shapeFillColorR" value="255"/>
-        <property key="labeling/shapeJoinStyle" value="64"/>
-        <property key="labeling/shapeOffsetMapUnitMaxScale" value="0"/>
-        <property key="labeling/shapeOffsetMapUnitMinScale" value="0"/>
-        <property key="labeling/shapeOffsetUnits" value="1"/>
-        <property key="labeling/shapeOffsetX" value="0"/>
-        <property key="labeling/shapeOffsetY" value="0"/>
-        <property key="labeling/shapeRadiiMapUnitMaxScale" value="0"/>
-        <property key="labeling/shapeRadiiMapUnitMinScale" value="0"/>
-        <property key="labeling/shapeRadiiUnits" value="1"/>
-        <property key="labeling/shapeRadiiX" value="0"/>
-        <property key="labeling/shapeRadiiY" value="0"/>
-        <property key="labeling/shapeRotation" value="0"/>
-        <property key="labeling/shapeRotationType" value="0"/>
-        <property key="labeling/shapeSVGFile" value=""/>
-        <property key="labeling/shapeSizeMapUnitMaxScale" value="0"/>
-        <property key="labeling/shapeSizeMapUnitMinScale" value="0"/>
-        <property key="labeling/shapeSizeType" value="0"/>
-        <property key="labeling/shapeSizeUnits" value="1"/>
-        <property key="labeling/shapeSizeX" value="0"/>
-        <property key="labeling/shapeSizeY" value="0"/>
-        <property key="labeling/shapeTransparency" value="0"/>
-        <property key="labeling/shapeType" value="0"/>
-        <property key="labeling/textColorA" value="255"/>
-        <property key="labeling/textColorB" value="0"/>
-        <property key="labeling/textColorG" value="0"/>
-        <property key="labeling/textColorR" value="0"/>
-        <property key="labeling/textTransp" value="0"/>
-        <property key="labeling/upsidedownLabels" value="0"/>
-        <property key="labeling/wrapChar" value=""/>
-        <property key="labeling/xOffset" value="0"/>
-        <property key="labeling/yOffset" value="0"/>
-      </customproperties>
+      <customproperties/>
       <blendMode>0</blendMode>
       <featureBlendMode>0</featureBlendMode>
       <layerTransparency>0</layerTransparency>
@@ -525,10 +495,10 @@
         <multilineenabled fieldname="" on=""/>
         <selectedonly on=""/>
       </labelattributes>
-      <editform>.</editform>
+      <editform></editform>
       <editforminit/>
       <featformsuppress>0</featformsuppress>
-      <annotationform>.</annotationform>
+      <annotationform></annotationform>
       <editorlayout>generatedlayout</editorlayout>
       <excludeAttributesWMS/>
       <excludeAttributesWFS/>
@@ -600,35 +570,161 @@
       </edittypes>
     </maplayer>
     <maplayer minimumScale="0" maximumScale="1e+08" simplifyDrawingHints="1" minLabelScale="0" maxLabelScale="1e+08" simplifyDrawingTol="1" geometry="Polygon" simplifyMaxScale="1" type="vector" hasScaleBasedVisibilityFlag="0" simplifyLocal="1" scaleBasedLabelVisibilityFlag="0">
-      <id>boundary20160506134207474</id>
-      <datasource>/Users/joemolloy/Projects/munich_zoning_project/code/boundary/boundary.shp</datasource>
+      <id>regions_lu_pop_emp20160529133802047</id>
+      <datasource>./data/regional/regions_lu_pop_emp.geojson</datasource>
       <title></title>
       <abstract></abstract>
       <keywordList>
         <value></value>
       </keywordList>
-      <layername>boundary</layername>
+      <layername>regions_lu_pop_emp</layername>
       <srs>
         <spatialrefsys>
-          <proj4>+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs</proj4>
-          <srsid>1000</srsid>
-          <srid>3035</srid>
-          <authid>EPSG:3035</authid>
-          <description>ETRS89 / ETRS-LAEA</description>
-          <projectionacronym>laea</projectionacronym>
-          <ellipsoidacronym>GRS80</ellipsoidacronym>
+          <proj4>+proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=4500000 +y_0=0 +ellps=bessel +towgs84=598.1,73.7,418.2,0.202,0.045,-2.455,6.7 +units=m +no_defs</proj4>
+          <srsid>2648</srsid>
+          <srid>31468</srid>
+          <authid>EPSG:31468</authid>
+          <description>DHDN / Gauss-Kruger zone 4</description>
+          <projectionacronym>tmerc</projectionacronym>
+          <ellipsoidacronym>bessel</ellipsoidacronym>
           <geographicflag>false</geographicflag>
         </spatialrefsys>
       </srs>
       <provider encoding="System">ogr</provider>
-      <previewExpression></previewExpression>
+      <previewExpression>COALESCE( "AGS_Int", '&lt;NULL>' )</previewExpression>
       <vectorjoins/>
       <expressionfields/>
       <map-layer-style-manager current="">
         <map-layer-style name=""/>
       </map-layer-style-manager>
       <edittypes>
-        <edittype widgetv2type="TextEdit" name="a">
+        <edittype widgetv2type="TextEdit" name="AGS_Int">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="GEN">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Area">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Area_cover">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Remainder">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Housing">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Special">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Mixed Use">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Industrial">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Sport+Rec">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Ort">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="pop_2008">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="SVB2008_gesamt">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="LW_FW_Fisch_08">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Prod_Gewerbe_08">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Handel_Verk_Gast_08">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Unternehm_DL_08">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="oeff_priv_DL_08">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Ant_LW_FW_SVB_08">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Ant_Prod_Gewerb_SVB_08">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Ant_Handel_Verk_SVB_08">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Ant_Untern_DL_SVB_08">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Ant_oeff_priv_DL_SVB_08">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="pop_2013">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="SVB2013_gesamt">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="LW_FW_Fisch_13">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Prod_Gewerbe_13">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Handel_Verk_Gast_13">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Unternehm_DL_13">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="oeff_priv_DL_13">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Ant_LW_FW_SVB_13">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Ant_Prod_Gewerb_SVB_13">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Ant_Handel_Verk_SVB_13">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Ant_Untern_DL_SVB_13">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Ant_oeff_priv_DL_SVB_13">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Saldo_LW_FW_SVB_08_13">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Saldo_Prod_Gewerb_SVB_08_13">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Saldo_Handel_Verk_SVB_08_13">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Saldo_Untern_DL_SVB_08_13">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Saldo_oeff_priv_DL_SVB_08_13">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Anteil SVB_gesamt_Bevoelk_2008">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Anteil SVB_gesamt_Bevoelk_2013">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Saldo_SVB_ges_Bevoelk_08_13">
           <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
         </edittype>
       </edittypes>
@@ -637,7 +733,7 @@
           <symbol alpha="1" type="fill" name="0">
             <layer pass="0" class="SimpleFill" locked="0">
               <prop k="border_width_map_unit_scale" v="0,0"/>
-              <prop k="color" v="112,109,199,255"/>
+              <prop k="color" v="69,22,145,255"/>
               <prop k="joinstyle" v="bevel"/>
               <prop k="offset" v="0,0"/>
               <prop k="offset_map_unit_scale" v="0,0"/>
@@ -657,7 +753,7 @@
       <blendMode>0</blendMode>
       <featureBlendMode>0</featureBlendMode>
       <layerTransparency>0</layerTransparency>
-      <displayfield>a</displayfield>
+      <displayfield>AGS_Int</displayfield>
       <label>0</label>
       <labelattributes>
         <label fieldname="" text="Label"/>
@@ -679,29 +775,155 @@
         <multilineenabled fieldname="" on=""/>
         <selectedonly on=""/>
       </labelattributes>
-      <editform>.</editform>
+      <editform></editform>
       <editforminit/>
       <featformsuppress>0</featformsuppress>
-      <annotationform>.</annotationform>
+      <annotationform></annotationform>
       <editorlayout>generatedlayout</editorlayout>
       <excludeAttributesWMS/>
       <excludeAttributesWFS/>
       <attributeactions/>
       <edittypes>
-        <edittype widgetv2type="TextEdit" name="a">
+        <edittype widgetv2type="TextEdit" name="AGS_Int">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="GEN">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Area">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Area_cover">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Remainder">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Housing">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Special">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Mixed Use">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Industrial">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Sport+Rec">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Ort">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="pop_2008">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="SVB2008_gesamt">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="LW_FW_Fisch_08">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Prod_Gewerbe_08">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Handel_Verk_Gast_08">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Unternehm_DL_08">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="oeff_priv_DL_08">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Ant_LW_FW_SVB_08">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Ant_Prod_Gewerb_SVB_08">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Ant_Handel_Verk_SVB_08">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Ant_Untern_DL_SVB_08">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Ant_oeff_priv_DL_SVB_08">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="pop_2013">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="SVB2013_gesamt">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="LW_FW_Fisch_13">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Prod_Gewerbe_13">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Handel_Verk_Gast_13">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Unternehm_DL_13">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="oeff_priv_DL_13">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Ant_LW_FW_SVB_13">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Ant_Prod_Gewerb_SVB_13">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Ant_Handel_Verk_SVB_13">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Ant_Untern_DL_SVB_13">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Ant_oeff_priv_DL_SVB_13">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Saldo_LW_FW_SVB_08_13">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Saldo_Prod_Gewerb_SVB_08_13">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Saldo_Handel_Verk_SVB_08_13">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Saldo_Untern_DL_SVB_08_13">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Saldo_oeff_priv_DL_SVB_08_13">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Anteil SVB_gesamt_Bevoelk_2008">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Anteil SVB_gesamt_Bevoelk_2013">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Saldo_SVB_ges_Bevoelk_08_13">
           <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
         </edittype>
       </edittypes>
     </maplayer>
-    <maplayer minimumScale="0" maximumScale="1e+08" type="raster" hasScaleBasedVisibilityFlag="0">
-      <id>land_use_100m20160526115506352</id>
-      <datasource>/Users/joemolloy/Projects/munich_zoning_project/land_use_100m.tif</datasource>
+    <maplayer minimumScale="0" maximumScale="1e+08" simplifyDrawingHints="1" minLabelScale="0" maxLabelScale="1e+08" simplifyDrawingTol="1" geometry="Polygon" simplifyMaxScale="1" type="vector" hasScaleBasedVisibilityFlag="0" simplifyLocal="1" scaleBasedLabelVisibilityFlag="0">
+      <id>regions_with_land_use20160529132656166</id>
+      <datasource>./data/temp/regions_with_land_use/regions_with_land_use.shp</datasource>
       <title></title>
       <abstract></abstract>
       <keywordList>
         <value></value>
       </keywordList>
-      <layername>land_use_100m</layername>
+      <layername>regions_with_land_use</layername>
       <srs>
         <spatialrefsys>
           <proj4>+proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=4500000 +y_0=0 +ellps=bessel +towgs84=598.1,73.7,418.2,0.202,0.045,-2.455,6.7 +units=m +no_defs</proj4>
@@ -714,75 +936,48 @@
           <geographicflag>false</geographicflag>
         </spatialrefsys>
       </srs>
-      <customproperties>
-        <property key="identify/format" value="Value"/>
-      </customproperties>
-      <provider>gdal</provider>
-      <noData>
-        <noDataList bandNo="1" useSrcNoData="1"/>
-        <noDataList bandNo="2" useSrcNoData="1"/>
-        <noDataList bandNo="3" useSrcNoData="1"/>
-        <noDataList bandNo="4" useSrcNoData="1"/>
-        <noDataList bandNo="5" useSrcNoData="1"/>
-      </noData>
-      <map-layer-style-manager current="">
-        <map-layer-style name=""/>
-      </map-layer-style-manager>
-      <pipe>
-        <rasterrenderer opacity="1" alphaBand="-1" classificationMax="90" classificationMinMaxOrigin="CumulativeCutFullExtentEstimated" band="1" classificationMin="1" type="singlebandpseudocolor">
-          <rasterTransparency/>
-          <rastershader>
-            <colorrampshader colorRampType="INTERPOLATED" clip="0">
-              <item alpha="255" value="1" label="1.000000" color="#d7191c"/>
-              <item alpha="255" value="23.25" label="23.250000" color="#fdae61"/>
-              <item alpha="255" value="45.5" label="45.500000" color="#ffffbf"/>
-              <item alpha="255" value="67.75" label="67.750000" color="#abd9e9"/>
-              <item alpha="255" value="90" label="90.000000" color="#2c7bb6"/>
-            </colorrampshader>
-          </rastershader>
-        </rasterrenderer>
-        <brightnesscontrast brightness="0" contrast="0"/>
-        <huesaturation colorizeGreen="128" colorizeOn="0" colorizeRed="255" colorizeBlue="128" grayscaleMode="0" saturation="0" colorizeStrength="100"/>
-        <rasterresampler maxOversampling="2"/>
-      </pipe>
-      <blendMode>0</blendMode>
-    </maplayer>
-    <maplayer minimumScale="0" maximumScale="1e+08" simplifyDrawingHints="1" minLabelScale="0" maxLabelScale="1e+08" simplifyDrawingTol="1" geometry="Polygon" simplifyMaxScale="1" type="vector" hasScaleBasedVisibilityFlag="0" simplifyLocal="1" scaleBasedLabelVisibilityFlag="0">
-      <id>zones20160506133106689</id>
-      <datasource>/Users/joemolloy/Projects/munich_zoning_project/code/zones/zones.shp</datasource>
-      <title></title>
-      <abstract></abstract>
-      <keywordList>
-        <value></value>
-      </keywordList>
-      <layername>zones</layername>
-      <srs>
-        <spatialrefsys>
-          <proj4>+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs</proj4>
-          <srsid>1000</srsid>
-          <srid>3035</srid>
-          <authid>EPSG:3035</authid>
-          <description>ETRS89 / ETRS-LAEA</description>
-          <projectionacronym>laea</projectionacronym>
-          <ellipsoidacronym>GRS80</ellipsoidacronym>
-          <geographicflag>false</geographicflag>
-        </spatialrefsys>
-      </srs>
       <provider encoding="System">ogr</provider>
-      <previewExpression></previewExpression>
+      <previewExpression>COALESCE( "AGS_Int", '&lt;NULL>' )</previewExpression>
       <vectorjoins/>
       <expressionfields/>
       <map-layer-style-manager current="">
         <map-layer-style name=""/>
       </map-layer-style-manager>
       <edittypes>
-        <edittype widgetv2type="TextEdit" name="Population">
+        <edittype widgetv2type="TextEdit" name="AGS_Int">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="GEN">
           <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
         </edittype>
         <edittype widgetv2type="TextEdit" name="Area">
           <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
         </edittype>
-        <edittype widgetv2type="TextEdit" name="AGS">
+        <edittype widgetv2type="TextEdit" name="Area_cover">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Remainder">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Housing">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Special">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Mixed Use">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Industrial">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Sport+Rec">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="pop_2008">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="emp_2008">
           <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
         </edittype>
       </edittypes>
@@ -811,7 +1006,7 @@
       <blendMode>0</blendMode>
       <featureBlendMode>0</featureBlendMode>
       <layerTransparency>0</layerTransparency>
-      <displayfield>Population</displayfield>
+      <displayfield>AGS_Int</displayfield>
       <label>0</label>
       <labelattributes>
         <label fieldname="" text="Label"/>
@@ -833,68 +1028,223 @@
         <multilineenabled fieldname="" on=""/>
         <selectedonly on=""/>
       </labelattributes>
-      <editform>.</editform>
+      <editform></editform>
       <editforminit/>
       <featformsuppress>0</featformsuppress>
-      <annotationform>.</annotationform>
+      <annotationform></annotationform>
       <editorlayout>generatedlayout</editorlayout>
       <excludeAttributesWMS/>
       <excludeAttributesWFS/>
       <attributeactions/>
       <edittypes>
-        <edittype widgetv2type="TextEdit" name="Population">
+        <edittype widgetv2type="TextEdit" name="AGS_Int">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="GEN">
           <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
         </edittype>
         <edittype widgetv2type="TextEdit" name="Area">
           <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
         </edittype>
-        <edittype widgetv2type="TextEdit" name="AGS">
+        <edittype widgetv2type="TextEdit" name="Area_cover">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Remainder">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Housing">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Special">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Mixed Use">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Industrial">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Sport+Rec">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="pop_2008">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="emp_2008">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+      </edittypes>
+    </maplayer>
+    <maplayer minimumScale="0" maximumScale="1e+08" simplifyDrawingHints="1" minLabelScale="0" maxLabelScale="1e+08" simplifyDrawingTol="1" geometry="Polygon" simplifyMaxScale="1" type="vector" hasScaleBasedVisibilityFlag="0" simplifyLocal="1" scaleBasedLabelVisibilityFlag="0">
+      <id>regions_with_land_use20160529133918506</id>
+      <datasource>./output/regions_with_land_use/regions_with_land_use.shp</datasource>
+      <title></title>
+      <abstract></abstract>
+      <keywordList>
+        <value></value>
+      </keywordList>
+      <layername>regions_with_land_use</layername>
+      <srs>
+        <spatialrefsys>
+          <proj4>+proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=4500000 +y_0=0 +ellps=bessel +towgs84=598.1,73.7,418.2,0.202,0.045,-2.455,6.7 +units=m +no_defs</proj4>
+          <srsid>2648</srsid>
+          <srid>31468</srid>
+          <authid>EPSG:31468</authid>
+          <description>DHDN / Gauss-Kruger zone 4</description>
+          <projectionacronym>tmerc</projectionacronym>
+          <ellipsoidacronym>bessel</ellipsoidacronym>
+          <geographicflag>false</geographicflag>
+        </spatialrefsys>
+      </srs>
+      <provider encoding="System">ogr</provider>
+      <previewExpression>COALESCE( "AGS_Int", '&lt;NULL>' )</previewExpression>
+      <vectorjoins/>
+      <expressionfields/>
+      <map-layer-style-manager current="">
+        <map-layer-style name=""/>
+      </map-layer-style-manager>
+      <edittypes>
+        <edittype widgetv2type="TextEdit" name="AGS_Int">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="GEN">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Area">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Area_cover">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Remainder">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Housing">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Special">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Mixed Use">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Industrial">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Sport+Rec">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="pop_2008">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="emp_2008">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+      </edittypes>
+      <renderer-v2 symbollevels="0" type="singleSymbol">
+        <symbols>
+          <symbol alpha="1" type="fill" name="0">
+            <layer pass="0" class="SimpleFill" locked="0">
+              <prop k="border_width_map_unit_scale" v="0,0"/>
+              <prop k="color" v="158,208,216,255"/>
+              <prop k="joinstyle" v="bevel"/>
+              <prop k="offset" v="0,0"/>
+              <prop k="offset_map_unit_scale" v="0,0"/>
+              <prop k="offset_unit" v="MM"/>
+              <prop k="outline_color" v="0,0,0,255"/>
+              <prop k="outline_style" v="solid"/>
+              <prop k="outline_width" v="0.26"/>
+              <prop k="outline_width_unit" v="MM"/>
+              <prop k="style" v="solid"/>
+            </layer>
+          </symbol>
+        </symbols>
+        <rotation/>
+        <sizescale scalemethod="area"/>
+      </renderer-v2>
+      <customproperties/>
+      <blendMode>0</blendMode>
+      <featureBlendMode>0</featureBlendMode>
+      <layerTransparency>0</layerTransparency>
+      <displayfield>AGS_Int</displayfield>
+      <label>0</label>
+      <labelattributes>
+        <label fieldname="" text="Label"/>
+        <family fieldname="" name=".Helvetica Neue DeskInterface"/>
+        <size fieldname="" units="pt" value="12"/>
+        <bold fieldname="" on="0"/>
+        <italic fieldname="" on="0"/>
+        <underline fieldname="" on="0"/>
+        <strikeout fieldname="" on="0"/>
+        <color fieldname="" red="0" blue="0" green="0"/>
+        <x fieldname=""/>
+        <y fieldname=""/>
+        <offset x="0" y="0" units="pt" yfieldname="" xfieldname=""/>
+        <angle fieldname="" value="0" auto="0"/>
+        <alignment fieldname="" value="center"/>
+        <buffercolor fieldname="" red="255" blue="255" green="255"/>
+        <buffersize fieldname="" units="pt" value="1"/>
+        <bufferenabled fieldname="" on=""/>
+        <multilineenabled fieldname="" on=""/>
+        <selectedonly on=""/>
+      </labelattributes>
+      <editform></editform>
+      <editforminit/>
+      <featformsuppress>0</featformsuppress>
+      <annotationform></annotationform>
+      <editorlayout>generatedlayout</editorlayout>
+      <excludeAttributesWMS/>
+      <excludeAttributesWFS/>
+      <attributeactions/>
+      <edittypes>
+        <edittype widgetv2type="TextEdit" name="AGS_Int">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="GEN">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Area">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Area_cover">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Remainder">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Housing">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Special">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Mixed Use">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Industrial">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="Sport+Rec">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="pop_2008">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="emp_2008">
           <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
         </edittype>
       </edittypes>
     </maplayer>
   </projectlayers>
   <properties>
-    <WMSContactPerson type="QString"></WMSContactPerson>
-    <WMSOnlineResource type="QString"></WMSOnlineResource>
-    <WMSUseLayerIDs type="bool">false</WMSUseLayerIDs>
-    <WMSContactOrganization type="QString"></WMSContactOrganization>
-    <WMSKeywordList type="QStringList">
-      <value></value>
-    </WMSKeywordList>
-    <WFSUrl type="QString"></WFSUrl>
-    <Topol>
-      <layer1_0 type="QString">zones20160418213838222</layer1_0>
-      <layer2_0 type="QString">No layer</layer2_0>
-      <testname_0 type="QString">must not overlap</testname_0>
-      <testCount type="int">1</testCount>
-      <tolerance_0 type="QString">0</tolerance_0>
-    </Topol>
+    <SpatialRefSys>
+      <ProjectCRSProj4String type="QString">+proj=longlat +datum=WGS84 +no_defs</ProjectCRSProj4String>
+      <ProjectCrs type="QString">EPSG:4326</ProjectCrs>
+      <ProjectCRSID type="int">3452</ProjectCRSID>
+    </SpatialRefSys>
     <Paths>
       <Absolute type="bool">false</Absolute>
     </Paths>
-    <WMSServiceTitle type="QString"></WMSServiceTitle>
-    <WFSLayers type="QStringList"/>
-    <WMSContactMail type="QString"></WMSContactMail>
-    <PositionPrecision>
-      <DecimalPlaces type="int">2</DecimalPlaces>
-      <Automatic type="bool">true</Automatic>
-      <DegreeFormat type="QString">D</DegreeFormat>
-    </PositionPrecision>
-    <WCSUrl type="QString"></WCSUrl>
-    <WMSContactPhone type="QString"></WMSContactPhone>
-    <WMSServiceCapabilities type="bool">false</WMSServiceCapabilities>
-    <WMSServiceAbstract type="QString"></WMSServiceAbstract>
-    <WMSAddWktGeometry type="bool">false</WMSAddWktGeometry>
-    <Measure>
-      <Ellipsoid type="QString">GRS80</Ellipsoid>
-    </Measure>
-    <WMSPrecision type="QString">8</WMSPrecision>
-    <WFSTLayers>
-      <Insert type="QStringList"/>
-      <Update type="QStringList"/>
-      <Delete type="QStringList"/>
-    </WFSTLayers>
     <Gui>
       <SelectionColorBluePart type="int">0</SelectionColorBluePart>
       <CanvasColorGreenPart type="int">255</CanvasColorGreenPart>
@@ -907,11 +1257,13 @@
     <Digitizing>
       <DefaultSnapToleranceUnit type="int">2</DefaultSnapToleranceUnit>
       <LayerSnappingList type="QStringList">
-        <value>Auspendler_in_Kernregion_25Proz_geglaettet20160418122212903</value>
-        <value>boundary20160506134207474</value>
-        <value>zones20160506133106689</value>
+        <value>regions20160529132436265</value>
+        <value>regions_with_land_use20160529132656166</value>
+        <value>regions_lu_pop_emp20160529133802047</value>
+        <value>regions_with_land_use20160529133918506</value>
       </LayerSnappingList>
       <LayerSnappingEnabledList type="QStringList">
+        <value>enabled</value>
         <value>enabled</value>
         <value>enabled</value>
         <value>enabled</value>
@@ -922,8 +1274,10 @@
         <value>2</value>
         <value>2</value>
         <value>2</value>
+        <value>2</value>
       </LayerSnappingToleranceUnitList>
       <LayerSnapToList type="QStringList">
+        <value>to_vertex</value>
         <value>to_vertex</value>
         <value>to_vertex</value>
         <value>to_vertex</value>
@@ -934,35 +1288,15 @@
         <value>0.000000</value>
         <value>0.000000</value>
         <value>0.000000</value>
+        <value>0.000000</value>
       </LayerSnappingToleranceList>
     </Digitizing>
-    <Identify>
-      <disabledLayers type="QStringList"/>
-    </Identify>
-    <Macros>
-      <pythonCode type="QString"></pythonCode>
-    </Macros>
-    <WMSAccessConstraints type="QString"></WMSAccessConstraints>
-    <WCSLayers type="QStringList"/>
+    <PositionPrecision>
+      <DecimalPlaces type="int">2</DecimalPlaces>
+      <Automatic type="bool">true</Automatic>
+    </PositionPrecision>
     <Legend>
       <filterByMap type="bool">false</filterByMap>
     </Legend>
-    <SpatialRefSys>
-      <ProjectCRSProj4String type="QString">+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs</ProjectCRSProj4String>
-      <ProjectCrs type="QString">EPSG:3035</ProjectCrs>
-      <ProjectCRSID type="int">1000</ProjectCRSID>
-      <ProjectionsEnabled type="int">1</ProjectionsEnabled>
-    </SpatialRefSys>
-    <DefaultStyles>
-      <Fill type="QString"></Fill>
-      <Line type="QString"></Line>
-      <Marker type="QString"></Marker>
-      <RandomColors type="bool">true</RandomColors>
-      <AlphaInt type="int">255</AlphaInt>
-      <ColorRamp type="QString"></ColorRamp>
-    </DefaultStyles>
-    <WMSFees type="QString"></WMSFees>
-    <WMSImageQuality type="int">90</WMSImageQuality>
-    <WMSUrl type="QString"></WMSUrl>
   </properties>
 </qgis>

@@ -35,11 +35,16 @@ def distribute_region_statistics(region_shapefile, land_use_raster_file, region_
                 #move the bands to the third dimension to make calculations easier to work with
                 #lu_array is the 100m raster of land use separated by bands. must be x100 to get land use in area.
                 #need to make sure we move up from ubyte to uint32 to store larger values that we will sue
-                cell_land_use_m2 = np.rollaxis(lu_array, 0, 3).astype(np.float64) * resolution
+                cell_land_use_m2 = np.rollaxis(lu_array, 0, 3).astype(np.float32) * resolution
                 print cell_land_use_m2.shape, cell_land_use_m2.dtype
 
+                print "zonal stats on:"
+                print "\t", region_shapefile
+                print "\t", land_use_raster_file
                 zs = rasterstats.zonal_stats(region_shapefile, land_use_raster_file, stats=['count'], geojson_out=True)
                 zs_indexed = {z['properties']['AGS_Int']:z['properties'] for z in zs}
+
+                print  "counts:", sum([props['count'] for (k,props) in zs_indexed.iteritems()])
 
                 #remove remaining column
                 REMAINDER_COL = 0
@@ -57,9 +62,9 @@ def distribute_region_statistics(region_shapefile, land_use_raster_file, region_
                 print "region code array shape: ", region_code_array.shape
                 print "region height:", region_raster.profile['height']
 
-                region_land_use_split_m2 = np.zeros(cell_land_use_m2.shape)
-                region_population = np.zeros(cell_land_use_m2.shape)
-                region_employment = np.zeros(cell_land_use_m2.shape)
+                region_land_use_split_m2 = np.zeros(cell_land_use_m2.shape, dtype=cell_land_use_m2.dtype)
+                region_population = np.zeros(cell_land_use_m2.shape, dtype=cell_land_use_m2.dtype)
+                region_employment = np.zeros(cell_land_use_m2.shape, dtype=cell_land_use_m2.dtype)
                 print "region_land_use_split_m2:", region_land_use_split_m2.shape, region_land_use_split_m2.dtype
                 print "region_population:", region_population.shape, region_population.dtype
 
@@ -117,6 +122,7 @@ def distribute_region_statistics(region_shapefile, land_use_raster_file, region_
 
                 print "TEST!!!!!!!"
                 print (800, 81), int(region_code_array[800, 81])
+                print cell_land_use_m2[800, 81]
                 print region_population[800, 81], cell_lu_pc[800, 81], pop_result[800, 81]
 
                 #for (row,col), v in np.ndenumerate(result):
@@ -129,7 +135,7 @@ def distribute_region_statistics(region_shapefile, land_use_raster_file, region_
                                                    .format(resolution = resolution))
 
                 profile = region_raster.profile
-                profile.update(dtype=rasterio.float64)
+                profile.update(dtype=rasterio.float32)
                 #profile.update(dtype=rasterio.ubyte)
                 print "Writing population to: ", population_output_file
                 print profile
@@ -166,27 +172,35 @@ def build_region_stats_lookup_table(region_shapefile):
 import rasterstats
 from math import sqrt, pow
 def check_raster_output(region_shapefile, stats_raster, fields):
-    zs = rasterstats.zonal_stats(region_shapefile, stats_raster, stats=['sum'])
-    with fiona.open(region_shapefile) as regions:
-        results = []
-        for (region, stat) in zip(regions, zs):
-            try:
-                actual=sum([float(region['properties'][f]) for f in fields])
-                if math.isnan(actual): actual = 0
 
-                calculated = stat['sum']
+    print "zonal stats on:"
+    print "\t", region_shapefile
+    print "\t", stats_raster
 
-                if math.isnan(calculated): calculated = 0
-                if math.isnan(stat['sum']):
-                    print region['properties']['AGS_Int']
+    zs = rasterstats.zonal_stats(region_shapefile, stats_raster, stats=['sum', 'count'], geojson_out=True)
+    zs_indexed = {z['properties']['AGS_Int']:z['properties'] for z in zs}
+    results = []
+    total_count = 0
+    for region_id, props in zs_indexed.iteritems():
+        if region_id == 9772131:
+            print region_id, props['pop_2008'], props['sum'], props['count']
+        try:
+            total_count += props['count']
+            actual=sum([float(props[f]) for f in fields])
 
-                results.append((actual, calculated))
-            except TypeError:
-                #print "no value for ", region['properties']['AGS_Int']
-                results.append((0,0))
+            calculated = props['sum']
+
+            if math.isnan(props['sum']):
+                print props['AGS_Int']
+
+            results.append((actual, calculated))
+        except TypeError:
+            #print "no value for ", region['properties']['AGS_Int']
+            results.append((0,0))
 
 
     print "results for", stats_raster,"..."
+    print "total count:", total_count
     print results
     actuals, calcd = zip(*results)
     print "\t actual:", sum(actuals)
