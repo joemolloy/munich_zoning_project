@@ -76,8 +76,8 @@ def distribute_region_statistics(region_shapefile, land_use_raster_file, region_
                             land_use_type = land_use_categories[z+1] #row 0 is now land use type 1
                             landuse_area = region_stats[region_id][land_use_type]
 
-                        #    if row in xrange(13,30) and col in xrange(790,800):
-                        #        print (row, col), z, int(region_id), pc_landuse, area_landuse, "=", value
+                            if row in xrange(13,30) and col in xrange(790,800):
+                                print (row, col), z, int(region_id), cell_land_use_m2[row, col, z], landuse_area, "=", cell_land_use_m2[row, col, z] / landuse_area
 
                             region_land_use_split_m2[row, col, z] = landuse_area
                             #assign population value
@@ -89,7 +89,7 @@ def distribute_region_statistics(region_shapefile, land_use_raster_file, region_
                                 region_population[row, col] = 0
                                 region_employment[row, col] = 0
 
-                print region_land_use_split_m2[13:20,790:800,0]
+                #print region_land_use_split_m2[13:20,790:800,0]
 
                 #for k in region_stats.keys():
                 #    print region_stats[k]["Area_cover"], region_stats[k]["cell_area"], region_stats[k]["Area_cover"] - region_stats[k]["cell_area"]
@@ -117,7 +117,7 @@ def distribute_region_statistics(region_shapefile, land_use_raster_file, region_
                                                    .format(resolution = resolution))
 
                 profile = region_raster.profile
-                profile.update(dtype=rasterio.uint32)
+                profile.update(dtype=rasterio.float64)
                 #profile.update(dtype=rasterio.ubyte)
                 print "Writing population to: ", population_output_file
                 print profile
@@ -136,7 +136,7 @@ def scale_stat_array_by_land_use(a, cell_lu_area_pc, scaling_vector):
 
     summed_a_by_lu = np.sum(a_by_lu, axis=2)
 
-    result = np.ceil(summed_a_by_lu).astype(np.uint32)
+    result = summed_a_by_lu
 
     return result
 
