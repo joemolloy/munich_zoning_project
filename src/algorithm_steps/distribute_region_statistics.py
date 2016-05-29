@@ -40,8 +40,8 @@ def distribute_region_statistics(region_shapefile, land_use_raster_file, region_
 
 
                 #remove remaining column
-                REMAINDER_COL = 0
-                cell_land_use_m2 = np.delete(cell_land_use_m2,REMAINDER_COL, axis=2)
+        #        REMAINDER_COL = 0
+        #        cell_land_use_m2 = np.delete(cell_land_use_m2,REMAINDER_COL, axis=2)
                 #repeat summed area value so that the divison against each band will work
                 #cell_land_use_m2 = np.true_divide(
                 #       cell_land_use_m2,

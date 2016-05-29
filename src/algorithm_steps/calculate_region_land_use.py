@@ -23,12 +23,23 @@ sys.path.append('../')
 #land_use_categories: (band, name)
 
 #
-def calculate_region_land_use(region_shapefile, land_use_raster_single_band,
+import rasterio
+
+def calculate_region_land_use(region_shapefile, land_use_raster_multi_band,
                               region_statistics_file, output_shapefile, land_use_categories):
+
+#    with rasterio.open(land_use_raster_multi_band) as lu_mb:
+#       a,b,c,d,e = lu_mb.read()
+#        affine = lu_mb.affine
+#        land_use_raster_single_band = (a+b+c+d+e).astype(rasterio.uint32)
+
+#    print land_use_raster_single_band.shape, land_use_raster_single_band
+
+#    print land_use_raster_single_band[13:20,790:800]
 
     include_fields = ['pop_2008','emp_2008']
     (headers, region_stats) = csv_to_dict_utf8(region_statistics_file, ',', include_fields)
-    print region_stats
+    print "land use from:", land_use_raster_multi_band
 
     with fiona.open(region_shapefile, 'r') as region_shapes:
         #for (band, lu_category) in land_use_categories:
@@ -37,9 +48,21 @@ def calculate_region_land_use(region_shapefile, land_use_raster_single_band,
         indexed_land_use_categories = [(float(i), x) for (i,x) in enumerate(land_use_categories)]
 
         print indexed_land_use_categories
-        print land_use_raster_single_band
-        zs = rasterstats.zonal_stats(region_shapefile, land_use_raster_single_band,
-                                            categorical=True, category_map=indexed_land_use_categories, geojson_out=True)
+        #print land_use_raster_single_band
+
+        with rasterio.open(land_use_raster_multi_band) as src:
+            affine = src.affine
+            a,b,c,d,e = src.read()
+
+        zs_by_band = [rasterstats.zonal_stats(region_shapefile, array, affine=affine,
+                                            stats=['sum'], geojson_out=True)
+                         for array in [a,b,c,d,e]]
+
+        for zs in zs_by_band:
+            print zs[-1]['properties']['sum']
+
+        print len(zs_by_band)
+
 
         schema = {'geometry': 'Polygon',
                 'properties': [ ('AGS_Int', 'int'), ('GEN', 'str'), ('Area', 'float'), ('Area_covered', 'float')]}
@@ -58,7 +81,7 @@ def calculate_region_land_use(region_shapefile, land_use_raster_single_band,
                      driver=region_shapes.driver,
                      crs=region_shapes.crs,
                      schema=schema) as c:
-            for region in zs:
+            for (i, region) in enumerate(zs_by_band[0]):
                 old_properties = region['properties']
                 region_id = region['properties']['AGS_Int']
 
@@ -68,19 +91,21 @@ def calculate_region_land_use(region_shapefile, land_use_raster_single_band,
                     'AGS_Int': region_id,
                 }
 
-                total_land_used = sum([old_properties[key]
-                                       for key in indexed_land_use_categories
-                                       if key[1] != "Remainder" and key in old_properties])
+                total_land_used = sum([zs[i]['properties']['sum'] for zs in zs_by_band
+                                       if zs[i]['properties']['sum']] )
 
-                for (k, cat_name) in indexed_land_use_categories:
-                    if (k,cat_name) in old_properties and cat_name != "Remainder":
-                        value = old_properties[(k, cat_name)]
-                        new_properties[cat_name] = value * 100
+                for band, zs in enumerate(zs_by_band):
+                    value = zs_by_band[band][i]['properties']['sum']
+                    category = land_use_categories[band+1]
+                    #print region_id, category, band, value
+
+                    if value:
+                        new_properties[category] = zs_by_band[band][i]['properties']['sum'] * 100
                         #print new_properties[cat_name]
                     else:
-                        new_properties[cat_name] = 0
+                        new_properties[category] = 0
 
-                new_properties['Area_covered'] = total_land_used * 100
+                new_properties['Area_covered'] = total_land_used  * 100
                 new_properties['Remainder'] = new_properties['Area'] - new_properties['Area_covered']
 
                 if region_id in region_stats:
