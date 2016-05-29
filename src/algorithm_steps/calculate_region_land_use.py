@@ -18,12 +18,7 @@ sys.path.append('../')
 #	WHEN OBJART  =  'AX_IndustrieUndGewerbeflaeche' THEN 4
 #	ELSE 0
 # END
-values = ["remainder",
- 'AX_Wohnbauflaeche',
- 'AX_FlaecheBesondererFunktionalerPraegung',
- 'AX_FlaecheGemischterNutzung',
- 'AX_IndustrieUndGewerbeflaeche',
- 'AX_SportFreizeitUndErholungsflaeche']
+
 
 #land_use_categories: (band, name)
 
