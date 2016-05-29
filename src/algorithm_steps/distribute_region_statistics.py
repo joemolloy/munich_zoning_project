@@ -17,7 +17,7 @@ import numpy as np
 from collections import OrderedDict
 from src import util
 
-def distribute_region_statistics(land_use_raster_file, region_raster_file, region_shapefile, output_file, land_use_categories):
+def distribute_region_statistics(region_shapefile, land_use_raster_file, region_raster_file, output_file, land_use_categories):
     with rasterio.open(land_use_raster_file, 'r') as land_use_raster:
         with rasterio.open(region_raster_file, 'r') as region_raster:
                 region_stats = build_region_stats_lookup_table(region_shapefile)
@@ -155,7 +155,9 @@ if __name__ == "__main__":
     land_use_categories = util.load_land_use_mapping()
     RUN_DISTRIBUTE = True
     if RUN_DISTRIBUTE:
-        distribute_region_statistics("../../data/land_use/land_use_100m_clipped.tif",
+        distribute_region_statistics(
+                                 "../../output/regions_with_land_use",
+                                "../../data/land_use/land_use_100m_clipped.tif",
                                  "../../data/regional/region_raster.tif",
                                  "../../output/regions_with_land_use",
                                  "../../output/population_100m.tif",

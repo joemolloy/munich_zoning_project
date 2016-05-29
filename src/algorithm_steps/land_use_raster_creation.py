@@ -4,11 +4,9 @@ import os, subprocess
 from src import util
 
 #new shapefile with landuse types coverted to integer codes (needed for gdal_rasterize
-def codify_shapefile_landuse(shapefile, new_folder_path_abs, seidlung_path):
+def codify_shapefile_landuse(shapefile, new_folder_path_abs, seidlung_path, land_use_encoding):
     os.mkdir(new_folder_path_abs)
     full_new_path = os.path.join(new_folder_path_abs, seidlung_path + ".shp")
-
-    land_use_mapping = util.load_land_use_encodings()
 
     with fiona.open(shapefile, 'r') as src:
         source_driver = src.driver
@@ -24,13 +22,13 @@ def codify_shapefile_landuse(shapefile, new_folder_path_abs, seidlung_path):
 
             for feature in src:
                 category = feature['properties']['OBJART']
-                feature['properties']['objart_int'] = land_use_mapping[category]
+                feature['properties']['objart_int'] = land_use_encoding[category]
                 out.write(feature)
 
     return full_new_path
 
 #go through land use shapefiles, and codify each one. #TODO: can be skipped
-def process_shapefiles(land_use_folder, new_land_use_folder):
+def encode_land_use_shapefiles(land_use_folder, land_use_encoding, new_land_use_folder):
     for ags_district in os.listdir(land_use_folder):
         folder_abs = os.path.join(land_use_folder, ags_district)
         if os.path.isdir(folder_abs):
@@ -47,10 +45,10 @@ def process_shapefiles(land_use_folder, new_land_use_folder):
 
             new_folder_path_abs = os.path.join(new_land_use_folder, ags_district)
 
-            codify_shapefile_landuse(full_sp_path, new_folder_path_abs, seidlung_path)
+            codify_shapefile_landuse(full_sp_path, new_folder_path_abs, seidlung_path, land_use_encoding)
 
 #for each land use shapefile, create a raster, save to a folder
-def create_rasters(land_use_folder, raster_output_folder):
+def create_land_userasters(land_use_folder, raster_output_folder):
     for ags_district in os.listdir(land_use_folder):
         folder_abs = os.path.join(land_use_folder, ags_district)
         if os.path.isdir(folder_abs):
@@ -118,7 +116,7 @@ def create_ags_code_raster(regions_shapefile, out_filename, resolution):
 
         print(cmd)
 
-        subprocess.Popen(cmd)
+        subprocess.call(cmd)
 
 #merge rasters from folder into a single raster. #TODO: apply the raster bounds here?
 def merge_rasters(raster_input_folder, output_raster):
@@ -135,7 +133,7 @@ def merge_rasters(raster_input_folder, output_raster):
 
     print(cmd)
 
-    subprocess.Popen(cmd)
+    subprocess.call(cmd)
 
 if __name__ == "__main__":
     land_use_folder = "../TN_7_Landkreise_Stadt_Muenchen_TUM_Herrn"
@@ -144,8 +142,8 @@ if __name__ == "__main__":
 
     #os.mkdir(new_land_use_folder)
     #os.mkdir(raster_output_folder)
-    #process_shapefiles(land_use_folder, new_land_use_folder)
-    create_rasters(new_land_use_folder, raster_output_folder)
+    #encode_land_use_shapefiles(land_use_folder, new_land_use_folder)
+    create_land_userasters(new_land_use_folder, raster_output_folder)
 
 
     #create_ags_code_raster("../../data/regional/regions/regions.shp", "../../output/regions.tif", 100)

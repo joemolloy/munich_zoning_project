@@ -448,10 +448,10 @@ def load_config(arg_num, error_message):
     Config.read(sys.argv[arg_num])
     return Config
 
-def load_land_use_mapping():
-    Config = load_config(2, "please supply a land use mapping")
+def load_land_use_mapping(arg_num):
+    Config = load_config(arg_num, "please supply a land use mapping")
     return [Config.get("Class Values", c) for c in Config.options("Class Values")]
 
-def load_land_use_encodings():
-    Config = load_config(2, "please supply a land use mapping")
+def load_land_use_encodings(arg_num):
+    Config = load_config(arg_num, "please supply a land use mapping")
     return {c : i for (i,c) in enumerate(Config.options("Class Values"))}

@@ -26,7 +26,7 @@
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2016-05-29 09:06:25 +0000</string>
+	<string>2016-05-29 09:56:13 +0000</string>
 	<key>Modifier</key>
 	<string>Joe Molloy</string>
 	<key>NotesVisible</key>
@@ -1017,7 +1017,7 @@
 			<key>BackgroundGraphic</key>
 			<dict>
 				<key>Bounds</key>
-				<string>{{0, 0}, {559, 1566}}</string>
+				<string>{{0, 0}, {559, 783}}</string>
 				<key>Class</key>
 				<string>SolidGraphic</string>
 				<key>ID</key>
@@ -1049,6 +1049,91 @@
 			<key>GraphicsList</key>
 			<array>
 				<dict>
+					<key>Bounds</key>
+					<string>{{35, 391.5}, {53, 12}}</string>
+					<key>Class</key>
+					<string>ShapedGraphic</string>
+					<key>FitText</key>
+					<string>YES</string>
+					<key>Flow</key>
+					<string>Resize</string>
+					<key>ID</key>
+					<integer>79</integer>
+					<key>Magnets</key>
+					<array>
+						<string>{0, 1}</string>
+						<string>{0, -1}</string>
+						<string>{1, 0}</string>
+						<string>{-1, 0}</string>
+					</array>
+					<key>Shape</key>
+					<string>ParallelLines</string>
+					<key>Style</key>
+					<dict>
+						<key>fill</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+						<key>shadow</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+						<key>stroke</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+					</dict>
+					<key>Text</key>
+					<dict>
+						<key>Text</key>
+						<string>{\rtf1\ansi\ansicpg1252\cocoartf1348\cocoasubrtf170
+\cocoascreenfonts1{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\qc
+
+\f0\fs20 \cf0 do before}</string>
+						<key>VerticalPad</key>
+						<integer>0</integer>
+					</dict>
+					<key>Wrap</key>
+					<string>NO</string>
+				</dict>
+				<dict>
+					<key>Bounds</key>
+					<string>{{35, 405}, {451, 69.5}}</string>
+					<key>Class</key>
+					<string>ShapedGraphic</string>
+					<key>ID</key>
+					<integer>78</integer>
+					<key>Shape</key>
+					<string>Rectangle</string>
+					<key>Style</key>
+					<dict>
+						<key>fill</key>
+						<dict>
+							<key>Draws</key>
+							<string>NO</string>
+						</dict>
+						<key>stroke</key>
+						<dict>
+							<key>Color</key>
+							<dict>
+								<key>b</key>
+								<string>0</string>
+								<key>g</key>
+								<string>0</string>
+								<key>r</key>
+								<string>1</string>
+							</dict>
+							<key>CornerRadius</key>
+							<real>9</real>
+						</dict>
+					</dict>
+				</dict>
+				<dict>
 					<key>Class</key>
 					<string>LineGraphic</string>
 					<key>Head</key>
@@ -1062,8 +1147,8 @@
 					<integer>77</integer>
 					<key>Points</key>
 					<array>
-						<string>{360, 183.5}</string>
-						<string>{296, 241}</string>
+						<string>{360, 136}</string>
+						<string>{296, 193.5}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -1101,8 +1186,8 @@
 					<integer>76</integer>
 					<key>Points</key>
 					<array>
-						<string>{294.5, 154}</string>
-						<string>{360, 183.5}</string>
+						<string>{294.5, 106.5}</string>
+						<string>{360, 136}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -1137,7 +1222,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{360, 166}, {81, 35}}</string>
+					<string>{{360, 118.5}, {81, 35}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
@@ -1178,8 +1263,8 @@
 					<integer>74</integer>
 					<key>Points</key>
 					<array>
-						<string>{249.5, 172}</string>
-						<string>{251, 223}</string>
+						<string>{249.5, 124.5}</string>
+						<string>{251, 175.5}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -1203,7 +1288,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{204.5, 136}, {90, 36}}</string>
+					<string>{{204.5, 88.5}, {90, 36}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
@@ -1244,8 +1329,8 @@
 					<integer>71</integer>
 					<key>Points</key>
 					<array>
-						<string>{249.5, 734.5}</string>
-						<string>{249.5, 774}</string>
+						<string>{249.5, 687}</string>
+						<string>{249.5, 726.5}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -1269,7 +1354,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{204.5, 774}, {90, 36}}</string>
+					<string>{{204.5, 726.5}, {90, 36}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
@@ -1318,8 +1403,8 @@
 					<integer>69</integer>
 					<key>Points</key>
 					<array>
-						<string>{249.5, 496.5}</string>
-						<string>{249.5, 524.49998569488525}</string>
+						<string>{249.5, 449}</string>
+						<string>{249.5, 505}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -1353,8 +1438,8 @@
 					<integer>68</integer>
 					<key>Points</key>
 					<array>
-						<string>{251, 413.5}</string>
-						<string>{249.5, 460.5}</string>
+						<string>{251, 366}</string>
+						<string>{249.5, 413}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -1390,8 +1475,8 @@
 					<integer>67</integer>
 					<key>Points</key>
 					<array>
-						<string>{251, 259}</string>
-						<string>{251, 293}</string>
+						<string>{251, 211.5}</string>
+						<string>{251, 245.5}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -1427,8 +1512,8 @@
 					<integer>66</integer>
 					<key>Points</key>
 					<array>
-						<string>{366, 424.5}</string>
-						<string>{294.5, 478.5}</string>
+						<string>{366, 377}</string>
+						<string>{294.5, 431}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -1466,8 +1551,8 @@
 					<integer>64</integer>
 					<key>Points</key>
 					<array>
-						<string>{249.5, 104.5}</string>
-						<string>{249.5, 136}</string>
+						<string>{249.5, 57}</string>
+						<string>{249.5, 88.5}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -1491,7 +1576,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{60, 699.5}, {81, 35}}</string>
+					<string>{{60, 652}, {81, 35}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
@@ -1534,8 +1619,8 @@
 					<integer>62</integer>
 					<key>Points</key>
 					<array>
-						<string>{141, 717}</string>
-						<string>{204.5, 716.5}</string>
+						<string>{141, 669.5}</string>
+						<string>{204.5, 669}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -1569,8 +1654,8 @@
 					<integer>61</integer>
 					<key>Points</key>
 					<array>
-						<string>{249.5, 624.49994116210939}</string>
-						<string>{249.5, 698.5}</string>
+						<string>{249.5, 604.99995546722414}</string>
+						<string>{249.5, 651}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -1606,8 +1691,8 @@
 					<integer>60</integer>
 					<key>Points</key>
 					<array>
-						<string>{249.5, 560.49998569488525}</string>
-						<string>{249.5, 588.49994116210939}</string>
+						<string>{249.5, 541}</string>
+						<string>{249.5, 568.99995546722414}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -1641,8 +1726,8 @@
 					<integer>59</integer>
 					<key>Points</key>
 					<array>
-						<string>{294.5, 716.5}</string>
-						<string>{366, 721}</string>
+						<string>{294.5, 669}</string>
+						<string>{366, 673.5}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -1689,8 +1774,8 @@
 					<integer>58</integer>
 					<key>Points</key>
 					<array>
-						<string>{366, 663}</string>
-						<string>{294.5, 716.5}</string>
+						<string>{366, 615.5}</string>
+						<string>{294.5, 669}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -1726,8 +1811,8 @@
 					<integer>57</integer>
 					<key>Points</key>
 					<array>
-						<string>{294.5, 606.49994116210939}</string>
-						<string>{366, 663}</string>
+						<string>{294.5, 586.99995546722414}</string>
+						<string>{366, 615.5}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -1772,8 +1857,8 @@
 					<integer>56</integer>
 					<key>Points</key>
 					<array>
-						<string>{366, 612}</string>
-						<string>{294.5, 606.49994116210939}</string>
+						<string>{366, 564.5}</string>
+						<string>{294.5, 586.99995546722414}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -1811,8 +1896,8 @@
 					<integer>55</integer>
 					<key>Points</key>
 					<array>
-						<string>{366, 561}</string>
-						<string>{294.5, 606.49994116210939}</string>
+						<string>{366, 513.5}</string>
+						<string>{294.5, 586.99995546722414}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -1850,8 +1935,8 @@
 					<integer>54</integer>
 					<key>Points</key>
 					<array>
-						<string>{294.5, 542.49998569488525}</string>
-						<string>{366, 612}</string>
+						<string>{294.5, 523}</string>
+						<string>{366, 564.5}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -1894,8 +1979,8 @@
 					<integer>53</integer>
 					<key>Points</key>
 					<array>
-						<string>{294.5, 542.49998569488525}</string>
-						<string>{366, 561}</string>
+						<string>{294.5, 523}</string>
+						<string>{366, 513.5}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -1938,8 +2023,8 @@
 					<integer>52</integer>
 					<key>Points</key>
 					<array>
-						<string>{366, 492.75}</string>
-						<string>{294.5, 542.49998569488525}</string>
+						<string>{366, 445.25}</string>
+						<string>{294.5, 523}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -1977,8 +2062,8 @@
 					<integer>51</integer>
 					<key>Points</key>
 					<array>
-						<string>{294.5, 478.5}</string>
-						<string>{366, 492.75}</string>
+						<string>{294.5, 431}</string>
+						<string>{366, 445.25}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -2023,8 +2108,8 @@
 					<integer>50</integer>
 					<key>Points</key>
 					<array>
-						<string>{251, 328}</string>
-						<string>{251, 377.5}</string>
+						<string>{251, 280.5}</string>
+						<string>{251, 330}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -2060,8 +2145,8 @@
 					<integer>49</integer>
 					<key>Points</key>
 					<array>
-						<string>{366, 346}</string>
-						<string>{294.5, 478.5}</string>
+						<string>{366, 298.5}</string>
+						<string>{294.5, 431}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -2097,8 +2182,8 @@
 					<integer>48</integer>
 					<key>Points</key>
 					<array>
-						<string>{291.5, 310.5}</string>
-						<string>{366, 346}</string>
+						<string>{291.5, 263}</string>
+						<string>{366, 298.5}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -2145,8 +2230,8 @@
 					<integer>47</integer>
 					<key>Points</key>
 					<array>
-						<string>{366, 273.5}</string>
-						<string>{291.5, 310.5}</string>
+						<string>{366, 226}</string>
+						<string>{291.5, 263}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -2184,8 +2269,8 @@
 					<integer>44</integer>
 					<key>Points</key>
 					<array>
-						<string>{141, 310.5}</string>
-						<string>{206, 241}</string>
+						<string>{141, 263}</string>
+						<string>{206, 193.5}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -2223,8 +2308,8 @@
 					<integer>43</integer>
 					<key>Points</key>
 					<array>
-						<string>{141, 478}</string>
-						<string>{204.5, 478.5}</string>
+						<string>{141, 430.5}</string>
+						<string>{204.5, 431}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -2262,8 +2347,8 @@
 					<integer>42</integer>
 					<key>Points</key>
 					<array>
-						<string>{141, 310.5}</string>
-						<string>{206, 395.5}</string>
+						<string>{141, 263}</string>
+						<string>{206, 348}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -2301,8 +2386,8 @@
 					<integer>41</integer>
 					<key>Points</key>
 					<array>
-						<string>{296, 395.5}</string>
-						<string>{366, 424.5}</string>
+						<string>{296, 348}</string>
+						<string>{366, 377}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -2349,8 +2434,8 @@
 					<integer>40</integer>
 					<key>Points</key>
 					<array>
-						<string>{296, 241}</string>
-						<string>{366, 273.5}</string>
+						<string>{296, 193.5}</string>
+						<string>{366, 226}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -2397,8 +2482,8 @@
 					<integer>39</integer>
 					<key>Points</key>
 					<array>
-						<string>{146, 153.5}</string>
-						<string>{204.5, 154}</string>
+						<string>{146, 106}</string>
+						<string>{204.5, 106.5}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -2424,7 +2509,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{366, 703.5}, {81, 35}}</string>
+					<string>{{366, 656}, {81, 35}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
@@ -2455,7 +2540,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{204.5, 698.5}, {90, 36}}</string>
+					<string>{{204.5, 651}, {90, 36}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
@@ -2486,7 +2571,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{366, 645.5}, {81, 35}}</string>
+					<string>{{366, 598}, {81, 35}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
@@ -2517,7 +2602,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{366, 594.5}, {81, 35}}</string>
+					<string>{{366, 547}, {81, 35}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
@@ -2548,7 +2633,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{366, 543.5}, {81, 35}}</string>
+					<string>{{366, 496}, {81, 35}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
@@ -2579,7 +2664,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{204.5, 588.49994116210939}, {90, 36}}</string>
+					<string>{{204.5, 568.99995546722414}, {90, 36}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
@@ -2610,7 +2695,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{204.5, 524.49998569488525}, {90, 36}}</string>
+					<string>{{204.5, 505}, {90, 36}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
@@ -2641,7 +2726,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{366, 475.25}, {81, 35}}</string>
+					<string>{{366, 427.75}, {81, 35}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
@@ -2672,7 +2757,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{60, 460.5}, {81, 35}}</string>
+					<string>{{60, 413}, {81, 35}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
@@ -2703,7 +2788,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{204.5, 460.5}, {90, 36}}</string>
+					<string>{{204.5, 413}, {90, 36}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
@@ -2734,7 +2819,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{366, 328.5}, {81, 35}}</string>
+					<string>{{366, 281}, {81, 35}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
@@ -2765,7 +2850,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{210.5, 293}, {81, 35}}</string>
+					<string>{{210.5, 245.5}, {81, 35}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
@@ -2796,7 +2881,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{65, 136}, {81, 35}}</string>
+					<string>{{65, 88.5}, {81, 35}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
@@ -2827,7 +2912,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{60, 293}, {81, 35}}</string>
+					<string>{{60, 245.5}, {81, 35}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
@@ -2858,7 +2943,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{366, 407}, {81, 35}}</string>
+					<string>{{366, 359.5}, {81, 35}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
@@ -2889,7 +2974,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{206, 377.5}, {90, 36}}</string>
+					<string>{{206, 330}, {90, 36}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
@@ -2920,7 +3005,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{366, 256}, {81, 35}}</string>
+					<string>{{366, 208.5}, {81, 35}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
@@ -2951,7 +3036,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{206, 223}, {90, 36}}</string>
+					<string>{{206, 175.5}, {90, 36}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
@@ -2982,7 +3067,7 @@
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{204.5, 68.5}, {90, 36}}</string>
+					<string>{{204.5, 21}, {90, 36}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
@@ -3061,7 +3146,7 @@
 			<key>UniqueID</key>
 			<integer>2</integer>
 			<key>VPages</key>
-			<integer>2</integer>
+			<integer>1</integer>
 		</dict>
 	</array>
 	<key>SmartAlignmentGuidesActive</key>
@@ -3089,7 +3174,7 @@
 		<key>SidebarWidth</key>
 		<integer>138</integer>
 		<key>VisibleRegion</key>
-		<string>{{-140, 1}, {840, 629}}</string>
+		<string>{{-140, 154}, {840, 629}}</string>
 		<key>Zoom</key>
 		<real>1</real>
 		<key>ZoomValues</key>
