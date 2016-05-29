@@ -19,48 +19,37 @@
 import numpy as np
 import rasterio
 from affine import Affine
+import skimage
 
 #max square area at 100m resolution is 100:
 def disaggregate(m10_data, ratio, bands):
     assert(isinstance(ratio, int))
 
     (height, width) = m10_data.shape
-    new_array_height = height/ratio + 1
-    new_array_width = width/ratio + 1
-    print "old array: ", (height, width)
-    print "new array: " , (new_array_height, new_array_width)
+    left_padding = ratio - (width % ratio)
+    bottom_padding = ratio - (height % ratio)
+    m10_padded = np.pad(m10_data, ((0,bottom_padding),(0,left_padding)), mode='constant', constant_values=0)
+    print "input:", m10_data.shape
 
-    if ratio < pow(2,8):
-        output_data_type = rasterio.ubyte
-    elif ratio < pow(2,16):
-        output_data_type = rasterio.uint16
-    elif ratio < pow(2,32):
-        output_data_type = rasterio.uint32
-    else:
-        raise Exception("compression ratio is too large, please select a smaller output resolution")
+    print "padded:", m10_padded.shape
+
+    blocked_a = skimage.util.view_as_blocks(m10_padded, (10,10))
+    print "blocked:", blocked_a.shape
+
+    (cols, rows) = blocked_a.shape[:2]
+    land_use_array = np.zeros((cols, rows, bands), dtype=np.ubyte)
+    print "output:", land_use_array.shape
 
 
-    land_use_array = np.zeros((bands,new_array_height, new_array_width), dtype=output_data_type)
 
-    #start here for values : 76, 8892
-    start_x = 0
-    start_y = 0
-    end_x = width
-    end_y = height
+    for i in range(blocked_a.shape[0]):
+        for j in range(blocked_a.shape[1]):
+            bin_counts = np.bincount(blocked_a[i][j].ravel(), minlength=bands+1)
+            #print (i, j), bin_counts
+            land_use_array[i,j] = bin_counts[1:] #exclude zero counts
 
-    for y in xrange(start_y, end_y, ratio):
-        for x in xrange(start_x, end_x, ratio):
-            window = m10_data[y:y+ratio, x:x+ratio]
-            (w_height, w_width) = window.shape
-            if w_width * w_height > 0:
 
-                bin_counts = np.bincount(window.ravel(), minlength=bands)
-                #if bin_counts[0] < 100: print bin_counts
-
-                for i in xrange(0,bands-1):
-                    land_use_array[i, y/ratio, x/ratio] = bin_counts[i]
-
-    return land_use_array
+    return np.rollaxis(land_use_array, 2, 0)
 
 output_resolution = 100
 bands = 6
@@ -111,8 +100,8 @@ def run_land_use_aggregation(input_file, bands, output_file, output_resolution):
 
 if __name__ == "__main__":
     output_resolution = 100
-    bands = 6
-    input_file = "../land_use_merged.tif"
-    output_file = "../land_use_100m.tif"
+    bands = 5
+    input_file = "../../data/temp/merged_land_use_10m.tif"
+    output_file = "../../data/temp/land_use_100m_test.tif"
 
     run_land_use_aggregation(input_file, bands, output_file, output_resolution)
