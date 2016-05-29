@@ -52,7 +52,7 @@ BUILD_REGION_ID_RASTER = False
 
 CALC_REGION_LAND_USE_STATS = False
 RUN_BUILD_STAT_RASTERS = False
-MERGE_POP_EMP_RASTERS = False
+MERGE_POP_EMP_RASTERS = True
 RUN_CHECKING = True
 
 if CLEAR_TEMP_DIR:
@@ -115,9 +115,9 @@ if MERGE_POP_EMP_RASTERS:
 
 
 if RUN_CHECKING:
-    dist_stats.check_raster_output(regions_with_land_use,pop_raster_file, ['pop_2008'])
-    dist_stats.check_raster_output(regions_with_land_use,emp_raster_file, ['emp_2008'])
-    dist_stats.check_raster_output(regions_with_land_use,merged_output_file, ['pop_2008', 'emp_2008'])
+    dist_stats.check_raster_output(regions_with_land_use, pop_raster_file, ['pop_2008'])
+    dist_stats.check_raster_output(regions_with_land_use, emp_raster_file, ['emp_2008'])
+    dist_stats.check_raster_output(regions_with_land_use, merged_output_file, ['pop_2008', 'emp_2008'])
 
 
 
