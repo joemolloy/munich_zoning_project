@@ -87,7 +87,7 @@ def create_land_userasters(land_use_folder, raster_output_folder):
 
             print(cmd)
 
-            subprocess.Popen(cmd)
+            subprocess.call(cmd)
 
 #create region_id raster
 def create_ags_code_raster(regions_shapefile, out_filename, resolution):
