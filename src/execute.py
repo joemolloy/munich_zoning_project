@@ -2,6 +2,7 @@
 import util
 import sys
 import os
+import shutil
 from os import path
 
 
@@ -17,6 +18,9 @@ landuse_mapping = util.load_land_use_mapping(3)
 land_use_encodings = util.load_land_use_encodings(3)
 temp_directory = sys.argv[4]
 output_folder = sys.argv[5]
+
+shutil.rmtree(temp_directory)
+os.mkdir(temp_directory)
 
 #encode land use values to new shapefile
 #encoded_lu_folder = path.join(temp_directory, "encoded_landuse")
@@ -40,7 +44,7 @@ print("\naggregate land use raster")
 num_land_use_bands = len(landuse_mapping)
 resolution = 100
 land_use_aggregated = path.join(temp_directory, "land_use_{resolution}m.tif".format(resolution = resolution))
-aggregate_lu.run_land_use_aggregation(merged_raster_filename, num_land_use_bands, resolution, land_use_aggregated)
+aggregate_lu.run_land_use_aggregation(merged_raster_filename, num_land_use_bands, land_use_aggregated, resolution)
 
 #build region_id_raster
 print("\nbuild region_id_raster")

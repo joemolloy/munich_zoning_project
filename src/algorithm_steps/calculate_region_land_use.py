@@ -4,13 +4,11 @@
 
 import fiona
 import rasterstats
-import ConfigParser
-import sys, os
+import sys
 from itertools import repeat
-from shapely.geometry import Point
-import numpy as np
 from collections import OrderedDict
 from src import util
+import csv
 
 sys.path.append('../')
 

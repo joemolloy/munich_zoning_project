@@ -87,7 +87,7 @@ def create_land_userasters(land_use_folder, raster_output_folder):
 
             print(cmd)
 
-            subprocess.call(cmd)
+            subprocess.check_call(cmd)
 
 #create region_id raster
 def create_ags_code_raster(regions_shapefile, out_filename, resolution):
@@ -116,7 +116,7 @@ def create_ags_code_raster(regions_shapefile, out_filename, resolution):
 
         print(cmd)
 
-        subprocess.call(cmd)
+        subprocess.check_call(cmd)
 
 #merge rasters from folder into a single raster. #TODO: apply the raster bounds here?
 def merge_rasters(raster_input_folder, output_raster):
@@ -133,7 +133,8 @@ def merge_rasters(raster_input_folder, output_raster):
 
     print(cmd)
 
-    subprocess.call(cmd)
+    subprocess.check_call(cmd)
+
 
 if __name__ == "__main__":
     land_use_folder = "../TN_7_Landkreise_Stadt_Muenchen_TUM_Herrn"
