@@ -1,46 +1,64 @@
 import sys, os
 import src.util as util
 import rasterio
+from rasterio.warp import reproject, Resampling
 import ConfigParser
 from fiona.crs import from_epsg
+import pyproj
+import numpy as np
 
 Config = util.load_program_config()
 
 #next step, find the 'power of two' box that best captures the polygonal boundary area.
 resolution = Config.getint("Input", "resolution")
-zonesSaptialRef = from_epsg(Config.getint("Input", "EPSGspatialReference"))
-regions_file = Config.get("Regions", "filename")
 
-regions = util.load_regions(regions_file, zonesSaptialRef)
-boundary = util.get_region_boundary(regions)
+with rasterio.open("data/temp/region_id_100m.tif") as r_id_f:
+    clipping_affine = r_id_f.affine
+    crs = pyproj.Proj(r_id_f.crs)
+    height = r_id_f.height
+    width = r_id_f.width
 
-(min_x, min_y, max_x, max_y) = map(int, boundary.bounds) #given boundary, get envelope of polygon, as integers
-print (min_x, min_y, max_x, max_y)
+    xoff = clipping_affine.xoff
+    yoff = clipping_affine.yoff
+    print "region x,y offsets:", (xoff, yoff)
+    to_proj = pyproj.Proj(from_epsg(3035))
+    print to_proj
+    xx, yy = pyproj.transform(crs, to_proj, xoff, yoff)
 
+    xmax = xx + width*100
+    ymin = yy - height*100
 
-max_dimension = max(max_x - min_x, max_y - min_y)
-sub_array_size = util.next_power_of_2(max_dimension / resolution)
-print "array will be size: ", sub_array_size
+    print "pop offsets:", xx, yy, xmax, ymin
 
-# need to include here
+(pop_array, affine) = util.load_data2(Config, xx, ymin, xmax, yy)
+(height, width) = pop_array.shape
 
+print (height, width)
 
-array_origin_x = (max_x + min_x - sub_array_size*resolution)/ 2
-array_origin_y = (max_y + min_y - sub_array_size*resolution)/ 2
+dest = np.zeros(pop_array.shape, np.int32)
 
-(pop_array, affine) = util.load_data(Config, array_origin_x, array_origin_y, sub_array_size)
+print "reprojecting raster"
 
-print pop_array.shape
+reproject(
+    pop_array,
+    dest,
+    src_transform=affine,
+    src_crs=from_epsg(3035),
+    dst_transform=clipping_affine,
+    dst_crs=r_id_f.crs,
+    resampling=Resampling.nearest)
+
 print "now saving raster"
 
-with rasterio.open("../population_raster.tiff", 'w',
+
+with rasterio.open("data/temp/population_zensus_raster.tiff", 'w',
               driver = "GTiff",
-              width=pop_array.size,
-              height=pop_array.size,
+              width=width,
+              height=height,
               count=1,
-              dtype=rasterio.int16,
-              crs=zonesSaptialRef,
-              transform=affine,
+              dtype=rasterio.int32,
+              crs=r_id_f.crs,
+              transform=clipping_affine,
               nodata=0
              ) as output:
-    output.write(pop_array)
+    output.write(dest, indexes=1)
