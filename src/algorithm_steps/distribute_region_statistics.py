@@ -14,10 +14,68 @@
 import rasterio
 import fiona
 import numpy as np
+import rasterstats
 from collections import OrderedDict
 from src import util
 from os import path
 import subprocess
+
+def build_pop_raster(region_shapefile, pop_density_raster_file, region_raster_file, output_folder):
+    build_region_density_raster(region_shapefile, "population", pop_density_raster_file, region_raster_file, output_folder, scale_factors = [1.0])
+
+def build_emp_raster(region_shapefile, land_use_clipped, region_raster_file, output_folder):
+    build_region_density_raster(region_shapefile, "employment", land_use_clipped, region_raster_file, output_folder, scale_factors = [0.7,0.2,0.1,0.0,0.0])
+
+#break the rasterisation down into steps. first.
+#first build a scaled density by region raster. Then we will multiply this by the regional values
+def build_region_density_raster(region_shapefile, name, value_raster_file, region_raster_file, output_folder, scale_factors = [1.0]):
+    with rasterio.open(value_raster_file, 'r') as value_raster:
+        with rasterio.open(region_raster_file, 'r') as region_raster:
+
+                (region_code_array,) = region_raster.read()
+
+                resolution = 100
+                num_bands = len(scale_factors)
+                density_arrays = []
+
+                for i,f in enumerate(scale_factors):
+
+                    zs = rasterstats.zonal_stats(region_shapefile, value_raster_file, band=i+1, stats=['sum'], geojson_out=True)
+
+                    region_value_sums = {z['properties']['AGS_Int']: z['properties'] for z in zs}
+
+                    value_array = value_raster.read(i+1)
+
+                    density_array = np.zeros(value_array.shape)
+
+                    #for each land use band
+                    for (row,col), v in np.ndenumerate(value_array):
+
+                        try:
+                            region_id = int(region_code_array[row,col])
+                            region_sum = region_value_sums[region_id]['sum']
+
+                            density_array[row, col] = float(value_array[row, col]) / (region_sum * f)
+                            #print (row, col), float(value_array[row, col]) / (region_sum * f)
+
+                        except (KeyError, IndexError, TypeError, ZeroDivisionError):
+                            density_array[row, col] = 0
+
+
+                    density_arrays.append(density_array)
+
+
+                population_output_file = path.join(output_folder, "{name}_density_{resolution}m.tif"
+                                                   .format(name = name, resolution = resolution))
+
+                profile = region_raster.profile
+                profile.update(dtype=rasterio.float64)
+                profile.update(count=num_bands)
+                print "Writing population to: ", population_output_file
+                print profile
+                with rasterio.open(population_output_file, 'w', **profile) as out:
+                    for band in range(num_bands):
+                        out.write(density_arrays[band], indexes=band+1)
 
 def distribute_region_statistics(region_shapefile, land_use_raster_file, region_raster_file, output_folder, land_use_categories):
     with rasterio.open(land_use_raster_file, 'r') as land_use_raster:

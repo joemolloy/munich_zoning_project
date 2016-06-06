@@ -36,6 +36,8 @@ region_id_raster = path.join(temp_directory, "region_id_{resolution}m.tif".forma
 
 regions_with_land_use = path.join(temp_directory, "regions_with_land_use")
 
+pop_density_raster = path.join("input_rasters", "population_zensus_raster.tiff")
+
 pop_raster_file = path.join(output_folder, "population_{resolution}m.tif".format(resolution = resolution))
 emp_raster_file = path.join(output_folder, "employment_{resolution}m.tif".format(resolution = resolution))
 merged_output_file = path.join(output_folder, "pop_emp_sum_{resolution}m.tif".format(resolution = resolution))
@@ -51,9 +53,13 @@ CLIP_LAND_USE_RASTERS = False
 BUILD_REGION_ID_RASTER = False
 
 CALC_REGION_LAND_USE_STATS = False
+
+BUILD_POPULATION_RASTER = True
+BUILD_EMPLOYMENT_RASTER = False
+
 RUN_BUILD_STAT_RASTERS = False
 MERGE_POP_EMP_RASTERS = False
-RUN_CHECKING = True
+RUN_CHECKING = False
 
 if CLEAR_TEMP_DIR:
     #clear temp directory
@@ -99,15 +105,23 @@ if CALC_REGION_LAND_USE_STATS:
     print("\ncalc region land_use stats")
     calc_lu.calculate_region_land_use(region_shapefile, land_use_clipped, region_stats_file, regions_with_land_use, landuse_mapping)
 
+if BUILD_POPULATION_RASTER:
+    #calc region land_use stats
+    print("\ncalc region land_use stats")
+    dist_stats.build_pop_raster(regions_with_land_use,
+                                            pop_density_raster,
+                                            region_id_raster,
+                                            output_folder)
+
+
 #build pop and employment rasters -> to output folder
 
-if RUN_BUILD_STAT_RASTERS:
+if BUILD_EMPLOYMENT_RASTER:
     print("\nbuild pop and employment rasters -> to output folder")
-    dist_stats.distribute_region_statistics(regions_with_land_use,
+    dist_stats.build_emp_raster(regions_with_land_use,
                                             land_use_clipped,
                                             region_id_raster,
-                                            output_folder,
-                                            landuse_mapping)
+                                            output_folder)
 
 #merge pop and employment rasters -> to output folder
 if MERGE_POP_EMP_RASTERS:
