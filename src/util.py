@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 import os
 import psycopg2
 from zoning_algorithm.octtree import OcttreeLeaf, OcttreeNode, build_out_nodes
@@ -139,7 +139,7 @@ def load_data2(Config, min_x, min_y, max_x, max_y):
     print (count_rows, count_cols, db_min_x, db_min_y)
 
 
-    pop_array = numpy.zeros((count_rows, count_cols), dtype=numpy.int32)
+    pop_array = np.zeros((count_rows, count_cols), dtype=np.int32)
 
 
     a = Affine(
@@ -167,7 +167,7 @@ def load_data2(Config, min_x, min_y, max_x, max_y):
         #reference arrays by (row_no , col_no)
         #reference arrays by (   a_y,      a_x   )
 
-    print numpy.sum(pop_array)
+    print np.sum(pop_array)
 
     return (pop_array, a)
 
@@ -207,7 +207,7 @@ def load_data(Config, array_origin_x, array_origin_y, size, inverted=False):
     x_max = array_origin_x + size * resolution
     y_max = array_origin_y + size * resolution
 
-    pop_array = numpy.zeros((size, size), dtype=numpy.int32)
+    pop_array = np.zeros((size, size), dtype=np.int32)
 
     print cursor.mogrify(sql, (array_origin_x, x_max, array_origin_y, y_max))
 
@@ -246,7 +246,7 @@ def load_data(Config, array_origin_x, array_origin_y, size, inverted=False):
         #reference arrays by (row_no , col_no)
         #reference arrays by (   a_y,      a_x   )
 
-    print numpy.sum(pop_array)
+    print np.sum(pop_array)
 
     return (pop_array, a)
 
@@ -529,7 +529,8 @@ def load_land_use_encodings(arg_num):
 def load_scaling_factors(arg_num, key):
     Config = load_config(arg_num, "please supply a land use file")
     try:
-        values = map(float,Config.get("Scaling Factors", "key").split(","))
-        assert sum(values) == 1.0, "Scaling factors must sum to 1.0"
+        values_strs = Config.get("Scaling Factors", key).split(",")
+        values = map(float,values_strs)
+        assert np.isclose(sum(values),1.0), "Scaling factors must sum to 1.0"
     except:
-        raise Exception("Please provide valid scaling factors, ie: '0.2,0.2,0.2,0.2'")
+        raise Exception("Please provide valid scaling factors that add to 1.0, ie: '0.2,0.2,0.2,0.2'")

@@ -21,9 +21,10 @@ def codify_shapefile_landuse(shapefile, new_folder_path_abs, seidlung_path, land
          schema=new_schema) as out:
 
             for feature in src:
-                category = feature['properties']['OBJART']
-                feature['properties']['objart_int'] = land_use_encoding[category]
-                out.write(feature)
+                category = feature['properties']['OBJART'].lower()
+                if category in land_use_encoding:
+                    feature['properties']['objart_int'] = land_use_encoding[category]
+                    out.write(feature)
 
     return full_new_path
 

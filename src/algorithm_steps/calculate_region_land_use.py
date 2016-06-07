@@ -24,6 +24,44 @@ sys.path.append('../')
 
 #
 import rasterio
+def add_region_stats(region_shapefile, region_statistics_file, include_fields, output_shapefile):
+
+    (headers, region_stats) = csv_to_dict_utf8(region_statistics_file, ',', include_fields)
+
+    with fiona.open(region_shapefile, 'r') as region_shapes:
+
+        schema = {'geometry': 'Polygon',
+                'properties': [ ('AGS_Int', 'int'), ('GEN', 'str'), ('Area', 'float')]}
+
+        #create land use properties for new schema (will be percentages)
+        stats_properties = zip(headers, repeat('float'))
+        schema['properties'].extend(stats_properties)
+
+        print schema
+
+        with fiona.open(
+                     output_shapefile, 'w',
+                     driver=region_shapes.driver,
+                     crs=region_shapes.crs,
+                     schema=schema) as c:
+            for region in region_shapes:
+                old_properties = region['properties']
+                region_id = region['properties']['AGS_Int']
+
+                new_properties = {
+                    'GEN': old_properties['GEN'],
+                    'Area': old_properties['Shape_Area'],
+                    'AGS_Int': region_id,
+                }
+
+                if region_id in region_stats:
+                    new_properties.update(region_stats[region_id])
+                else:
+                    new_properties.update(zip(headers, repeat(0)))
+
+                region['properties'] = new_properties
+
+                c.write(region)
 
 def calculate_region_land_use(region_shapefile, land_use_raster_multi_band,
                               region_statistics_file, output_shapefile, land_use_categories):
