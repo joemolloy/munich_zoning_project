@@ -16,6 +16,7 @@ region_shapefile = sys.argv[1]
 land_use_shapefiles = sys.argv[2]
 region_stats_file = sys.argv[3]
 landuse_mapping = util.load_land_use_mapping(4)
+scale_factors = util.load_scaling_factors(4, "employment")
 land_use_encodings = util.load_land_use_encodings(4)
 temp_directory = sys.argv[5]
 output_folder = sys.argv[6]
@@ -38,6 +39,9 @@ regions_with_land_use = path.join(temp_directory, "regions_with_land_use")
 
 pop_density_raster = path.join("input_rasters", "population_zensus_raster.tiff")
 
+pop_area_coverage_raster = path.join(temp_directory, "population_coverage_raster.tif")
+emp_area_coverage_raster = path.join(temp_directory, "employment_coverage_raster.tif")
+
 pop_raster_file = path.join(output_folder, "population_{resolution}m.tif".format(resolution = resolution))
 emp_raster_file = path.join(output_folder, "employment_{resolution}m.tif".format(resolution = resolution))
 merged_output_file = path.join(output_folder, "pop_emp_sum_{resolution}m.tif".format(resolution = resolution))
@@ -54,12 +58,11 @@ BUILD_REGION_ID_RASTER = False
 
 CALC_REGION_LAND_USE_STATS = False
 
-BUILD_POPULATION_RASTER = True
-BUILD_EMPLOYMENT_RASTER = False
+BUILD_POPULATION_RASTER = False
+BUILD_EMPLOYMENT_RASTER = True
 
-RUN_BUILD_STAT_RASTERS = False
-MERGE_POP_EMP_RASTERS = False
-RUN_CHECKING = False
+MERGE_POP_EMP_RASTERS = True
+RUN_CHECKING = True
 
 if CLEAR_TEMP_DIR:
     #clear temp directory
@@ -107,21 +110,27 @@ if CALC_REGION_LAND_USE_STATS:
 
 if BUILD_POPULATION_RASTER:
     #calc region land_use stats
-    print("\ncalc region land_use stats")
+    print("\nbuild population raster -> to output folder")
     dist_stats.build_pop_raster(regions_with_land_use,
                                             pop_density_raster,
                                             region_id_raster,
-                                            output_folder)
+                                            pop_area_coverage_raster, [1])
+
+    dist_stats.distribute_region_statistics(regions_with_land_use, "pop_2008",
+                                            pop_area_coverage_raster, region_id_raster, pop_raster_file)
 
 
 #build pop and employment rasters -> to output folder
 
 if BUILD_EMPLOYMENT_RASTER:
-    print("\nbuild pop and employment rasters -> to output folder")
+    print("\nbuild employment raster -> to output folder")
     dist_stats.build_emp_raster(regions_with_land_use,
                                             land_use_clipped,
                                             region_id_raster,
-                                            output_folder)
+                                            emp_area_coverage_raster, scale_factors)
+
+    dist_stats.distribute_region_statistics(regions_with_land_use, "emp_2008",
+                                            emp_area_coverage_raster, region_id_raster, emp_raster_file)
 
 #merge pop and employment rasters -> to output folder
 if MERGE_POP_EMP_RASTERS:

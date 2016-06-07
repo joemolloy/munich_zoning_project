@@ -20,15 +20,15 @@ from src import util
 from os import path
 import subprocess
 
-def build_pop_raster(region_shapefile, pop_density_raster_file, region_raster_file, output_folder):
-    build_region_density_raster(region_shapefile, "population", pop_density_raster_file, region_raster_file, output_folder, scale_factors = [1.0])
+def build_pop_raster(region_shapefile, pop_density_raster_file, region_raster_file, output_file, scale_factors):
+    build_region_density_raster(region_shapefile, "population", pop_density_raster_file, region_raster_file, output_file, scale_factors)
 
-def build_emp_raster(region_shapefile, land_use_clipped, region_raster_file, output_folder):
-    build_region_density_raster(region_shapefile, "employment", land_use_clipped, region_raster_file, output_folder, scale_factors = [0.7,0.2,0.1,0.0,0.0])
+def build_emp_raster(region_shapefile, land_use_clipped, region_raster_file, output_file, scale_factors):
+    build_region_density_raster(region_shapefile, "employment", land_use_clipped, region_raster_file, output_file, scale_factors)
 
 #break the rasterisation down into steps. first.
 #first build a scaled density by region raster. Then we will multiply this by the regional values
-def build_region_density_raster(region_shapefile, name, value_raster_file, region_raster_file, output_folder, scale_factors = [1.0]):
+def build_region_density_raster(region_shapefile, name, value_raster_file, region_raster_file, output_file, scale_factors):
     with rasterio.open(value_raster_file, 'r') as value_raster:
         with rasterio.open(region_raster_file, 'r') as region_raster:
 
@@ -39,23 +39,31 @@ def build_region_density_raster(region_shapefile, name, value_raster_file, regio
                 density_arrays = []
 
                 for i,f in enumerate(scale_factors):
+                    #clip values so that smallest value is positive
+                    value_array = np.clip(value_raster.read(i+1), 0, None)
 
-                    zs = rasterstats.zonal_stats(region_shapefile, value_raster_file, band=i+1, stats=['sum'], geojson_out=True)
+                    zs = rasterstats.zonal_stats(region_shapefile,
+                                                 value_array,
+                                                 affine=value_raster.affine,
+                                                 band=i+1, stats=['sum', 'count'],
+                                                 geojson_out=True)
 
                     region_value_sums = {z['properties']['AGS_Int']: z['properties'] for z in zs}
-
-                    value_array = value_raster.read(i+1)
 
                     density_array = np.zeros(value_array.shape)
 
                     #for each land use band
                     for (row,col), v in np.ndenumerate(value_array):
-
                         try:
                             region_id = int(region_code_array[row,col])
                             region_sum = region_value_sums[region_id]['sum']
+                            #if value_array[row, col]:
+                            #    print region_id, ":", region_sum, region_value_sums[region_id]['count']
+                            #    print "\tv:", (row, col), value_array[row, col]
 
-                            density_array[row, col] = float(value_array[row, col]) / (region_sum * f)
+                            density_array[row, col] = (float(value_array[row, col]) / region_sum) * f
+                            #if value_array[row, col] < 0 or (region_sum * f) < 0:
+                            #    print "(v, region, f):", value_array[row, col], region_sum, f
                             #print (row, col), float(value_array[row, col]) / (region_sum * f)
 
                         except (KeyError, IndexError, TypeError, ZeroDivisionError):
@@ -64,139 +72,55 @@ def build_region_density_raster(region_shapefile, name, value_raster_file, regio
 
                     density_arrays.append(density_array)
 
-
-                population_output_file = path.join(output_folder, "{name}_density_{resolution}m.tif"
-                                                   .format(name = name, resolution = resolution))
-
                 profile = region_raster.profile
                 profile.update(dtype=rasterio.float64)
                 profile.update(count=num_bands)
-                print "Writing population to: ", population_output_file
+                print "Writing population to: ", output_file
                 print profile
-                with rasterio.open(population_output_file, 'w', **profile) as out:
+                with rasterio.open(output_file, 'w', **profile) as out:
                     for band in range(num_bands):
                         out.write(density_arrays[band], indexes=band+1)
 
-def distribute_region_statistics(region_shapefile, land_use_raster_file, region_raster_file, output_folder, land_use_categories):
-    with rasterio.open(land_use_raster_file, 'r') as land_use_raster:
+def distribute_region_statistics(region_shapefile, key, density_raster_file, region_raster_file, output_file):
+    with rasterio.open(density_raster_file, 'r') as density_raster:
         with rasterio.open(region_raster_file, 'r') as region_raster:
-                region_stats = build_region_stats_lookup_table(region_shapefile)
+                region_stats = extract_region_value(region_shapefile, key)
 
                 resolution = 100
-                #trim land
-                affine_LU = land_use_raster.profile['affine']
-                affine_regions = region_raster.profile['affine']
 
-                lu_array = land_use_raster.read()
-
-                #move the bands to the third dimension to make calculations easier to work with
-                #lu_array is the 100m raster of land use separated by bands. must be x100 to get land use in area.
-                #need to make sure we move up from ubyte to uint32 to store larger values that we will sue
-                cell_land_use_m2 = np.rollaxis(lu_array, 0, 3).astype(np.uint32) * resolution
-                print cell_land_use_m2.shape, cell_land_use_m2.dtype
-
-
-
-                #remove remaining column
-        #        REMAINDER_COL = 0
-        #        cell_land_use_m2 = np.delete(cell_land_use_m2,REMAINDER_COL, axis=2)
-                #repeat summed area value so that the divison against each band will work
-                #cell_land_use_m2 = np.true_divide(
-                #       cell_land_use_m2,
-                #        np.atleast_3d(np.sum(cell_land_use_m2, axis=2))
-                #)
-                #cell_land_use_m2 = np.nan_to_num(cell_land_use_m2)
-
-                print cell_land_use_m2[13:20,790:800,0]
+                density_array_list = list(density_raster.read())
 
                 (region_code_array,) = region_raster.read()
                 print "region code array shape: ", region_code_array.shape
                 print "region height:", region_raster.profile['height']
 
-                region_land_use_split_m2 = np.zeros(cell_land_use_m2.shape)
-                region_population = np.zeros(cell_land_use_m2.shape)
-                region_employment = np.zeros(cell_land_use_m2.shape)
-                print "region_land_use_split_m2:", region_land_use_split_m2.shape, region_land_use_split_m2.dtype
-                print "region_population:", region_population.shape, region_population.dtype
+                regional_value_a = np.zeros(density_array_list[0].shape)
+                print "region_value:", regional_value_a.shape, regional_value_a.dtype
 
                 #for each land use band
-                for (row,col,z), v in np.ndenumerate(cell_land_use_m2):
-                    #if not math.isnan(v):
-                        #TODO: auto clip land-use raster to region raster
-                        #location region_id from region_raster
-                        try:
-                            region_id = int(region_code_array[row,col])
-                        except IndexError:
-                            region_id = None
+                for (row,col), v in np.ndenumerate(region_code_array):
+                    try:
+                        region_id = int(region_code_array[row,col])
+                        regional_value_a[row, col] = region_stats[region_id]
+                    except KeyError:
+                        regional_value_a[row, col] = 0
 
-                        #pull the regional land use percentage for each region
-                        if region_id and region_id in region_stats:
-                            land_use_type = land_use_categories[z+1] #row 0 is now land use type 1
-                            landuse_area = region_stats[region_id][land_use_type]
 
-                            if row in xrange(13,30) and col in xrange(790,800):
-                                print (row, col), z, int(region_id), cell_land_use_m2[row, col, z], landuse_area, "=", cell_land_use_m2[row, col, z] / landuse_area
-
-                            region_land_use_split_m2[row, col, z] = landuse_area
-                            #assign population value
-                            try:
-                                region_population[row, col] = region_stats[region_id]['pop_2008']
-                                region_employment[row, col] = region_stats[region_id]['emp_2008']
-                            except KeyError:
-                                print region_id, region_stats[region_id]['GEN'], "not in pop/emp dataset"
-                                region_population[row, col] = 0
-                                region_employment[row, col] = 0
-
-                #print region_land_use_split_m2[13:20,790:800,0]
-
-                #for k in region_stats.keys():
-                #    print region_stats[k]["Area_cover"], region_stats[k]["cell_area"], region_stats[k]["Area_cover"] - region_stats[k]["cell_area"]
-
-                with np.errstate(divide='ignore', invalid='ignore'):
-                    cell_lu_pc = np.true_divide(cell_land_use_m2,region_land_use_split_m2)
-                    cell_lu_pc[cell_lu_pc == np.inf] = 0
-                    cell_lu_pc = np.nan_to_num(cell_lu_pc)
-
-                scale_factors = [0.7,0.05,0,0.01,0]
-
-                pop_scaling_vector = np.array(scale_factors) / sum(scale_factors)
-                emp_scaling_vector = np.array(scale_factors) / sum(scale_factors)
-
-                pop_result = scale_stat_array_by_land_use(region_population, cell_lu_pc, pop_scaling_vector)
-                emp_result = scale_stat_array_by_land_use(region_employment, cell_lu_pc, emp_scaling_vector)
-
-                #for (row,col), v in np.ndenumerate(result):
-                #    if v > 0:
-                #        print (row, col), v
-
-                population_output_file = path.join(output_folder, "population_{resolution}m.tif"
-                                                   .format(resolution = resolution))
-                employment_output_file = path.join(output_folder, "employment_{resolution}m.tif"
-                                                   .format(resolution = resolution))
+                result_a = sum([regional_value_a * d_a for d_a in density_array_list])
 
                 profile = region_raster.profile
                 profile.update(dtype=rasterio.float64)
                 #profile.update(dtype=rasterio.ubyte)
-                print "Writing population to: ", population_output_file
+                print "Writing", key, "to: ", output_file
                 print profile
-                with rasterio.open(population_output_file, 'w', **profile) as out:
-                    out.write(pop_result, indexes=1)
+                with rasterio.open(output_file, 'w', **profile) as out:
+                    out.write(result_a, indexes=1)
 
-                print "Writing employment to: ", employment_output_file
-                with rasterio.open(employment_output_file, 'w', **profile) as out:
-                    out.write(emp_result, indexes=1)
+def extract_region_value(region_shapefile, key):
 
-def scale_stat_array_by_land_use(a, cell_lu_area_pc, scaling_vector):
-    print "calculating population raster with scale vector:", scaling_vector
-    a_land_use_distributed = np.atleast_3d(a) * scaling_vector
-
-    a_by_lu = cell_lu_area_pc * a_land_use_distributed
-
-    summed_a_by_lu = np.sum(a_by_lu, axis=2)
-
-    result = summed_a_by_lu
-
-    return result
+    with fiona.open(region_shapefile, 'r') as region_features:
+        stat_dict = {r['properties']['AGS_Int']:r['properties'][key] for r in region_features}
+    return stat_dict
 
 def build_region_stats_lookup_table(region_shapefile):
 
@@ -231,10 +155,10 @@ def check_raster_output(region_shapefile, stats_raster, fields):
     print "results for", stats_raster,"..."
     print results
     actuals, calcd = zip(*results)
-    print "\t actual:", sum(actuals)
-    print "\t calculated:", sum(calcd)
-    print "\t difference:", sum(actuals) - sum(calcd)
-    print "\t RMSE:", sqrt(sum([pow(a-b,2) for (a,b) in results]) / len(results))
+    print "\t actual:", "{:,}".format(sum(actuals))
+    print "\t calculated:", "{:,}".format(sum(calcd))
+    print "\t difference:", "{:,}".format(sum(actuals) - sum(calcd))
+    print "\t RMSE:", "{:,}".format(sqrt(sum([pow(a-b,2) for (a,b) in results]) / len(results)))
 
 
 def add_rasters(a_file,b_file, outputfile):

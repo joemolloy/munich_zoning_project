@@ -519,9 +519,17 @@ def load_config(arg_num, error_message):
     return Config
 
 def load_land_use_mapping(arg_num):
-    Config = load_config(arg_num, "please supply a land use mapping")
+    Config = load_config(arg_num, "please supply a land use file")
     return [Config.get("Class Values", c) for c in Config.options("Class Values")]
 
 def load_land_use_encodings(arg_num):
-    Config = load_config(arg_num, "please supply a land use mapping")
+    Config = load_config(arg_num, "please supply a land use file")
     return {c : i for (i,c) in enumerate(Config.options("Class Values"))}
+
+def load_scaling_factors(arg_num, key):
+    Config = load_config(arg_num, "please supply a land use file")
+    try:
+        values = map(float,Config.get("Scaling Factors", "key").split(","))
+        assert sum(values) == 1.0, "Scaling factors must sum to 1.0"
+    except:
+        raise Exception("Please provide valid scaling factors, ie: '0.2,0.2,0.2,0.2'")
