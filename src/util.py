@@ -532,5 +532,6 @@ def load_scaling_factors(arg_num, key):
         values_strs = Config.get("Scaling Factors", key).split(",")
         values = map(float,values_strs)
         assert np.isclose(sum(values),1.0), "Scaling factors must sum to 1.0"
+        return values
     except:
         raise Exception("Please provide valid scaling factors that add to 1.0, ie: '0.2,0.2,0.2,0.2'")

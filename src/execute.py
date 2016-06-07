@@ -128,7 +128,7 @@ if BUILD_POPULATION_RASTER:
 #build pop and employment rasters -> to output folder
 
 if BUILD_EMPLOYMENT_RASTER:
-    print("\nbuild employment raster -> to output folder")
+    print("\nbuild employment raster -> to output folder, using scale factors:", scale_factors)
     dist_stats.build_emp_raster(regions_with_stats,
                                 land_use_clipped,
                                 region_id_raster,
