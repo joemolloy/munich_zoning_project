@@ -2,6 +2,7 @@ from Queue import Queue
 from rasterstats import zonal_stats
 from shapely.geometry import shape
 from helper_functions import *
+import numpy as np
 
 class Octtree:
     fid_counter = 0
@@ -95,25 +96,33 @@ class OcttreeNode(Octtree):
             child.prune(bounding_geo)
         return self.count()
 
-def build_out_nodes(Config, region_node, regions, array, affine, pop_threshold):
+def build_out_nodes(Config, region_node, regions, raster, pop_threshold):
     Octtree.fid_counter = 0
 
-    octtree_top =  build(region_node.polygon, region_node, array, affine, pop_threshold)
+    octtree_top =  build(region_node.polygon, region_node, raster, pop_threshold)
     print "\toriginal number zones: ", octtree_top.count_populated()
-    splice(Config, octtree_top, regions, array, affine)
+    splice(Config, octtree_top, regions, raster)
 
     print "\tafter split and merge: ", octtree_top.count_populated()
 
     return octtree_top
 
 
-def build(box, parent_node, array, affine, pop_threshold): #list of bottom nodes to work from
+def build(box, parent_node, raster, pop_threshold): #list of bottom nodes to work from
     #run rasterstats with sum and count
+    (x,y,xx,yy) = box.bounds
+    #print "bounds", (x,y,xx,yy)
+    (col1, row1) = ~raster.affine * (x,y)
+    (col2, row2) = ~raster.affine * (xx,yy)
+    #print "window", (row2, row1), (col1, col2)
 
-    stats = zonal_stats(box.wkb, array, affine=affine, stats="sum count", raster_out=True, nodata=-1)
-    if stats[0]['sum'] < pop_threshold or stats[0]['count'] == 1: # leaf #need the count of valid cells
+    r_a = raster.read(1, window=((row2, row1), (col1, col2)))
+    r_a_sum = np.sum(np.clip(r_a,-1, None))
+    #print "thresholds:", pop_threshold, 1, "| count, sum:", r_a.size, r_a_sum
+
+    if r_a_sum < pop_threshold or r_a.size == 1: # leaf #need the count of valid cells
         leaf = OcttreeLeaf(box, parent_node)
-        leaf.value = stats[0]['sum']
+        leaf.value = r_a_sum
         if leaf.value == None: leaf.value = 0
         return leaf
 
@@ -124,12 +133,12 @@ def build(box, parent_node, array, affine, pop_threshold): #list of bottom nodes
         #maybe use clipped and masked sub array
         node = OcttreeNode(box, None, parent_node)
 
-        children = [build(sub, node, stats[0]['mini_raster_array'], stats[0]['mini_raster_affine'], pop_threshold)
+        children = [build(sub, node, raster, pop_threshold)
                     for sub in sub_polygons if sub.geom_type == 'Polygon'] #type 3 is polygon
         node.children = children
         return node
 
-def splice(Config, tree, regions, pop_array, transform):
+def splice(Config, tree, regions, raster):
     print "running splice algorithm..."
 
     region_results = []
@@ -165,7 +174,7 @@ def splice(Config, tree, regions, pop_array, transform):
                             spliced_node.region = region
                             region_results[-1]['all'].add(spliced_node)
                             #calculate new population value
-                            spliced_node.value = calculate_pop_value(spliced_node, pop_array, transform)
+                            spliced_node.value = calculate_pop_value(spliced_node, raster)
                             if spliced_node.is_acceptable(Config):
                                 top.children.append(spliced_node)
                             else:

@@ -60,7 +60,7 @@ def next_power_of_2(n):
     """
     return 2**(n-1).bit_length()
 
-def solve_iteratively(Config, region_octtree, regions, pop_array, affine):
+def solve_iteratively(Config, region_octtree, regions, r):
     ##
     # if num zones is too large, we need a higher threshold
     # keep a record of the thresholds that result in the nearest low, and nearest high
@@ -80,7 +80,7 @@ def solve_iteratively(Config, region_octtree, regions, pop_array, affine):
 
     while not solved: # difference greater than 10%
         print 'step %d with threshold level %d...' % (step, pop_threshold)
-        region_octtree = build_out_nodes(Config, region_octtree, regions, pop_array, affine, pop_threshold)
+        region_octtree = build_out_nodes(Config, region_octtree, regions, r, pop_threshold)
         num_zones = region_octtree.count_populated()
         print "\tnumber of cells:", num_zones
         print ''
@@ -171,86 +171,6 @@ def load_data2(Config, min_x, min_y, max_x, max_y):
 
     return (pop_array, a)
 
-
-def load_data(Config, array_origin_x, array_origin_y, size, inverted=False):
-
-    database_string = Config.get("Input", "databaseString")
-    if database_string:
-        conn = psycopg2.connect(None, "arcgis", "postgres", "postgres")
-    else:
-        db = Config.get("Input", "database")
-        user = Config.get("Input", "user")
-        pw = Config.get("Input", "password")
-        host = Config.get("Input", "host")
-
-        conn = psycopg2.connect(database=db, user=user, password=pw, host=host)
-    cursor = conn.cursor()
-
-    sql = """SELECT {sql_x}, {sql_y}, {sql_value}
-            FROM {sql_table}
-            WHERE {sql_x} between %s and %s AND {sql_y} between %s and %s
-            """.format(sql_x = Config.get("Sql", "x"),
-                       sql_y = Config.get("Sql", "y"),
-                       sql_value = Config.get("Sql", "value"),
-                       sql_table = Config.get("Sql", "table"))
-
-    sql_mins = """SELECT min({sql_x}),min({sql_y})
-            FROM {sql_table}
-            WHERE {sql_x} between %s and %s AND {sql_y} between %s and %s
-            """.format(sql_x = Config.get("Sql", "x"),
-                       sql_y = Config.get("Sql", "y"),
-                       sql_table = Config.get("Sql", "table"))
-
-    resolution = Config.getint("Input", "resolution")
-
-
-    x_max = array_origin_x + size * resolution
-    y_max = array_origin_y + size * resolution
-
-    pop_array = np.zeros((size, size), dtype=np.int32)
-
-    print cursor.mogrify(sql, (array_origin_x, x_max, array_origin_y, y_max))
-
-    cursor.execute(sql_mins, (array_origin_x, x_max, array_origin_y, y_max))
-    (results_min_x, results_min_y) = cursor.fetchone()
-
-    a = Affine(
-            resolution,
-            0,
-            results_min_x, #shift from the center marking to bottom left corner
-            0,
-            -resolution,
-            results_min_y + size*resolution #shift from the center marking to bottom left corner
-    )
-
-    print "array origins: ", (results_min_x, results_min_y)
-    array_origin_x = results_min_x
-    array_origin_y = results_min_y
-    x_max = results_min_x + size * resolution
-    y_max = results_min_y + size * resolution
-
-    #cursor.execute("SELECT x_mp_100m, y_mp_100m, \"Einwohner\" FROM public.muc_all_population;")
-    #this metheod only works when total rows = ncols x nrows in database. (IE no missing values)
-    print "parameters", (array_origin_x, (x_max-1), (array_origin_y+1), y_max)
-    cursor.execute(sql, (array_origin_x, (x_max-1), (array_origin_y+1), y_max)) #xmin xmax, ymin, ymax in that order
-    #ttes charhra
-
-
-    for line in cursor:
-        if line[2] > 0:
-            (x,y) = (line[0], line[1])
-            #print "(x,y): ", (x,y)
-            (col, row) = ~a * (x,y)
-            #print "(col,row): ", (col, row)
-            pop_array[row, col] = line[2]
-        #reference arrays by (row_no , col_no)
-        #reference arrays by (   a_y,      a_x   )
-
-    print np.sum(pop_array)
-
-    return (pop_array, a)
-
-
 def run_tabulate_intersection(zone_octtree, octtree_crs, land_use_folder, land_use_crs, class_field, field_values):
 
     #set value for each zones and class to zero
@@ -279,8 +199,6 @@ def run_tabulate_intersection(zone_octtree, octtree_crs, land_use_folder, land_u
             full_sp_path = os.path.join(folder_abs, seidlung_path + ".shp")
 
             tabulate_intersection(zone_octtree, octtree_crs, full_sp_path, land_use_crs, class_field, field_values)
-
-
 
 def tabulate_intersection(zone_octtree, octtreeSaptialRef, shapefile, inSpatialEPSGRef, class_field, field_values):
     #print "running intersection tabulation"

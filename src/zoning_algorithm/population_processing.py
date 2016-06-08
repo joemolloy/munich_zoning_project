@@ -16,16 +16,16 @@ with rasterio.open(Config.get("Input", "raster")) as r:
     transform = r.affine
     zonesSaptialRef = r.crs
 
-regions = util.load_regions(Config)
-boundary = util.get_region_boundary(regions)
+    regions = util.load_regions(Config)
+    boundary = util.get_region_boundary(regions)
 
-region_octtree = octtree.OcttreeNode(boundary.envelope, None, None)
+    region_octtree = octtree.OcttreeNode(boundary.envelope, None, None)
 
-if Config.getboolean("Parameters", "solve_iteratively"):
-    region_octtree = util.solve_iteratively(Config, region_octtree, regions, raster_array, transform)
-else:
-    pop_threshold =  Config.getint("Parameters", "population_threshold")
-    region_octtree = octtree.build_out_nodes(Config, region_octtree, regions, raster_array, transform, pop_threshold)
+    if Config.getboolean("Parameters", "solve_iteratively"):
+        region_octtree = util.solve_iteratively(Config, region_octtree, regions, r)
+    else:
+        pop_threshold =  Config.getint("Parameters", "population_threshold")
+        region_octtree = octtree.build_out_nodes(Config, region_octtree, regions, r, pop_threshold)
 
 
 shapefile = Config.get("Land Use", "filename")

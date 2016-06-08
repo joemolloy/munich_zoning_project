@@ -62,8 +62,9 @@ def get_geom_parts(geom):
     return parts
 
 
-def calculate_pop_value(node, array, transform):
-    stats = zonal_stats(node.polygon, array, affine=transform, stats="sum", nodata=-1)
+def calculate_pop_value(node, raster):
+    (array,)=raster.read()
+    stats = zonal_stats(node.polygon, array, affine=raster.affine, stats="sum", nodata=-1)
     total = stats[0]['sum']
     if total:
         return total
@@ -140,19 +141,3 @@ def get_common_boundary(node1, node2):
             edge_length = edge_length + l.length
 
     return edge_length
-
-
-def find_best_neighbour(node, neighbours):
-    max_length = 0
-    best_neighbour = None
-    for neighbour in neighbours:
-        if node.index != neighbour.index and node.polygon.touches(neighbour.polygon):
-            #neighbour_area = neighbour.polygon.GetArea()
-            length = get_common_boundary(node, neighbour)
-            if length > max_length:
-                max_length = length
-                best_neighbour = neighbour
-    if max_length == 0:
-        print "failed for node:", node.index, "against ", [n.index for n in neighbours]
-
-    return best_neighbour
