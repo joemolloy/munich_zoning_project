@@ -2,6 +2,7 @@ import numpy as np
 import os
 import psycopg2
 from zoning_algorithm.octtree import OcttreeLeaf, OcttreeNode, build_out_nodes
+import rasterio
 from rasterstats import zonal_stats
 from affine import Affine
 
@@ -185,6 +186,8 @@ def run_tabulate_intersection(zone_octtree, octtree_crs, land_use_folder, land_u
     print "running intersection tabulation"
 
     print land_use_folder
+    checked_features = set() #need to make sure that we dont double count features that are in two files (rely on unique OIDs)
+
     for folder in os.listdir(land_use_folder):
         folder_abs = os.path.join(land_use_folder, folder)
         if os.path.isdir(folder_abs):
@@ -198,32 +201,35 @@ def run_tabulate_intersection(zone_octtree, octtree_crs, land_use_folder, land_u
             #print ags, os.path.join(folder_abs, seidlung_path)
             #for each land use shapefile, tabulate intersections for each zone in that shapefile
             full_sp_path = os.path.join(folder_abs, seidlung_path + ".shp")
+            tabulate_intersection(zone_octtree, octtree_crs, full_sp_path, checked_features, land_use_crs, class_field, field_values)
 
-            tabulate_intersection(zone_octtree, octtree_crs, full_sp_path, land_use_crs, class_field, field_values)
-
-def tabulate_intersection(zone_octtree, octtreeSaptialRef, shapefile, inSpatialEPSGRef, class_field, field_values):
+def tabulate_intersection(zone_octtree, octtreeSaptialRef, shapefile, checked_features, inSpatialEPSGRef, class_field, field_values):
     #print "running intersection tabulation"
     (land_types, land_type_aliases) = zip(*field_values)
     with fiona.open(shapefile) as src:
         print '\t' , shapefile, '...'
 
         for feature in src:
-            #get class
-            poly_class = feature['properties']['OBJART'].lower()
-            if poly_class in land_types: #*zip means unzip. Only work with land types we want
-                class_alias = land_type_aliases[land_types.index(poly_class)] #make faster?
-                #transform
-                transform_fiona_polygon(feature, Proj(inSpatialEPSGRef), Proj(octtreeSaptialRef))
-                poly = shape(feature['geometry'])
+            oid = feature['properties']['OID']
+            if oid not in checked_features:
+                checked_features.add(oid)
+                #need to check the OID. If it has already been checked in another land use file, ignore.
+                #get class
+                poly_class = feature['properties'][class_field].lower()
+                if poly_class in land_types: #*zip means unzip. Only work with land types we want
+                    class_alias = land_type_aliases[land_types.index(poly_class)] #make faster?
+                    #transform
+                    transform_fiona_polygon(feature, Proj(inSpatialEPSGRef), Proj(octtreeSaptialRef))
+                    poly = shape(feature['geometry'])
 
-                matches = find_intersections(zone_octtree, poly)
+                    matches = find_intersections(zone_octtree, poly)
 
-                for zone in matches:
-                    #print zone.index, class_name, percentage
-                    intersection = zone.polygon.intersection(poly)
-                    pc_coverage = min(1, intersection.area / zone.polygon.area) #max 100% area
-                    zone.landuse_pc[class_alias] += pc_coverage
-                    zone.landuse_area[class_alias] += zone.polygon.area
+                    for zone in matches:
+                        #print zone.index, class_name, percentage
+                        intersection = zone.polygon.intersection(poly)
+                        pc_coverage = intersection.area / zone.polygon.area
+                        zone.landuse_pc[class_alias] += pc_coverage
+                        zone.landuse_area[class_alias] += intersection.area
 
 def find_intersections(node, poly):
     matches = []
@@ -241,7 +247,8 @@ def save(filename, outputSpatialReference, octtree, include_land_use = False, fi
     print "saving zones with land use to:", filename
 
     schema = {'geometry': 'Polygon',
-                'properties': [('Population', 'int'), ('Area', 'float'), ('AGS', 'int')]}
+                'properties': [('Pop+Emp', 'int'), ('Population', 'int'),
+                               ('Employment', 'int'), ('Area', 'float'), ('AGS', 'int')]}
 
     if include_land_use:
         for (f, alias) in field_values:
@@ -256,7 +263,9 @@ def save(filename, outputSpatialReference, octtree, include_land_use = False, fi
 
         for zone in octtree.iterate():
 
-            properties = {'Population': zone.value,
+            properties = {'Pop+Emp': zone.combined,
+                               'Population': zone.population,
+                               'Employment': zone.employment,
                                'Area': zone.polygon.area,
                                'AGS': zone.region['properties']['AGS_Int']
                             }
@@ -306,5 +315,25 @@ def load_scaling_factors(arg_num, key):
     except:
         raise Exception("Please provide valid scaling factors that add to 1.0, ie: '0.2,0.2,0.2,0.2'")
 
+
 def calculate_final_values(Config, zone_octtree):
-    with rasterio.read(Config.get("")
+    with rasterio.open(Config.get("Input","combined_raster")) as combined_rst:
+        combined_array = combined_rst.read(1)
+        combined_affine = combined_rst.affine
+    with rasterio.open(Config.get("Input","pop_raster")) as pop_rst:
+        pop_array = pop_rst.read(1)
+        pop_affine = combined_rst.affine
+    with rasterio.open(Config.get("Input","emp_raster")) as emp_rst:
+        emp_array = emp_rst.read(1)
+        emp_affine = emp_rst.affine
+
+    for zone in zone_octtree.iterate():
+        zs_cmb = zonal_stats(zone.polygon.wkb, combined_array, affine=combined_affine, stats='sum')[0]['sum']
+        zs_pop = zonal_stats(zone.polygon.wkb, pop_array, affine=pop_affine, stats='sum')[0]['sum']
+        zs_emp = zonal_stats(zone.polygon.wkb, emp_array, affine=emp_affine, stats='sum')[0]['sum']
+
+        zone.combined = zs_cmb
+        zone.population = zs_pop
+        zone.employment = zs_emp
+
+

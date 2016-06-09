@@ -27,6 +27,7 @@ with rasterio.open(Config.get("Input", "combined_raster")) as r:
         pop_threshold =  Config.getint("Parameters", "population_threshold")
         region_octtree = octtree.build_out_nodes(Config, region_octtree, regions, raster_array, r.affine, pop_threshold)
 
+    util.calculate_final_values(Config, region_octtree)
 
 
 shapefile = Config.get("Land Use", "filename")
