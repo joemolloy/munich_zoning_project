@@ -1,19 +1,16 @@
 import numpy as np
 import os
 import psycopg2
-from zoning_algorithm.octtree import OcttreeLeaf, OcttreeNode, build_out_nodes
+from zoning_algorithm.octtree import build_out_nodes
 import rasterio
 from rasterstats import zonal_stats
 from affine import Affine
 
 import fiona
 from shapely.geometry import mapping, shape
-
+from shapely.ops import cascaded_union
 
 from pyproj import transform, Proj
-from shapely.ops import cascaded_union
-from shapely.geometry import LineString, Polygon
-
 
 def load_regions(Config):
     regions_file = Config.get("Regions", "filename")
@@ -45,13 +42,6 @@ def transform_fiona_polygon(f, p_in, p_out) :
         x2, y2 = transform(p_in, p_out, *zip(*ring))
         new_coords.append(zip(x2, y2))
     f['geometry']['coordinates'] = new_coords
-
-def create_octtree(regions):
-    boundary = cascaded_union(regions)
-    ot = None
-    children = [OcttreeNode(region,[], ot) for region in regions]
-    ot = OcttreeNode(boundary, None, None)
-    return ot
 
 #Round up to next higher power of 2 (return x if it's already a power of 2).
 #from http://stackoverflow.com/questions/1322510

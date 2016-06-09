@@ -34,7 +34,6 @@ def build_region_density_raster(region_shapefile, name, value_raster_file, regio
 
                 (region_code_array,) = region_raster.read()
 
-                resolution = 100
                 num_bands = len(scale_factors)
                 density_arrays = []
 
