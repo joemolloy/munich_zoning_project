@@ -1,6 +1,4 @@
 from Queue import Queue
-from rasterstats import zonal_stats
-from shapely.geometry import shape
 from helper_functions import *
 import numpy as np
 
@@ -90,33 +88,43 @@ class OcttreeNode(Octtree):
         if child in self.children:
             self.children.remove(child)
 
-    def prune(self, bounding_geo):
-        self.children = [child for child in self.children if bounding_geo.intersects(child.polygon)]
+    def prune(self, bounding_area):
+        self.children = [child for child in self.children if bounding_area.intersects(child.polygon)]
         for child in self.children:
-            child.prune(bounding_geo)
+            child.prune(bounding_area)
         return self.count()
 
-def build_out_nodes(Config, region_node, regions, raster, pop_threshold):
+def build_out_nodes(Config, region_node, regions, raster, raster_affine, pop_threshold):
     Octtree.fid_counter = 0
 
-    octtree_top =  build(region_node.polygon, region_node, raster, pop_threshold)
+    octtree_top =  build(region_node.polygon, region_node, raster, raster_affine, pop_threshold)
     print "\toriginal number zones: ", octtree_top.count_populated()
-    splice(Config, octtree_top, regions, raster)
+
+    #import cProfile
+    #pr = cProfile.Profile()
+    #pr.enable()
+    to_merge = splice(Config, octtree_top, regions, raster, raster_affine)
+    merge(Config, to_merge)
+    bounding_area = get_region_boundary(regions) #need to check against boundary too.
+    octtree_top.prune(bounding_area)
+    # ... do something ...
+    #pr.disable()
+    #pr.dump_stats("data/stats")
 
     print "\tafter split and merge: ", octtree_top.count_populated()
 
     return octtree_top
 
 
-def build(box, parent_node, raster, pop_threshold): #list of bottom nodes to work from
+def build(box, parent_node, raster, raster_affine, pop_threshold): #list of bottom nodes to work from
     #run rasterstats with sum and count
     (x,y,xx,yy) = box.bounds
     #print "bounds", (x,y,xx,yy)
-    (col1, row1) = ~raster.affine * (x,y)
-    (col2, row2) = ~raster.affine * (xx,yy)
+    (col1, row1) = ~raster_affine * (x,y)
+    (col2, row2) = ~raster_affine * (xx,yy)
     #print "window", (row2, row1), (col1, col2)
 
-    r_a = raster.read(1, window=((row2, row1), (col1, col2)))
+    r_a = raster[row2:row1, col1:col2]
     r_a_sum = np.sum(np.clip(r_a,-1, None))
     #print "thresholds:", pop_threshold, 1, "| count, sum:", r_a.size, r_a_sum
 
@@ -133,18 +141,16 @@ def build(box, parent_node, raster, pop_threshold): #list of bottom nodes to wor
         #maybe use clipped and masked sub array
         node = OcttreeNode(box, None, parent_node)
 
-        children = [build(sub, node, raster, pop_threshold)
+        children = [build(sub, node, raster, raster_affine, pop_threshold)
                     for sub in sub_polygons if sub.geom_type == 'Polygon'] #type 3 is polygon
         node.children = children
         return node
 
-def splice(Config, tree, regions, raster):
+def splice(Config, tree, regions, raster, raster_affine):
     print "running splice algorithm..."
 
     region_results = []
     nodes_to_delete = set()
-
-    bounding_area = get_region_boundary(regions) #need to check against boundary too.
 
     for region in regions:
         region_results.append({'region':region, 'all':set(), 'to_merge':set()})
@@ -170,13 +176,13 @@ def splice(Config, tree, regions, raster):
                         intersections_list = get_geom_parts(intersection)
 
                         for intersection in intersections_list:
-                            spliced_node = OcttreeLeaf(intersection, top)
+                            spliced_node = OcttreeLeaf(intersection, child.parent)
                             spliced_node.region = region
                             region_results[-1]['all'].add(spliced_node)
                             #calculate new population value
-                            spliced_node.value = calculate_pop_value(spliced_node, raster)
+                            spliced_node.value = calculate_pop_value(spliced_node, raster, raster_affine)
                             if spliced_node.is_acceptable(Config):
-                                top.children.append(spliced_node)
+                                child.parent.children.append(spliced_node)
                             else:
                                 #need to combine later
                                 region_results[-1]['to_merge'].add(spliced_node)
@@ -191,9 +197,7 @@ def splice(Config, tree, regions, raster):
     for node in nodes_to_delete:
         node.parent.remove(node)
 
-    merge(Config, region_results)
-
-    tree.prune(bounding_area)
+    return region_results
 
 
 def merge(Config, region_results):

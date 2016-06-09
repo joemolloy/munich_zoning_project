@@ -60,7 +60,7 @@ def next_power_of_2(n):
     """
     return 2**(n-1).bit_length()
 
-def solve_iteratively(Config, region_octtree, regions, r):
+def solve_iteratively(Config, region_octtree, regions, raster, raster_affine):
     ##
     # if num zones is too large, we need a higher threshold
     # keep a record of the thresholds that result in the nearest low, and nearest high
@@ -80,7 +80,7 @@ def solve_iteratively(Config, region_octtree, regions, r):
 
     while not solved: # difference greater than 10%
         print 'step %d with threshold level %d...' % (step, pop_threshold)
-        region_octtree = build_out_nodes(Config, region_octtree, regions, r, pop_threshold)
+        region_octtree = build_out_nodes(Config, region_octtree, regions, raster, raster_affine, pop_threshold)
         num_zones = region_octtree.count_populated()
         print "\tnumber of cells:", num_zones
         print ''
@@ -172,6 +172,7 @@ def load_data2(Config, min_x, min_y, max_x, max_y):
     return (pop_array, a)
 
 def run_tabulate_intersection(zone_octtree, octtree_crs, land_use_folder, land_use_crs, class_field, field_values):
+    print field_values
 
     #set value for each zones and class to zero
     for zone in zone_octtree.iterate():
@@ -228,11 +229,12 @@ def find_intersections(node, poly):
     matches = []
 
     if node.polygon.intersects(poly):
-        if isinstance(node, OcttreeLeaf):
-            matches.append(node)
-        else:
+        try:
             for child in node.getChildren():
                 matches.extend(find_intersections(child, poly))
+        except AttributeError: #octtreeleaf
+            matches.append(node)
+
     return matches
 
 def save(filename, outputSpatialReference, octtree, include_land_use = False, field_values = None):
@@ -286,6 +288,10 @@ def load_land_use_mapping(arg_num):
     Config = load_config(arg_num, "please supply a land use file")
     return [Config.get("Class Values", c) for c in Config.options("Class Values")]
 
+def load_land_use_translations(arg_num):
+    Config = load_config(arg_num, "please supply a land use file")
+    return [(c, Config.get("Class Values", c)) for c in Config.options("Class Values")]
+
 def load_land_use_encodings(arg_num):
     Config = load_config(arg_num, "please supply a land use file")
     return {c : i for (i,c) in enumerate(Config.options("Class Values"))}
@@ -299,3 +305,6 @@ def load_scaling_factors(arg_num, key):
         return values
     except:
         raise Exception("Please provide valid scaling factors that add to 1.0, ie: '0.2,0.2,0.2,0.2'")
+
+def calculate_final_values(Config, zone_octtree):
+    with rasterio.read(Config.get("")
