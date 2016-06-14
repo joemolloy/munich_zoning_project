@@ -19,8 +19,9 @@ if __name__ == "__main__":
 
         regions = util.load_regions(Config)
         boundary = util.get_region_boundary(regions)
+        envelope = util.get_square_envelope(raster_array.shape, transform)
 
-        region_octtree = octtree.OcttreeNode(boundary.envelope, None, None)
+        region_octtree = octtree.OcttreeNode(envelope, None, None)
 
         if Config.getboolean("Parameters", "solve_iteratively"):
             region_octtree = util.solve_iteratively(Config, region_octtree, regions, raster_array, r.affine)

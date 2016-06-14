@@ -126,7 +126,6 @@ def build(box, parent_node, raster, raster_affine, pop_threshold): #list of bott
 
     r_a = raster[row2:row1, col1:col2]
     r_a_sum = np.sum(np.clip(r_a,-1, None))
-    #print "thresholds:", pop_threshold, 1, "| count, sum:", r_a.size, r_a_sum
 
     if r_a_sum < pop_threshold or r_a.size == 1: # leaf #need the count of valid cells
         leaf = OcttreeLeaf(box, parent_node)

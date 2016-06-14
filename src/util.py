@@ -7,7 +7,7 @@ from rasterstats import zonal_stats
 from affine import Affine
 
 import fiona
-from shapely.geometry import mapping, shape
+from shapely.geometry import mapping, shape, box
 from shapely.ops import cascaded_union
 
 from pyproj import transform, Proj
@@ -34,6 +34,16 @@ def load_regions(Config):
 
 def get_region_boundary(regions):
     return cascaded_union([shape(r['geometry']) for r in regions])
+
+def get_square_envelope((rows, cols), affine):
+    n = next_power_of_2(max(rows, cols))
+    extra_r = n - rows
+    extra_c = n - cols
+    (minx, miny) = affine * (0,0)
+    (maxx, maxy) = affine * (cols + extra_c, rows + extra_r)
+    envelope = box(minx, miny, maxx, maxy)
+
+    return envelope
 
 def transform_fiona_polygon(f, p_in, p_out) :
     new_coords = []
