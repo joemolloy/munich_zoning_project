@@ -46,10 +46,7 @@ def quarter_polygon(geom_poly):
                     polys.append(geom_part)
         else:
             polys.append(geom)
-
-
     return polys
-
 
 def get_geom_parts(geom):
     parts = []
@@ -60,7 +57,6 @@ def get_geom_parts(geom):
     elif geom.geom_type == 'Polygon': #ignore linestrings and multilinestrings
         parts.append(geom)
     return parts
-
 
 def calculate_pop_value(node, raster_array, affine):
     stats = zonal_stats(node.polygon, raster_array, affine=affine, stats="sum", nodata=-1)

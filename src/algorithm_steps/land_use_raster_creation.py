@@ -1,7 +1,6 @@
 import fiona
 from fiona.crs import from_epsg, to_string
 import os, subprocess
-from src import util
 
 #new shapefile with landuse types coverted to integer codes (needed for gdal_rasterize
 def codify_shapefile_landuse(shapefile, new_folder_path_abs, seidlung_path, land_use_encoding):
@@ -28,7 +27,7 @@ def codify_shapefile_landuse(shapefile, new_folder_path_abs, seidlung_path, land
 
     return full_new_path
 
-#go through land use shapefiles, and codify each one. #TODO: can be skipped
+#go through land use shapefiles, and codify each one. TODO:Generalise for non ALKIS Data
 def encode_land_use_shapefiles(land_use_folder, land_use_encoding, new_land_use_folder):
     for ags_district in os.listdir(land_use_folder):
         folder_abs = os.path.join(land_use_folder, ags_district)
@@ -57,8 +56,6 @@ def create_land_userasters(land_use_folder, raster_output_folder):
             seidlung_path = [os.path.splitext(filename)[0]
                              for filename in os.listdir(folder_abs) if 'Siedlung' in filename][0]
             ags = ags_district[0:3]
-
-            #if int(ags) in [175, 177, 183, 187]: #only for test config
 
             print ags, os.path.join(folder_abs, seidlung_path)
 
@@ -143,19 +140,4 @@ def merge_rasters(raster_input_folder, output_raster):
     print(cmd)
 
     subprocess.check_call(cmd)
-
-
-if __name__ == "__main__":
-    land_use_folder = "../TN_7_Landkreise_Stadt_Muenchen_TUM_Herrn"
-    new_land_use_folder = "../TN_7_modified"
-    raster_output_folder= "../TN_7_rasters2"
-
-    #os.mkdir(new_land_use_folder)
-    #os.mkdir(raster_output_folder)
-    #encode_land_use_shapefiles(land_use_folder, new_land_use_folder)
-    create_land_userasters(new_land_use_folder, raster_output_folder)
-
-
-    #create_ags_code_raster("../../data/regional/regions/regions.shp", "../../output/regions.tif", 100)
-
 

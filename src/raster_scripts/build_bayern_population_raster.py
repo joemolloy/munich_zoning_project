@@ -50,7 +50,6 @@ reproject(
 
 print "now saving raster"
 
-
 with rasterio.open("data/temp/population_zensus_raster.tiff", 'w',
               driver = "GTiff",
               width=width,

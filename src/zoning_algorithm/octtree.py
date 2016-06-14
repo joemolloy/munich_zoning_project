@@ -137,7 +137,6 @@ def build(box, parent_node, raster, raster_affine, pop_threshold): #list of bott
         #split box into 4
         #recurse to leafs for each subpolygon
         sub_polygons = quarter_polygon(box)
-        #maybe use clipped and masked sub array
         node = OcttreeNode(box, None, parent_node)
 
         children = [build(sub, node, raster, raster_affine, pop_threshold)
