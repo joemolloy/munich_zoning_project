@@ -10,6 +10,8 @@ import rasterio
 def add_region_stats(region_shapefile, region_statistics_file, include_fields, output_shapefile):
 
     (headers, region_stats) = csv_to_dict_utf8(region_statistics_file, ',', include_fields)
+    if headers != include_fields:
+        raise Exception("required columns are not in csv file:", ",".join(headers))
 
     with fiona.open(region_shapefile, 'r') as region_shapes:
 

@@ -1,29 +1,44 @@
 
 import util
-import sys
 import os
 import shutil
 from os import path
 
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("region", help="ESRI shapefile of study area and municipalities")
+parser.add_argument("population", help="Raster of zensus population. Used to distribute municipal statistics. Must be trimmed to scaled to region boundary")
+parser.add_argument("land_use", help="Configuration file for land use processing, Land use data is used to disaggregate Employment data. resolution must be same as population raster")
+parser.add_argument("statistics", help="Population and employment stats for each municipality")
+parser.add_argument("temp", help="Temporary directory", default='temp')
+parser.add_argument("out", help="Output_directory", default='output')
 
-#execute.py region_shapefile, landuse_shapefile_folder, region_stats, landuse_mapping temp_directory output_folder
+parser.add_argument("-s", "--start", help="algorithm step to start from.\nAll file required from this point must be in the temp or output folder")
+parser.add_argument("-c", "--check", help="output statistical error information on completion", action="store_true")
+
+args = parser.parse_args()
+
 import src.algorithm_steps.aggregate_land_use_raster as aggregate_lu
 import src.algorithm_steps.land_use_raster_creation as lurc
 import src.algorithm_steps.calculate_region_land_use as calc_lu
 import src.algorithm_steps.distribute_region_statistics as dist_stats
 
-region_shapefile = sys.argv[1]
-land_use_shapefiles = sys.argv[2]
-region_stats_file = sys.argv[3]
-landuse_mapping = util.load_land_use_mapping(4)
-scale_factors = util.load_scaling_factors(4, "employment")
-land_use_encodings = util.load_land_use_encodings(4)
-temp_directory = sys.argv[5]
-output_folder = sys.argv[6]
 
-#TODO: params set somewhere else?
+region_shapefile = args.region
+pop_density_raster = args.population
+region_stats_file = args.statistics
+
+land_use_config = util.LandUseConfig(args.land_use)
+land_use_shapefiles = land_use_config.shapefiles
+landuse_mapping = land_use_config.mapping
+scale_factors = land_use_config.scale_factors
+land_use_encodings = land_use_config.encodings
+
+temp_directory = args.temp
+output_folder = args.out
+
 num_land_use_bands = len(landuse_mapping)
-resolution = 100
+resolution = land_use_config.resolution
 
 #paths
 rasterized_lu_folder = path.join(temp_directory, "land_use_rasters_10m")
@@ -37,8 +52,6 @@ region_id_raster = path.join(temp_directory, "region_id_{resolution}m.tif".forma
 
 regions_with_stats = path.join(temp_directory, "regions_with_stats")
 
-pop_density_raster = path.join("input_rasters", "population_zensus_raster.tiff")
-
 pop_area_coverage_raster = path.join(temp_directory, "population_coverage_raster.tif")
 emp_area_coverage_raster = path.join(temp_directory, "employment_coverage_raster.tif")
 
@@ -48,21 +61,21 @@ merged_output_file = path.join(output_folder, "pop_emp_sum_{resolution}m.tif".fo
 
 
 #step flags
-CLEAR_DIRS = True
-ENCODE_LAND_USE_VALUES = True #we already have encoded values in the shapefile
-CREATE_LAND_USE_RASTERS = True
-MERGE_LAND_USE_RASTERS = True
-AGGREGATE_LAND_USE_RASTERS = True
-CLIP_LAND_USE_RASTERS = True
-BUILD_REGION_ID_RASTER = True
+CLEAR_DIRS = False
+ENCODE_LAND_USE_VALUES = False #we already have encoded values in the shapefile
+CREATE_LAND_USE_RASTERS = False
+MERGE_LAND_USE_RASTERS = False
+AGGREGATE_LAND_USE_RASTERS = False
+CLIP_LAND_USE_RASTERS = False
+BUILD_REGION_ID_RASTER = False
 
 ADD_REGION_STATS = True
 
 BUILD_POPULATION_RASTER = True
 BUILD_EMPLOYMENT_RASTER = True
 
-MERGE_POP_EMP_RASTERS = False
-RUN_CHECKING = False
+MERGE_POP_EMP_RASTERS = True
+RUN_CHECKING = args.check
 
 if CLEAR_DIRS:
     #clear temp directory
@@ -116,6 +129,8 @@ if ADD_REGION_STATS:
 if BUILD_POPULATION_RASTER:
     #calc region land_use stats
     print("\nbuild population raster -> to output folder")
+    #TODO: analyse pop_density raster, and trim and fit to region and resolution if needed
+
     dist_stats.build_pop_raster(regions_with_stats,
                                 pop_density_raster,
                                 region_id_raster,
@@ -128,11 +143,11 @@ if BUILD_POPULATION_RASTER:
 #build pop and employment rasters -> to output folder
 
 if BUILD_EMPLOYMENT_RASTER:
-    print("\nbuild employment raster -> to output folder, using scale factors:", scale_factors)
+    print("\nbuild employment raster -> to output folder, using scale factors:", scale_factors['employment'])
     dist_stats.build_emp_raster(regions_with_stats,
                                 land_use_clipped,
                                 region_id_raster,
-                                emp_area_coverage_raster, scale_factors)
+                                emp_area_coverage_raster, scale_factors['employment'])
 
     dist_stats.distribute_region_statistics(regions_with_stats, "emp_2008",
                                             emp_area_coverage_raster, region_id_raster, emp_raster_file)

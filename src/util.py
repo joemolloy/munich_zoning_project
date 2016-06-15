@@ -5,7 +5,7 @@ from zoning_algorithm.octtree import build_out_nodes
 import rasterio
 from rasterstats import zonal_stats
 from affine import Affine
-
+import ConfigParser
 import fiona
 from shapely.geometry import mapping, shape, box
 from shapely.ops import cascaded_union
@@ -211,40 +211,38 @@ def save(filename, outputSpatialReference, octtree, include_land_use = False, fi
                 'properties': properties
             })
 
-def load_program_config():
-    return load_config(1, "please supply a configuration file as a program arugment")
-
-def load_config(arg_num, error_message):
-    import ConfigParser, sys
+def load_config(filename):
     Config = ConfigParser.ConfigParser(allow_no_value=True)
+    if not os.path.exists(filename):
+        raise IOError("Config file %s does not exist" % filename)
+    else:
+        Config.read(filename)
+        return Config
 
-    if len(sys.argv) == 1 or not os.path.exists(sys.argv[arg_num]):
-        raise IOError(error_message)
-    Config.read(sys.argv[arg_num])
-    return Config
+class LandUseConfig:
+    def __init__(self, filename):
+        self.config = load_config(filename)
+        self.class_field = self.config.get("Class Field", "Field")
+        self.resolution = self.config.getint("Input", "desired_raster_resolution")
+        self.shapefiles = self.config.get("Input", "file")
+        self.mapping = [self.config.get("Class Values", c) for c in self.config.options("Class Values")]
+        self.scale_factors = load_scaling_factors(self.config)
+        self.encodings = {c : i for (i,c) in enumerate(self.config.options("Class Values"))}
+        self.translations = [(c, self.config.get("Class Values", c)) for c in self.config.options("Class Values")]
 
-def load_land_use_mapping(arg_num):
-    Config = load_config(arg_num, "please supply a land use file")
-    return [Config.get("Class Values", c) for c in Config.options("Class Values")]
+        #TODO: check all inputs
 
-def load_land_use_translations(arg_num):
-    Config = load_config(arg_num, "please supply a land use file")
-    return [(c, Config.get("Class Values", c)) for c in Config.options("Class Values")]
-
-def load_land_use_encodings(arg_num):
-    Config = load_config(arg_num, "please supply a land use file")
-    return {c : i for (i,c) in enumerate(Config.options("Class Values"))}
-
-def load_scaling_factors(arg_num, key):
-    Config = load_config(arg_num, "please supply a land use file")
-    try:
-        values_strs = Config.get("Scaling Factors", key).split(",")
-        values = map(float,values_strs)
-        assert np.isclose(sum(values),1.0), "Scaling factors must sum to 1.0"
-        return values
-    except:
-        raise Exception("Please provide valid scaling factors that add to 1.0, ie: '0.2,0.2,0.2,0.2'")
-
+def load_scaling_factors(config):
+    factors = {}
+    for key in config.options("Scaling Factors"):
+        try:
+            values_strs = config.get("Scaling Factors", key).split(",")
+            values = map(float,values_strs)
+            assert np.isclose(sum(values),1.0), "Scaling factors must sum to 1.0"
+            factors[key] = values
+        except:
+            raise Exception("Please provide valid scaling factors that add to 1.0, ie: '0.2,0.2,0.2,0.2'")
+    return factors
 
 def calculate_final_values(Config, zone_octtree):
     with rasterio.open(Config.get("Input","combined_raster")) as combined_rst:
