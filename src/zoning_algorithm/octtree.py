@@ -17,9 +17,6 @@ class Octtree:
                 for r in child.iterate():
                     yield r
 
-    def to_geom_wkb_list(self):
-        return [n.polygon.wkb for n in self.iterate()]
-
     def find_intersections(self, poly):
 
         if self.polygon.intersects(poly):

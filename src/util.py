@@ -328,9 +328,9 @@ def calculate_final_values(Config, zone_octtree):
         emp_affine = emp_rst.affine
 
     for zone in zone_octtree.iterate():
-        zs_cmb = zonal_stats(zone.polygon.wkb, combined_array, affine=combined_affine, stats='sum')[0]['sum']
-        zs_pop = zonal_stats(zone.polygon.wkb, pop_array, affine=pop_affine, stats='sum')[0]['sum']
-        zs_emp = zonal_stats(zone.polygon.wkb, emp_array, affine=emp_affine, stats='sum')[0]['sum']
+        zs_cmb = zonal_stats(zone.polygon, combined_array, affine=combined_affine, stats='sum')[0]['sum']
+        zs_pop = zonal_stats(zone.polygon, pop_array, affine=pop_affine, stats='sum')[0]['sum']
+        zs_emp = zonal_stats(zone.polygon, emp_array, affine=emp_affine, stats='sum')[0]['sum']
 
         zone.combined = zs_cmb
         zone.population = zs_pop
