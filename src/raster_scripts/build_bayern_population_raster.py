@@ -6,6 +6,7 @@ from fiona.crs import from_epsg
 import pyproj
 import numpy as np
 import psycopg2
+import os
 
 
 def load_data2(Config, min_x, min_y, max_x, max_y):
@@ -78,67 +79,85 @@ def load_data2(Config, min_x, min_y, max_x, max_y):
 
     return (pop_array, a)
 
+def warp_raster_to_template(input_raster_file, template_raster_file, output_file):
+    print "reprojecting raster"
+    with rasterio.open(input_raster_file) as input_r:
+        with rasterio.open(template_raster_file) as template_r:
+            input_array = input_r.read(1)
+            dest_array = np.zeros((template_r.width, template_r.height), dtype=input_array.dtype)
 
-Config = util.load_config("config/database_config.ini")
+    reproject(
+        input_array,
+        dest_array,
+        src_transform=input_r.affine,
+        src_crs=input_r.crs,
+        dst_transform=template_r.affine,
+        dst_crs=template_r.crs,
+        resampling=Resampling.nearest)
 
-with rasterio.open("data/temp/region_id_100m.tif") as r_id_f:
-    clipping_affine = r_id_f.affine
-    crs = pyproj.Proj(r_id_f.crs)
-    height = r_id_f.height
-    width = r_id_f.width
+    print "now saving raster"
 
-    xoff = clipping_affine.xoff
-    yoff = clipping_affine.yoff
-    print "region x,y offsets:", (xoff, yoff)
-    to_proj = pyproj.Proj(from_epsg(3035))
-    print to_proj
-    xx, yy = pyproj.transform(crs, to_proj, xoff, yoff)
+    with rasterio.open(output_file, 'w',
+                  driver = "GTiff",
+                  width=template_r.width,
+                  height=template_r.height,
+                  count=1,
+                  dtype=dest_array.dtype,
+                  crs=template_r.crs,
+                  transform=template_r.affine,
+                  nodata=0
+                 ) as output:
+        output.write(dest_array, indexes=1)
 
-    xmax = xx + width*100
-    ymin = yy - height*100
 
-    print "pop offsets:", xx, yy, xmax, ymin
+def calculate_study_area_offsets(region_id_file, population_crs):
+    with rasterio.open(region_id_file) as r_id_f:
+        clipping_affine = r_id_f.affine
+        crs = pyproj.Proj(r_id_f.crs)
+        height = r_id_f.height
+        width = r_id_f.width
 
-(pop_array, affine) = load_data2(Config, xx, ymin, xmax, yy)
-(height, width) = pop_array.shape
+        xoff = clipping_affine.xoff
+        yoff = clipping_affine.yoff
+        print "region x,y offsets:", (xoff, yoff)
+        to_proj = pyproj.Proj(population_crs)
+        print to_proj
+        xmin, ymax = pyproj.transform(crs, to_proj, xoff, yoff)
 
-print (height, width)
+        xmax = xmin + width*100
+        ymin = ymax - height*100
 
-dest = np.zeros(pop_array.shape, np.int32)
+        print "pop offsets:", xmin, ymin, xmax, ymax
+        return xmin, ymin, xmax, ymax
 
-with rasterio.open("data/temp/population_zensus_raster.tiff", 'w',
-              driver = "GTiff",
-              width=width,
-              height=height,
-              count=1,
-              dtype=rasterio.int32,
-              crs=from_epsg(3035),
-              transform=affine,
-              nodata=0
-             ) as output:
-    output.write(pop_array, indexes=1)
+if __name__ == "__main__":
 
-print "reprojecting raster"
+    Config = util.load_config("config/database_config.ini")
+    region_id_file = "data/temp/region_id_100m.tif"
+    pop_raster_file = "data/temp/population_zensus_raster.tiff"
 
-reproject(
-    pop_array,
-    dest,
-    src_transform=affine,
-    src_crs=from_epsg(3035),
-    dst_transform=clipping_affine,
-    dst_crs=r_id_f.crs,
-    resampling=Resampling.nearest)
+    if os.path.exists(pop_raster_file):
+        with rasterio.open(pop_raster_file) as r:
+            pop_array = r.read(1)
+            affine = r.affine
+    else:
+        population_crs = from_epsg(Config.getint("Input", "EPSGspatialReference"))
+        (min_x, min_y, max_x, max_y) = calculate_study_area_offsets(region_id_file, population_crs)
+        (pop_array, affine) = load_data2(Config, min_x, min_y, max_x, max_y)
+        (height, width) = pop_array.shape
 
-print "now saving raster"
+        with rasterio.open(pop_raster_file, 'w',
+                      driver = "GTiff",
+                      width=width,
+                      height=height,
+                      count=1,
+                      dtype=rasterio.int32,
+                      crs=population_crs,
+                      transform=affine,
+                      nodata=0
+                     ) as output:
+            output.write(pop_array, indexes=1)
 
-with rasterio.open("data/temp/population_zensus_raster_trimmed.tiff", 'w',
-              driver = "GTiff",
-              width=width,
-              height=height,
-              count=1,
-              dtype=rasterio.int32,
-              crs=r_id_f.crs,
-              transform=clipping_affine,
-              nodata=0
-             ) as output:
-    output.write(dest, indexes=1)
+    output_file = "data/temp/population_zensus_raster_trimmed.tiff"
+
+    warp_raster_to_template(pop_raster_file, region_id_file, output_file)
