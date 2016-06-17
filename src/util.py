@@ -228,7 +228,7 @@ class LandUseConfig:
         self.shapefiles = self.config.get("Input", "folder")
         self.mapping = [self.config.get("Class Values", c) for c in self.config.options("Class Values")]
         self.scale_factors = load_scaling_factors(self.config)
-        self.encodings = {c : i for (i,c) in enumerate(self.config.options("Class Values"))}
+        self.encodings = {c : i+1 for (i,c) in enumerate(self.config.options("Class Values"))}
         self.translations = [(c, self.config.get("Class Values", c)) for c in self.config.options("Class Values")]
 
         #TODO: check all inputs
