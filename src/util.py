@@ -177,7 +177,7 @@ def save(filename, outputSpatialReference, octtree, include_land_use = False, fi
     print "saving zones with land use to:", filename
 
     schema = {'geometry': 'Polygon',
-                'properties': [('Pop+Emp', 'int'), ('Population', 'int'),
+                'properties': [('id', 'int'), ('Pop+Emp', 'int'), ('Population', 'int'),
                                ('Employment', 'int'), ('Area', 'float'), ('AGS', 'int')]}
 
     if include_land_use:
@@ -191,14 +191,16 @@ def save(filename, outputSpatialReference, octtree, include_land_use = False, fi
          crs=outputSpatialReference,
          schema=schema) as c:
 
-        for zone in octtree.iterate():
+        for i, zone in enumerate(octtree.iterate()):
 
-            properties = {'Pop+Emp': zone.combined,
-                               'Population': zone.population,
-                               'Employment': zone.employment,
-                               'Area': zone.polygon.area,
-                               'AGS': zone.region['properties']['AGS_Int']
-                            }
+            properties = {
+                'id': i+1,
+                'Pop+Emp': zone.combined,
+                'Population': zone.population,
+                'Employment': zone.employment,
+                'Area': zone.polygon.area,
+                'AGS': zone.region['properties']['AGS_Int']
+            }
             if include_land_use:
                 land_use_remainder = 1.0
                 for (f, alias) in field_values:
