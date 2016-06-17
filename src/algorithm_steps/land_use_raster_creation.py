@@ -1,19 +1,19 @@
 import fiona
-from fiona.crs import from_epsg, to_string
+from fiona.crs import to_string
 import os, subprocess
 
 #new shapefile with landuse types coverted to integer codes (needed for gdal_rasterize
-def codify_shapefile_landuse(shapefile, new_folder_path_abs, shapefile_name, land_use_encoding):
+def codify_shapefile_landuse(land_use_config, shapefile, new_folder_path_abs, shapefile_name):
     os.mkdir(new_folder_path_abs)
     full_new_path = os.path.join(new_folder_path_abs, shapefile_name + ".shp")
-    print full_new_path
+    land_use_encoding = land_use_config.encodings
 
     with fiona.open(shapefile, 'r') as src:
         source_driver = src.driver
         source_crs = src.crs
 
         new_schema = src.schema
-        new_schema['properties']['objart_int'] = 'int'
+        new_schema['properties']['lu_code'] = 'int'
 
         with fiona.open(full_new_path, 'w',
          driver=source_driver,
@@ -21,15 +21,15 @@ def codify_shapefile_landuse(shapefile, new_folder_path_abs, shapefile_name, lan
          schema=new_schema) as out:
 
             for feature in src:
-                category = feature['properties']['OBJART'].lower()
+                category = feature['properties'][land_use_config.class_field].lower()
                 if category in land_use_encoding:
-                    feature['properties']['objart_int'] = land_use_encoding[category]
+                    feature['properties']['lu_code'] = land_use_encoding[category]
                     out.write(feature)
 
     return full_new_path
 
 #go through land use shapefiles, and codify each one. TODO:Generalise for non ALKIS Data
-def encode_land_use_shapefiles(land_use_folder, land_use_encoding, new_land_use_folder):
+def encode_land_use_shapefiles(land_use_config, land_use_folder, new_land_use_folder):
     for ags_district in os.listdir(land_use_folder):
         folder_abs = os.path.join(land_use_folder, ags_district)
         new_shape_file_name = ags_district
@@ -44,30 +44,33 @@ def encode_land_use_shapefiles(land_use_folder, land_use_encoding, new_land_use_
 
             new_folder_path_abs = os.path.join(new_land_use_folder, ags_district)
 
-            codify_shapefile_landuse(full_sp_path, new_folder_path_abs, new_shape_file_name, land_use_encoding)
+            codify_shapefile_landuse(land_use_config, full_sp_path, new_folder_path_abs, new_shape_file_name)
 
 #for each land use shapefile, create a raster, save to a folder
-def create_land_userasters(land_use_folder, raster_output_folder, shapefile_name_filter = None):
+def create_land_use_rasters(land_use_folder, raster_output_folder, crs = None):
     for ags_district in os.listdir(land_use_folder):
         folder_abs = os.path.join(land_use_folder, ags_district)
         if os.path.isdir(folder_abs):
             #find siedlung shapefile name
-            #TODO: Take first shapefile in list (or shapefile name filter)
-            seidlung_path = [os.path.splitext(filename)[0]
-                             for filename in os.listdir(folder_abs)
-                                 if (not shapefile_name_filter) or shapefile_name_filter in filename][0]
+            #TODO: Take first shapefile in list
+            shapefile = [f for f in os.listdir(folder_abs) if f.endswith('.shp')][0]
                                  #if there is a name filter, filter shapefiles.
 
             #for each land use shapefile, tabulate intersections for each zone in that shapefile
-            full_sp_path = os.path.join(folder_abs, seidlung_path + ".shp")
+            full_sp_path = os.path.join(folder_abs, shapefile)
+            layer_name = os.path.splitext(shapefile)[0]
             with fiona.open(full_sp_path, 'r') as vector_f:
+                assert crs or vector_f.crs, "a CRS must be specified either in in the shapefile or as an argument"
+                if not crs:
+                    crs = vector_f.crs
+
                 (minx, miny, maxx, maxy) = map(lambda a:int(a - a % 50), vector_f.bounds)
 
                 cmd = ["gdal_rasterize",
-                                  "-a_srs",
-                                  to_string(vector_f.crs),
                                   "-a",
-                                  "objart_int",
+                                  "lu_code",
+                                  "-a_srs",
+                                  to_string(crs),
                                   "-te",
                                   str(minx - 100), str(miny - 100), str(maxx+100), str(maxy+100),
                                   "-tr",
@@ -75,9 +78,9 @@ def create_land_userasters(land_use_folder, raster_output_folder, shapefile_name
                                   "10.0",
                                   "-ot", "Int16",
                                   "-l",
-                                  seidlung_path,
+                                  layer_name,
                                   full_sp_path,
-                                  os.path.join(raster_output_folder, ags_district + "_" + seidlung_path + '.tif')]
+                                  os.path.join(raster_output_folder, ags_district + "_" + layer_name + '.tif')]
 
                 print(cmd)
 

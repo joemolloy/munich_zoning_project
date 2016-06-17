@@ -30,7 +30,7 @@ def disaggregate(m10_data, ratio, bands):
     bottom_padding = ratio - (height % ratio)
     m10_padded = np.pad(m10_data, ((0,bottom_padding),(0,left_padding)), mode='constant', constant_values=0)
 
-    blocked_a = view_as_blocks(m10_padded, (10,10))
+    blocked_a = view_as_blocks(m10_padded, (ratio,ratio))
 
     (cols, rows) = blocked_a.shape[:2]
     land_use_array = np.zeros((cols, rows, bands), dtype=np.ubyte)
