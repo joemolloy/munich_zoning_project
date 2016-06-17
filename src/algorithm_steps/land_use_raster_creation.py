@@ -3,9 +3,10 @@ from fiona.crs import from_epsg, to_string
 import os, subprocess
 
 #new shapefile with landuse types coverted to integer codes (needed for gdal_rasterize
-def codify_shapefile_landuse(shapefile, new_folder_path_abs, seidlung_path, land_use_encoding):
+def codify_shapefile_landuse(shapefile, new_folder_path_abs, shapefile_name, land_use_encoding):
     os.mkdir(new_folder_path_abs)
-    full_new_path = os.path.join(new_folder_path_abs, seidlung_path + ".shp")
+    full_new_path = os.path.join(new_folder_path_abs, shapefile_name + ".shp")
+    print full_new_path
 
     with fiona.open(shapefile, 'r') as src:
         source_driver = src.driver
@@ -31,61 +32,56 @@ def codify_shapefile_landuse(shapefile, new_folder_path_abs, seidlung_path, land
 def encode_land_use_shapefiles(land_use_folder, land_use_encoding, new_land_use_folder):
     for ags_district in os.listdir(land_use_folder):
         folder_abs = os.path.join(land_use_folder, ags_district)
+        new_shape_file_name = ags_district
         if os.path.isdir(folder_abs):
             #find siedlung shapefile name
             seidlung_path = [os.path.splitext(filename)[0]
                              for filename in os.listdir(folder_abs) if 'Siedlung' in filename][0]
-            ags = ags_district[0:3]
 
-            #if int(ags) in [175, 177, 183, 187]: #only for test config
-
-            print ags, os.path.join(folder_abs, seidlung_path)
+            print os.path.join(folder_abs, seidlung_path)
             #for each land use shapefile, tabulate intersections for each zone in that shapefile
             full_sp_path = os.path.join(folder_abs, seidlung_path + ".shp")
 
             new_folder_path_abs = os.path.join(new_land_use_folder, ags_district)
 
-            codify_shapefile_landuse(full_sp_path, new_folder_path_abs, seidlung_path, land_use_encoding)
+            codify_shapefile_landuse(full_sp_path, new_folder_path_abs, new_shape_file_name, land_use_encoding)
 
 #for each land use shapefile, create a raster, save to a folder
-def create_land_userasters(land_use_folder, raster_output_folder):
+def create_land_userasters(land_use_folder, raster_output_folder, shapefile_name_filter = None):
     for ags_district in os.listdir(land_use_folder):
         folder_abs = os.path.join(land_use_folder, ags_district)
         if os.path.isdir(folder_abs):
             #find siedlung shapefile name
+            #TODO: Take first shapefile in list (or shapefile name filter)
             seidlung_path = [os.path.splitext(filename)[0]
-                             for filename in os.listdir(folder_abs) if 'Siedlung' in filename][0]
-            ags = ags_district[0:3]
-
-            print ags, os.path.join(folder_abs, seidlung_path)
+                             for filename in os.listdir(folder_abs)
+                                 if (not shapefile_name_filter) or shapefile_name_filter in filename][0]
+                                 #if there is a name filter, filter shapefiles.
 
             #for each land use shapefile, tabulate intersections for each zone in that shapefile
             full_sp_path = os.path.join(folder_abs, seidlung_path + ".shp")
             with fiona.open(full_sp_path, 'r') as vector_f:
                 (minx, miny, maxx, maxy) = map(lambda a:int(a - a % 50), vector_f.bounds)
 
-            seidlung_path = [os.path.splitext(filename)[0]
-                             for filename in os.listdir(folder_abs) if 'Siedlung' in filename][0]
+                cmd = ["gdal_rasterize",
+                                  "-a_srs",
+                                  to_string(vector_f.crs),
+                                  "-a",
+                                  "objart_int",
+                                  "-te",
+                                  str(minx - 100), str(miny - 100), str(maxx+100), str(maxy+100),
+                                  "-tr",
+                                  "10.0", #10m resolution
+                                  "10.0",
+                                  "-ot", "Int16",
+                                  "-l",
+                                  seidlung_path,
+                                  full_sp_path,
+                                  os.path.join(raster_output_folder, ags_district + "_" + seidlung_path + '.tif')]
 
-            cmd = ["gdal_rasterize",
-                              "-a_srs",
-                              to_string(from_epsg(31468)),
-                              "-a",
-                              "objart_int",
-                              "-te",
-                              str(minx - 100), str(miny - 100), str(maxx+100), str(maxy+100),
-                              "-tr",
-                              "10.0",
-                              "10.0",
-                              "-ot", "Int16",
-                              "-l",
-                              seidlung_path,
-                              full_sp_path,
-                              os.path.join(raster_output_folder, ags_district + "_" + seidlung_path + '.tif')]
+                print(cmd)
 
-            print(cmd)
-
-            subprocess.check_call(cmd)
+                subprocess.check_call(cmd)
 
 #create region_id raster
 def create_ags_code_raster(regions_shapefile, out_filename, resolution):
@@ -93,8 +89,6 @@ def create_ags_code_raster(regions_shapefile, out_filename, resolution):
     layername = os.path.splitext(os.path.split(regions_shapefile)[-1])[0]
 
     cmd = ["gdal_rasterize",
-                              "-a_srs",
-                              to_string(from_epsg(31468)),
                               "-a",
                               "AGS_Int",
                               "-a_nodata", "0",

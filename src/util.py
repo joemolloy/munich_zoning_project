@@ -149,7 +149,6 @@ def tabulate_intersection(zone_octtree, octtreeSaptialRef, shapefile, checked_fe
                 if poly_class in land_types: #*zip means unzip. Only work with land types we want
                     class_alias = land_type_aliases[land_types.index(poly_class)] #make faster?
                     #transform
-                    transform_fiona_polygon(feature, Proj(inSpatialEPSGRef), Proj(octtreeSaptialRef))
                     poly = shape(feature['geometry'])
 
                     matches = find_intersections(zone_octtree, poly)
@@ -226,7 +225,7 @@ class LandUseConfig:
         self.config = load_config(filename)
         self.class_field = self.config.get("Class Field", "Field")
         self.resolution = self.config.getint("Input", "desired_raster_resolution")
-        self.shapefiles = self.config.get("Input", "file")
+        self.shapefiles = self.config.get("Input", "folder")
         self.mapping = [self.config.get("Class Values", c) for c in self.config.options("Class Values")]
         self.scale_factors = load_scaling_factors(self.config)
         self.encodings = {c : i for (i,c) in enumerate(self.config.options("Class Values"))}

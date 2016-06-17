@@ -10,9 +10,9 @@ parser.add_argument("region", help="ESRI shapefile of study area and municipalit
 parser.add_argument("population", help="Raster of zensus population. Used to distribute municipal statistics. Must be trimmed to scaled to region boundary")
 parser.add_argument("land_use", help="Configuration file for land use processing, Land use data is used to disaggregate Employment data. resolution must be same as population raster")
 parser.add_argument("statistics", help="Population and employment stats for each municipality")
-parser.add_argument("temp", help="Temporary directory", default='temp')
 parser.add_argument("out", help="Output_directory", default='output')
 
+parser.add_argument("-t","--temp", help="Temporary directory", default='temp')
 parser.add_argument("-s", "--start", help="algorithm step to start from.\nAll file required from this point must be in the temp or output folder")
 parser.add_argument("-c", "--check", help="output statistical error information on completion", action="store_true")
 
@@ -61,13 +61,13 @@ merged_output_file = path.join(output_folder, "pop_emp_sum_{resolution}m.tif".fo
 
 
 #step flags
-CLEAR_DIRS = False
-ENCODE_LAND_USE_VALUES = False #we already have encoded values in the shapefile
-CREATE_LAND_USE_RASTERS = False
-MERGE_LAND_USE_RASTERS = False
-AGGREGATE_LAND_USE_RASTERS = False
-CLIP_LAND_USE_RASTERS = False
-BUILD_REGION_ID_RASTER = False
+CLEAR_DIRS = True
+ENCODE_LAND_USE_VALUES = True #we already have encoded values in the shapefile
+CREATE_LAND_USE_RASTERS = True
+MERGE_LAND_USE_RASTERS = True
+AGGREGATE_LAND_USE_RASTERS = True
+CLIP_LAND_USE_RASTERS = True
+BUILD_REGION_ID_RASTER = True
 
 ADD_REGION_STATS = True
 
@@ -99,7 +99,7 @@ if CREATE_LAND_USE_RASTERS:
     #convert land use shapefile to raster
     print("\nconvert land use shapefile to raster...")
     os.mkdir(rasterized_lu_folder)
-    lurc.create_land_userasters(encoded_lu_folder, rasterized_lu_folder)
+    lurc.create_land_userasters(encoded_lu_folder, rasterized_lu_folder, "Siedlung")
 
 if MERGE_LAND_USE_RASTERS:
     #merge land use rasters
