@@ -102,7 +102,7 @@ def solve_iteratively(Config, region_octtree, regions, raster, raster_affine):
 
     return region_octtree
 
-def run_tabulate_intersection(zone_octtree, octtree_crs, land_use_folder, land_use_crs, class_field, field_values):
+def run_tabulate_intersection(zone_octtree, land_use_folder, class_field, field_values):
     print field_values
 
     #set value for each zones and class to zero
@@ -124,16 +124,11 @@ def run_tabulate_intersection(zone_octtree, octtree_crs, land_use_folder, land_u
             #find siedlung shapefile name
             seidlung_path = [os.path.splitext(filename)[0]
                              for filename in os.listdir(folder_abs) if 'Siedlung' in filename][0]
-            ags = folder[0:3]
 
-            #if int(ags) in [175, 177, 183, 187]: #only for test config
-
-            #print ags, os.path.join(folder_abs, seidlung_path)
-            #for each land use shapefile, tabulate intersections for each zone in that shapefile
             full_sp_path = os.path.join(folder_abs, seidlung_path + ".shp")
-            tabulate_intersection(zone_octtree, octtree_crs, full_sp_path, checked_features, land_use_crs, class_field, field_values)
+            tabulate_intersection(zone_octtree, full_sp_path, checked_features, class_field, field_values)
 
-def tabulate_intersection(zone_octtree, octtreeSaptialRef, shapefile, checked_features, inSpatialEPSGRef, class_field, field_values):
+def tabulate_intersection(zone_octtree, shapefile, checked_features, class_field, field_values):
     #print "running intersection tabulation"
     (land_types, land_type_aliases) = zip(*field_values)
     with fiona.open(shapefile) as src:

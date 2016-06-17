@@ -2,7 +2,6 @@ import sys, os
 import src.util as util
 import octtree
 import ConfigParser
-from fiona.crs import from_epsg
 import rasterio
 
 if __name__ == "__main__":
@@ -32,15 +31,15 @@ if __name__ == "__main__":
         util.calculate_final_values(Config, region_octtree)
 
 
-    shapefile = Config.get("Land Use", "filename")
-    inSpatialReference = from_epsg(Config.getint("Land Use", "EPSGspatialReference"))
     output_file = Config.get("Output", "filename")
 
     if Config.getboolean("Land Use", "calculate_land_use"):
-        class_field = Config.get("Land Use", "class_field")
+        lu_config = util.LandUseConfig(sys.argv[2])
+        class_field = lu_config.class_field
+        shapefiles = lu_config.shapefiles
         #get land use values from config
-        field_values = util.load_land_use_translations(2)
-        util.run_tabulate_intersection(region_octtree, zonesSaptialRef, shapefile, inSpatialReference, class_field, field_values)
+        field_values = lu_config.translations
+        util.run_tabulate_intersection(region_octtree, shapefiles, class_field, field_values)
         util.save(output_file, zonesSaptialRef, region_octtree, include_land_use=True, field_values=field_values)
 
     else:

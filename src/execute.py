@@ -3,6 +3,7 @@ import util
 import os
 import shutil
 from os import path
+from fiona.crs import from_epsg
 
 import argparse
 parser = argparse.ArgumentParser()
@@ -13,6 +14,7 @@ parser.add_argument("statistics", help="Population and employment stats for each
 parser.add_argument("out", help="Output_directory", default='output')
 
 parser.add_argument("-t","--temp", help="Temporary directory", default='temp')
+parser.add_argument("-crs","--crs", help="EPSG coordinate reference system", type=int)
 parser.add_argument("-s", "--start", help="algorithm step to start from.\nAll file required from this point must be in the temp or output folder")
 parser.add_argument("-c", "--check", help="output statistical error information on completion", action="store_true")
 
@@ -32,10 +34,10 @@ land_use_config = util.LandUseConfig(args.land_use)
 land_use_shapefiles = land_use_config.shapefiles
 landuse_mapping = land_use_config.mapping
 scale_factors = land_use_config.scale_factors
-land_use_encodings = land_use_config.encodings
 
 temp_directory = args.temp
 output_folder = args.out
+crs = from_epsg(args.crs)
 
 num_land_use_bands = len(landuse_mapping)
 resolution = land_use_config.resolution
@@ -89,8 +91,7 @@ if ENCODE_LAND_USE_VALUES:
     #encode land use values to new shapefile
     encoded_lu_folder = path.join(temp_directory, "encoded_landuse")
     os.mkdir(encoded_lu_folder)
-    print land_use_encodings
-    lurc.encode_land_use_shapefiles(land_use_shapefiles, land_use_encodings, encoded_lu_folder)
+    lurc.encode_land_use_shapefiles(land_use_config, land_use_shapefiles, encoded_lu_folder)
     #
 else:
     encoded_lu_folder = land_use_shapefiles
@@ -98,8 +99,11 @@ else:
 if CREATE_LAND_USE_RASTERS:
     #convert land use shapefile to raster
     print("\nconvert land use shapefile to raster...")
-    os.mkdir(rasterized_lu_folder)
-    lurc.create_land_userasters(encoded_lu_folder, rasterized_lu_folder, "Siedlung")
+    try:
+        os.mkdir(rasterized_lu_folder)
+    except:
+        print rasterized_lu_folder, "already exists, continuing"
+    lurc.create_land_use_rasters(encoded_lu_folder, rasterized_lu_folder, crs)
 
 if MERGE_LAND_USE_RASTERS:
     #merge land use rasters
