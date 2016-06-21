@@ -20,10 +20,10 @@ parser.add_argument("-c", "--check", help="output statistical error information 
 
 args = parser.parse_args()
 
-import src.algorithm_steps.aggregate_land_use_raster as aggregate_lu
-import src.algorithm_steps.land_use_raster_creation as lurc
-import src.algorithm_steps.calculate_region_land_use as calc_lu
-import src.algorithm_steps.distribute_region_statistics as dist_stats
+import pyGr.algorithm_steps.aggregate_land_use_raster as aggregate_lu
+import pyGr.algorithm_steps.land_use_raster_creation as lurc
+import pyGr.algorithm_steps.calculate_region_land_use as calc_lu
+import pyGr.algorithm_steps.distribute_region_statistics as dist_stats
 
 
 region_shapefile = args.region

@@ -38,7 +38,8 @@ def disaggregate(m10_data, ratio, bands):
     for i in range(blocked_a.shape[0]):
         for j in range(blocked_a.shape[1]):
             bin_counts = np.bincount(blocked_a[i][j].ravel(), minlength=bands+1)
-            #print (i, j), bin_counts
+            if bin_counts[0] < 100:
+                print (i, j), bin_counts
             land_use_array[i,j] = bin_counts[1:] #exclude zero counts
 
     return np.rollaxis(land_use_array, 2, 0)

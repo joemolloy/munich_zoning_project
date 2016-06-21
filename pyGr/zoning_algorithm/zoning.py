@@ -1,5 +1,5 @@
 import sys, os
-import src.util as util
+import pyGr.util as util
 import octtree
 import ConfigParser
 import rasterio

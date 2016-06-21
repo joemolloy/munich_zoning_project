@@ -1,5 +1,5 @@
 from affine import Affine
-import src.util as util
+import pyGr.util as util
 import rasterio
 from rasterio.warp import reproject, Resampling
 from fiona.crs import from_epsg
@@ -113,16 +113,16 @@ def warp_raster_to_template(input_raster_file, template_raster_file, output_file
 def calculate_study_area_offsets(region_id_file, population_crs):
     with rasterio.open(region_id_file) as r_id_f:
         clipping_affine = r_id_f.affine
-        crs = pyproj.Proj(r_id_f.crs)
+        region_crs = pyproj.Proj(r_id_f.crs)
         height = r_id_f.height
         width = r_id_f.width
 
         xoff = clipping_affine.xoff
         yoff = clipping_affine.yoff
         print "region x,y offsets:", (xoff, yoff)
-        to_proj = pyproj.Proj(population_crs)
-        print to_proj
-        xmin, ymax = pyproj.transform(crs, to_proj, xoff, yoff)
+        population_crs = pyproj.Proj(population_crs)
+        print population_crs
+        xmin, ymax = pyproj.transform(region_crs, population_crs, xoff, yoff)
 
         xmax = xmin + width*100
         ymin = ymax - height*100
