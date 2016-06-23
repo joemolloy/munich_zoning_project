@@ -4,3 +4,7 @@ code/zones
 *.zip
 data
 output
+*.pyc
+*.idea
+._*
+.DS_Store

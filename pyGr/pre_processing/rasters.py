@@ -14,7 +14,8 @@
 import rasterio
 import fiona
 import numpy as np
-from collections import OrderedDict
+import rasterstats
+from math import sqrt
 
 def build_pop_raster(region_shapefile, pop_density_raster_file, region_raster_file, output_file, scale_factors):
     build_region_density_raster(region_shapefile, "population", pop_density_raster_file, region_raster_file, output_file, scale_factors)
@@ -69,54 +70,8 @@ def build_region_density_raster(region_shapefile, name, value_raster_file, regio
                     for band in range(num_bands):
                         out.write(density_arrays[band], indexes=band+1)
 
-def distribute_region_statistics(region_shapefile, key, density_raster_file, region_raster_file, output_file):
-    with rasterio.open(density_raster_file, 'r') as density_raster:
-        with rasterio.open(region_raster_file, 'r') as region_raster:
-                region_stats = extract_region_value(region_shapefile, key)
-
-                density_array_list = list(density_raster.read())
-
-                (region_code_array,) = region_raster.read()
-                print "region code array shape: ", region_code_array.shape
-                print "region height:", region_raster.profile['height']
-
-                regional_value_a = np.zeros(density_array_list[0].shape)
-                print "region_value:", regional_value_a.shape, regional_value_a.dtype
-
-                #for each land use band
-                for (row,col), v in np.ndenumerate(region_code_array):
-                    try:
-                        region_id = int(region_code_array[row,col])
-                        regional_value_a[row, col] = region_stats[region_id]
-                    except KeyError:
-                        regional_value_a[row, col] = 0
-
-                result_a = sum([regional_value_a * d_a for d_a in density_array_list])
-
-                profile = region_raster.profile
-                profile.update(dtype=rasterio.float64)
-                print "Writing", key, "to: ", output_file
-                print profile
-                with rasterio.open(output_file, 'w', **profile) as out:
-                    out.write(result_a, indexes=1)
-
-def extract_region_value(region_shapefile, key):
-
-    with fiona.open(region_shapefile, 'r') as region_features:
-        stat_dict = {r['properties']['AGS_Int']:r['properties'][key] for r in region_features}
-    return stat_dict
-
-def build_region_stats_lookup_table(region_shapefile):
-
-    with fiona.open(region_shapefile, 'r') as region_features:
-
-        region_attrs = [region['properties'].items() for region in region_features]
-        stat_dict = {attrs[0][1] : OrderedDict(attrs[1:]) for attrs in region_attrs}
-        return stat_dict
 
 
-import rasterstats
-from math import sqrt, pow
 def check_raster_output(region_shapefile, stats_raster, fields):
     zs = rasterstats.zonal_stats(region_shapefile, stats_raster, stats=['sum'])
     with fiona.open(region_shapefile) as regions:
@@ -137,7 +92,7 @@ def check_raster_output(region_shapefile, stats_raster, fields):
     print "\t actual:", "{:,}".format(sum(actuals))
     print "\t calculated:", "{:,}".format(sum(calcd))
     print "\t difference:", "{:,}".format(sum(actuals) - sum(calcd))
-    print "\t RMSE:", "{:,}".format(sqrt(sum([pow(a-b,2) for (a,b) in results]) / len(results)))
+    print "\t RMSE:", "{:,}".format(sqrt(sum([a-b**2 for (a,b) in results]) / len(results)))
 
 def add_rasters(a_file,b_file, outputfile):
     with rasterio.open(a_file) as a:
