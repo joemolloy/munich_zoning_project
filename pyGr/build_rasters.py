@@ -62,11 +62,11 @@ merged_output_file = path.join(output_folder, "pop_emp_sum_{resolution}m.tif".fo
 
 
 #step flags
-CLEAR_DIRS = True
-ENCODE_LAND_USE_VALUES = True #we already have encoded values in the shapefile
-CREATE_LAND_USE_RASTERS = True
-MERGE_LAND_USE_RASTERS = True
-AGGREGATE_LAND_USE_RASTERS = True
+CLEAR_DIRS = False
+ENCODE_LAND_USE_VALUES = False #we already have encoded values in the shapefile
+CREATE_LAND_USE_RASTERS = False
+MERGE_LAND_USE_RASTERS = False
+AGGREGATE_LAND_USE_RASTERS = False
 CLIP_LAND_USE_RASTERS = True
 BUILD_REGION_ID_RASTER = True
 

@@ -1,4 +1,4 @@
-import os
+import os, sys
 import fiona
 from fiona.crs import to_string
 import subprocess
@@ -78,9 +78,9 @@ def clip_land_use_raster(land_use_raster, region_shapefile, output_file):
     print cmd
     subprocess.check_call(cmd)
 
-#merge rasters from folder into a single raster. #TODO: apply the raster bounds here?
+#merge rasters from folder into a single raster. #TODO: make it detect windows or osx automatically
 def merge_rasters(raster_input_folder, output_raster):
-    cmd = ["C:\Python27\Scripts\gdal_merge.py",
+    cmd = [sys.executable, """C:\Python27\ArcGIS10.3\Scripts\gdal_merge.py""",
                                   "-o",
                                   output_raster,
                                   "-n",
