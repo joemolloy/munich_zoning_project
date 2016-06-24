@@ -67,7 +67,7 @@ def run_land_use_aggregation(input_file, bands, output_file, output_resolution):
                        width = new_array_width)
 
         with rasterio.open(output_file, 'w', **profile) as out:
-            print land_use_array.shape , "->", (out.height, out.width)
+            print land_use_array.shape , "->", output_file
             for k in xrange(0,num_bands):
                 out.write(land_use_array[k], indexes=k+1)
 

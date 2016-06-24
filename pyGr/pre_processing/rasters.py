@@ -92,7 +92,7 @@ def check_raster_output(region_shapefile, stats_raster, fields):
     print "\t actual:", "{:,}".format(sum(actuals))
     print "\t calculated:", "{:,}".format(sum(calcd))
     print "\t difference:", "{:,}".format(sum(actuals) - sum(calcd))
-    print "\t RMSE:", "{:,}".format(sqrt(sum([a-b**2 for (a,b) in results]) / len(results)))
+    print "\t RMSE:", "{:,}".format(sqrt(sum([(a-b)**2 for (a,b) in results]) / len(results)))
 
 def add_rasters(a_file,b_file, outputfile):
     with rasterio.open(a_file) as a:
