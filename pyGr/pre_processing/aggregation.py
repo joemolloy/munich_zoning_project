@@ -19,11 +19,8 @@
 import numpy as np
 import rasterio
 from affine import Affine
+from pyGr.common.math import roundup_to_multiple_of
 
-def roundup_to_multiple_of(x, v):
-     return x if x % v == 0 else x + v - x % v
-
-#max square area at 100m resolution is 100:
 def disaggregate(m10_raster, ratio, bands):
     assert(isinstance(ratio, int))
 

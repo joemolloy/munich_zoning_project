@@ -2,10 +2,9 @@ import argparse
 import os
 import shutil
 from os import path
+from pyGr.common import config
 
 from fiona.crs import from_epsg
-
-import util
 
 parser = argparse.ArgumentParser()
 parser.add_argument("region", help="ESRI shapefile of study area and municipalities")
@@ -29,7 +28,7 @@ region_shapefile = args.region
 pop_density_raster = args.population
 region_stats_file = args.statistics
 
-land_use_config = util.LandUseConfig(args.land_use)
+land_use_config = config.LandUseConfig(args.land_use)
 land_use_shapefiles = land_use_config.shapefiles
 landuse_mapping = land_use_config.mapping
 scale_factors = land_use_config.scale_factors
@@ -62,11 +61,11 @@ merged_output_file = path.join(output_folder, "pop_emp_sum_{resolution}m.tif".fo
 
 
 #step flags
-CLEAR_DIRS = False
-ENCODE_LAND_USE_VALUES = False #we already have encoded values in the shapefile
-CREATE_LAND_USE_RASTERS = False
-MERGE_LAND_USE_RASTERS = False
-AGGREGATE_LAND_USE_RASTERS = False
+CLEAR_DIRS = True
+ENCODE_LAND_USE_VALUES = True #we already have encoded values in the shapefile
+CREATE_LAND_USE_RASTERS = True
+MERGE_LAND_USE_RASTERS = True
+AGGREGATE_LAND_USE_RASTERS = True
 CLIP_LAND_USE_RASTERS = True
 BUILD_REGION_ID_RASTER = True
 

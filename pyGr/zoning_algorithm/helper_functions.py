@@ -1,9 +1,8 @@
-from shapely.geometry import shape, Polygon, LineString
+from shapely.geometry import shape, Polygon, LineString, mapping
 from shapely.ops import cascaded_union
 from rasterstats import zonal_stats
-
-def get_region_boundary(regions):
-    return cascaded_union([shape(r['geometry']) for r in regions])
+import rasterio
+import fiona
 
 def quarter_polygon(geom_poly):
     #https://pcjericks.github.io/py-gdalogr-cookbook/geometry.html#quarter-polygon-and-create-centroids
@@ -111,3 +110,66 @@ def get_common_boundary(node1, node2):
             edge_length = edge_length + l.length
 
     return edge_length
+
+
+def calculate_final_values(Config, zone_octtree):
+    with rasterio.open(Config.get("Input","combined_raster")) as combined_rst:
+        combined_array = combined_rst.read(1)
+        combined_affine = combined_rst.affine
+    with rasterio.open(Config.get("Input","pop_raster")) as pop_rst:
+        pop_array = pop_rst.read(1)
+        pop_affine = combined_rst.affine
+    with rasterio.open(Config.get("Input","emp_raster")) as emp_rst:
+        emp_array = emp_rst.read(1)
+        emp_affine = emp_rst.affine
+
+    for zone in zone_octtree.iterate():
+        zs_cmb = zonal_stats(zone.polygon, combined_array, affine=combined_affine, stats='sum')[0]['sum']
+        zs_pop = zonal_stats(zone.polygon, pop_array, affine=pop_affine, stats='sum')[0]['sum']
+        zs_emp = zonal_stats(zone.polygon, emp_array, affine=emp_affine, stats='sum')[0]['sum']
+
+        zone.combined = zs_cmb
+        zone.population = zs_pop
+        zone.employment = zs_emp
+
+
+def save(filename, outputSpatialReference, octtree, include_land_use = False, field_values = None):
+    print "saving zones with land use to:", filename
+
+    schema = {'geometry': 'Polygon',
+                'properties': [('id', 'int'), ('Pop+Emp', 'int'), ('Population', 'int'),
+                               ('Employment', 'int'), ('Area', 'float'), ('AGS', 'int')]}
+
+    if include_land_use:
+        for (f, alias) in field_values:
+            schema['properties'].append((alias,'float'))
+        schema['properties'].append(('remainder', 'float'))
+
+    with fiona.open(
+         filename, 'w',
+         driver="ESRI Shapefile",
+         crs=outputSpatialReference,
+         schema=schema) as c:
+
+        for i, zone in enumerate(octtree.iterate()):
+
+            properties = {
+                'id': i+1,
+                'Pop+Emp': zone.combined,
+                'Population': zone.population,
+                'Employment': zone.employment,
+                'Area': zone.polygon.area,
+                'AGS': zone.region['properties']['AGS_Int']
+            }
+            if include_land_use:
+                land_use_remainder = 1.0
+                for (f, alias) in field_values:
+                    land_use_remainder -= zone.landuse_pc[alias]
+                    properties[alias] = zone.landuse_pc[alias]
+                properties['remainder'] = land_use_remainder
+
+            c.write({
+                'geometry': mapping(zone.polygon),
+                'properties': properties
+            })
+

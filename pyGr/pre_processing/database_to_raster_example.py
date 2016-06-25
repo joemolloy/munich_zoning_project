@@ -110,7 +110,7 @@ def warp_raster_to_template(input_raster_file, template_raster_file, output_file
         output.write(dest_array, indexes=1)
 
 
-def calculate_study_area_offsets(region_id_file, population_crs):
+def calculate_study_area_offsets(region_id_file, population_crs, resolution):
     with rasterio.open(region_id_file) as r_id_f:
         clipping_affine = r_id_f.affine
         region_crs = pyproj.Proj(r_id_f.crs)
@@ -124,8 +124,8 @@ def calculate_study_area_offsets(region_id_file, population_crs):
         print population_crs
         xmin, ymax = pyproj.transform(region_crs, population_crs, xoff, yoff)
 
-        xmax = xmin + width*100
-        ymin = ymax - height*100
+        xmax = xmin + width*resolution
+        ymin = ymax - height*resolution
 
         print "pop offsets:", xmin, ymin, xmax, ymax
         return xmin, ymin, xmax, ymax
@@ -142,7 +142,8 @@ if __name__ == "__main__":
             affine = r.affine
     else:
         population_crs = from_epsg(Config.getint("Input", "EPSGspatialReference"))
-        (min_x, min_y, max_x, max_y) = calculate_study_area_offsets(region_id_file, population_crs)
+        resolution = 100
+        (min_x, min_y, max_x, max_y) = calculate_study_area_offsets(region_id_file, population_crs, resolution)
         (pop_array, affine) = load_data2(Config, min_x, min_y, max_x, max_y)
         (height, width) = pop_array.shape
 

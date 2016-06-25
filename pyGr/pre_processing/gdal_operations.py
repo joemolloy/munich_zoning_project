@@ -67,10 +67,6 @@ def create_ags_code_raster(regions_shapefile, out_filename, resolution):
 
     subprocess.check_call(cmd)
 
-
-def roundup_to_multiple_of(x, v):
-     return x if x % v == 0 else x + v - x % v
-
 def clip_land_use_raster(land_use_raster, region_shapefile, output_file):
 
     with rasterio.open(land_use_raster) as r:
