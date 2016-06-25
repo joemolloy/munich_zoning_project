@@ -92,10 +92,10 @@ def clip_land_use_raster(land_use_raster, region_shapefile, output_file):
 
             with rasterio.open(output_file, 'w', **profile) as out:
 
-                for i in xrange(r.count):
-                    clipped = r.read(i+1, window = ((min_row, max_row), (min_col, max_col)))
+                for i in r.indexes:
+                    clipped = r.read(i, window = ((min_row, max_row), (min_col, max_col)))
                     #print clipped.shape
-                    out.write(clipped, indexes = i+1)
+                    out.write(clipped, indexes = i)
 
 
 #merge rasters from folder into a single raster. #TODO: make it detect windows or osx automatically
