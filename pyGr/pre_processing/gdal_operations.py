@@ -1,7 +1,9 @@
 import os, sys
 import fiona
+import rasterio
 from fiona.crs import to_string
 import subprocess
+from affine import Affine
 
 #for each land use shapefile, create a raster, save to a folder
 def create_land_use_rasters(land_use_folder, raster_output_folder, crs = None):
@@ -65,18 +67,40 @@ def create_ags_code_raster(regions_shapefile, out_filename, resolution):
 
     subprocess.check_call(cmd)
 
-def clip_land_use_raster(land_use_raster, region_shapefile, output_file):
-    cmd = ["gdalwarp",
-           "-dstnodata", "0",
-           "-q",
-           "-cutline",
-           region_shapefile,
-           "-crop_to_cutline",
-           land_use_raster,
-           output_file]
 
-    print cmd
-    subprocess.check_call(cmd)
+def roundup_to_multiple_of(x, v):
+     return x if x % v == 0 else x + v - x % v
+
+def clip_land_use_raster(land_use_raster, region_shapefile, output_file):
+
+    with rasterio.open(land_use_raster) as r:
+        with fiona.open(region_shapefile) as clipper:
+
+            (w, s, e, n) = clipper.bounds
+            a = r.affine
+            #TODO: need to transform the affine for new clipping
+            (min_col, min_row) = map(int, ~a * (w, n))
+            (max_col, max_row) = map(int, ~a * (e, s))
+            w2, n2 = a * (min_col, min_row)
+            new_affine = Affine.from_gdal(w2, 100, 0.0, n2, 0.0, -100)
+
+            (height,width) = r.read(1, window = ((min_row, max_row), (min_col, max_col))).shape
+
+            profile = r.profile
+            profile.update({
+                        'transform': new_affine,
+                        'affine': new_affine,
+                        'height': height,
+                        'width': width
+            })
+
+            with rasterio.open(output_file, 'w', **profile) as out:
+
+                for i in xrange(r.count):
+                    clipped = r.read(i+1, window = ((min_row, max_row), (min_col, max_col)))
+                    #print clipped.shape
+                    out.write(clipped, indexes = i+1)
+
 
 #merge rasters from folder into a single raster. #TODO: make it detect windows or osx automatically
 def merge_rasters(raster_input_folder, output_raster):
