@@ -1,4 +1,5 @@
-import os, sys
+import os
+import sys
 import fiona
 import rasterio
 from fiona.crs import to_string
@@ -100,16 +101,18 @@ def clip_land_use_raster(land_use_raster, region_shapefile, output_file):
 
 #merge rasters from folder into a single raster. #TODO: make it detect windows or osx automatically
 def merge_rasters(raster_input_folder, output_raster):
-    #cmd = [sys.executable, """C:\Python27\ArcGIS10.3\Scripts\gdal_merge.py""",
-    cmd = ["""gdal_merge.py""",
-                                  "-o",
-                                  output_raster,
-                                  "-n",
-                                  "0"]
+    if sys.platform == "win32":
+        cmd = [sys.executable, """C:\Python27\ArcGIS10.3\Scripts\gdal_merge.py"""]
+    else:
+        cmd = ["""gdal_merge.py"""]
+
+    args = ["-o", output_raster, "-n", "0"]
+
     input_files = [os.path.join(raster_input_folder, f)
                    for f in os.listdir(raster_input_folder)
                    if os.path.isfile(os.path.join(raster_input_folder, f))]
 
+    cmd.extend(args)
     cmd.extend(input_files)
 
     print(cmd)
