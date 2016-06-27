@@ -8,19 +8,23 @@ Moeckel, R., Donnelly, R. (2014) Gradual Rasterization: Redefining the spatial r
 
 pyGr also provides two extensions:
 
-1. Aligning of zones to municipal boundaries
+1. **Aligning of zones to municipal boundaries**
+
 Due to privacy requirements, statistical data are often only available at a municipal level. These municipalities rarely line up with an ideal grid based zoning. After generating a grid of zones, our tool splits the grid based zones along municipal boundaries, distributing the zone’s value accordingly, and merging zones within a region where necessary to avoid slivers along the municipal boundaries.
-2. Iterative behaviour
+
+2. **Iterative behaviour**
 When designing a zoning system, the number of zones in a model needs to be tailored to balance the usefulness and complexity of the model. In the original gr, a threshold must be specified that is used to divide larger zones into smaller ones. Previously this was a manual process of trial and error. With pyGr, the desired number of zones can be specified, and the the zoning algorithm is iterated to find the parameters that best provide the desired number of zones.
 
 pyGr can be run without these extensions, by setting flags in the configuration file.
 
-Design
+##Design
 The tool is split into two scripts, a pre-processing procedure and the zoning algorithm itself.
 
 The zoning algorithm takes as input the following:
 1. A polygon shapefile of the study area and metropolitan regions
+
 2. Two raster inputs of the same resolution and size, for population and employment figures respectively.
+
 3. If the land use statistics for each zone are desired, a configuration file is required with the following:
   * **Input folder:** The folder with the land use files (we used ALKIS data)
   * **Class Field:** the attribute representing the land use type
@@ -40,14 +44,17 @@ pyGr assumes that all input files have the same CRS embedded. An update will fol
 
 The tool is designed to work with German datasets. As such the AGS ‘Amtlicher Gemeindeschlüssel’ is used as a numerical identifier for each muncipality. Some modifications may be required to work with other regional typologies.
 
-For our zone system in Munich, we take advantage of 100m2 resolution census population data (CITE) to disaggregate municipal population counts, and fall back on ALKIS land use data for disaggregating employment.
+For our zone system in Munich, we take advantage of 100m2 resolution [2011 census population data](https://www.zensus2011.de/SharedDocs/Aktuelles/Ergebnisse/DemografischeGrunddaten.html?nn=3065474) to disaggregate municipal population counts, and fall back on ALKIS land use data for disaggregating employment.
 
 ##Installation and Execution
 Our tool requires some external packages and libraries to handle the geospatial operations.
 rasterstats, rasterio, shapely, Fiona and scikit-image need to be installed, along with the GDAL library.
 
 For details on running the  pre-processing script, run:
-  build_rasters.py --help
-
+```
+build_rasters.py --help
+```
 The zoning algorithm is run as followed:
-  generate_zones.py {zoning config file} {land use config file}
+```
+generate_zones.py {zoning config file} {land use config file}
+```
