@@ -49,18 +49,22 @@ def create_land_use_rasters(land_use_folder, raster_output_folder, crs = None):
                 subprocess.check_call(cmd)
 
 #create region_id raster
-def create_ags_code_raster(regions_shapefile, out_filename, resolution):
+def create_ags_code_raster(regions_shapefile, raster_template, out_filename, resolution):
+    #pre build region raster file, with same properties as the template (ie clipped land use) before rasterizing
+    #helps to avoid windows, osx differences in gdal_rasterize
+    with rasterio.open(raster_template) as rt:
+        profile = rt.profile
+        profile['count'] = 1
+        profile['dtype'] = rasterio.int32
+
+    with rasterio.open(out_filename, 'w', **profile):
+        pass
 
     layername = os.path.splitext(os.path.split(regions_shapefile)[-1])[0]
 
     cmd = ["gdal_rasterize",
                               "-a",
                               "AGS_Int",
-                              "-a_nodata", "0",
-                              "-tr",
-                              str(resolution),
-                              str(resolution),
-                              "-ot", "Int32",
                               "-l",
                               layername,
                               regions_shapefile,
