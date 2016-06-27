@@ -92,24 +92,22 @@ class OcttreeNode(Octtree):
             child.prune(bounding_area)
         return self.count()
 
-def build_out_nodes(Config, region_node, regions, raster, raster_affine, pop_threshold):
+def build_out_nodes(Config, region_node, regions, raster, raster_affine, pop_threshold, split=True):
     Octtree.fid_counter = 0
 
     octtree_top =  build(region_node.polygon, region_node, raster, raster_affine, pop_threshold)
-    print "\toriginal number zones: ", octtree_top.count_populated()
 
-    #import cProfile
-    #pr = cProfile.Profile()
-    #pr.enable()
-    to_merge = splice(Config, octtree_top, regions, raster, raster_affine)
-    merge(Config, to_merge)
+    if split:
+        print "\toriginal number zones: ", octtree_top.count_populated()
+        to_merge = splice(Config, octtree_top, regions, raster, raster_affine)
+        merge(Config, to_merge)
+        print "\tafter split and merge: ", octtree_top.count_populated()
     bounding_area = get_region_boundary(regions) #need to check against boundary too.
     octtree_top.prune(bounding_area)
     # ... do something ...
     #pr.disable()
     #pr.dump_stats("data/stats")
 
-    print "\tafter split and merge: ", octtree_top.count_populated()
 
     return octtree_top
 

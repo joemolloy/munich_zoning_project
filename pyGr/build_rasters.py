@@ -121,7 +121,7 @@ if CLIP_LAND_USE_RASTERS:
 if BUILD_REGION_ID_RASTER:
     #build region_id_raster
     print("\nbuild region_id_raster")
-    gdal_operations.create_ags_code_raster(region_shapefile, region_id_raster, resolution)
+    gdal_operations.create_ags_code_raster(region_shapefile, land_use_clipped, region_id_raster, resolution)
 
 if ADD_REGION_STATS:
     #calc region land_use stats

@@ -1,5 +1,22 @@
 from octtree import build_out_nodes
 
+def model_zones_vs_threshold(Config, region_octtree, regions, raster, raster_affine):
+    print 'running trend analysis...'
+    results = []
+    for pop_threshold in xrange(2000, 20000, 2000):
+        octtree = build_out_nodes(Config, region_octtree, regions, raster, raster_affine, pop_threshold, split=False)
+        num_zones = octtree.count_populated()
+        results.append((pop_threshold, num_zones))
+        print results[-1]
+
+    from matplotlib import pyplot
+
+    pyplot.plot(*zip(*results))
+    pyplot.xlabel('Data Threshold used (population + employment)')
+    pyplot.ylabel('Number of zones created')
+    pyplot.title('Trends of zone size')
+    pyplot.show()
+
 def solve_iteratively(Config, region_octtree, regions, raster, raster_affine):
     ##
     # if num zones is too large, we need a higher threshold
