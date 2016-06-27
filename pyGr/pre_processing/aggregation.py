@@ -19,25 +19,24 @@
 import numpy as np
 import rasterio
 from affine import Affine
-from pyGr.common.math import roundup_to_multiple_of
+from skimage.util import view_as_blocks
 
-def disaggregate(m10_raster, ratio, bands):
+def disaggregate(m10_data, ratio, bands):
     assert(isinstance(ratio, int))
 
-    new_height = roundup_to_multiple_of(m10_raster.height, ratio) / ratio
-    new_width = roundup_to_multiple_of(m10_raster.width, ratio) / ratio
+    (height, width) = m10_data.shape
+    left_padding = ratio - (width % ratio)
+    bottom_padding = ratio - (height % ratio)
+    m10_padded = np.pad(m10_data, ((0,bottom_padding),(0,left_padding)), mode='constant', constant_values=0)
 
-    land_use_array = np.zeros((new_height, new_width, bands), dtype=np.ubyte)
+    blocked_a = view_as_blocks(m10_padded, (ratio,ratio))
 
+    (cols, rows) = blocked_a.shape[:2]
+    land_use_array = np.zeros((cols, rows, bands), dtype=np.ubyte)
 
-    for i in xrange(0, new_height):
-        (row_start, row_stop) = (i* ratio, (i+1)*ratio)
-        for j in xrange(0, new_width):
-            (col_start, col_stop) = (j* ratio, (j+1)*ratio)
-            window = m10_raster.read(window=((row_start, row_stop), (col_start, col_stop)))
-            bin_counts = np.bincount(window.ravel(), minlength=bands+1)
-        #    if bin_counts[0] < 100:
-        #        print (i, j), bin_counts
+    for i in range(blocked_a.shape[0]):
+        for j in range(blocked_a.shape[1]):
+            bin_counts = np.bincount(blocked_a[i][j].ravel(), minlength=bands+1)
             land_use_array[i,j] = bin_counts[1:] #exclude zero counts
 
     return np.rollaxis(land_use_array, 2, 0)
@@ -48,11 +47,13 @@ def run_land_use_aggregation(input_file, bands, output_file, output_resolution):
         affine_fine = land_use_raster.profile['affine']
         profile = land_use_raster.profile
 
+        m10_data, = land_use_raster.read()
+
         ratio = int(output_resolution / affine_fine.a)
 
         affine_gross = affine_fine * Affine.scale(ratio)
 
-        land_use_array = disaggregate(land_use_raster, ratio, bands)
+        land_use_array = disaggregate(m10_data, ratio, bands)
 
         (num_bands, new_array_height, new_array_width) = land_use_array.shape
 
@@ -64,7 +65,7 @@ def run_land_use_aggregation(input_file, bands, output_file, output_resolution):
                        width = new_array_width)
 
         with rasterio.open(output_file, 'w', **profile) as out:
-            print land_use_array.shape , "->", output_file
+            print land_use_array.shape , "->", (out.height, out.width)
             for k in xrange(0,num_bands):
                 out.write(land_use_array[k], indexes=k+1)
 
