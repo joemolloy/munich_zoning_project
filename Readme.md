@@ -47,6 +47,9 @@ The tool is designed to work with German datasets. As such the AGS ‘Amtlicher 
 
 For our zone system in Munich, we take advantage of 100m2 resolution [2011 census population data](https://www.zensus2011.de/SharedDocs/Aktuelles/Ergebnisse/DemografischeGrunddaten.html?nn=3065474) to disaggregate municipal population counts, and fall back on ALKIS land use data for disaggregating employment.
 
+##Configuration File Examples
+In the [config](config) folder, commented example configuration files can be found for the zoning algorithm.
+
 ##Installation and Execution
 Our tool requires some external packages and libraries to handle the geospatial operations.
 rasterstats, rasterio, shapely, Fiona and scikit-image need to be installed, along with the GDAL library.
