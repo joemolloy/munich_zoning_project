@@ -1,5 +1,5 @@
 #pyGr
-A port and extension of the Gradual Rasterization Tool
+A port and extension of the (Gradual Rasterization Tool, gr](https://github.com/moeckel/gr)
 
 ##Background
 pyGr is a python port of the gradual zoning algorithm gr, developed to automatically define automatically sized zoned based on population and employment rasters. The model documentation can be found here:
