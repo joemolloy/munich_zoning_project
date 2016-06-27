@@ -13,6 +13,7 @@ pyGr also provides two extensions:
 Due to privacy requirements, statistical data are often only available at a municipal level. These municipalities rarely line up with an ideal grid based zoning. After generating a grid of zones, our tool splits the grid based zones along municipal boundaries, distributing the zone’s value accordingly, and merging zones within a region where necessary to avoid slivers along the municipal boundaries.
 
 2. **Iterative behaviour**
+
 When designing a zoning system, the number of zones in a model needs to be tailored to balance the usefulness and complexity of the model. In the original gr, a threshold must be specified that is used to divide larger zones into smaller ones. Previously this was a manual process of trial and error. With pyGr, the desired number of zones can be specified, and the the zoning algorithm is iterated to find the parameters that best provide the desired number of zones.
 
 pyGr can be run without these extensions, by setting flags in the configuration file.
@@ -31,7 +32,7 @@ The zoning algorithm takes as input the following:
   * **Class Values:** A list (with a translations) of land use types to be included. Values not in this list will be ignored
   * **Scaling factors:** Comma separated values of the weighting for each land use type when distributing a certain statistic. We only apply scaling to employment in our example. The list must be the same length as the number of land use types in ‘Class Values’, and sum to 1
 
-The pre processing is designed specifically for the data availability that we are working with in developing the CITE Munich Regional Model. However, care has been taken to make many of the steps generic, and will be useful to modellers preparing their data for the zoning algorithm.
+The pre processing is designed specifically for the data availability that we are working with in developing the [Munich Regional Model](http://www.msm.bgu.tum.de/index.php?id=30&L=1). However, care has been taken to make many of the steps generic, and will be useful to modellers preparing their data for the zoning algorithm.
 
 
 ##Notes on Inputs
