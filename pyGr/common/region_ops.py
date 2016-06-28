@@ -2,7 +2,7 @@ import fiona
 from shapely.geometry import mapping, shape, box
 from shapely.ops import cascaded_union
 
-from pyGr.common.math import next_power_of_2
+from pyGr.common.util import next_power_of_2
 
 def load_regions(Config):
     regions_file = Config.get("Regions", "filename")

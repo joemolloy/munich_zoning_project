@@ -51,3 +51,9 @@ if __name__ == "__main__":
             else:
                 helper_functions.save(output_file, zonesSaptialRef, region_octtree)
 
+            if Config.getboolean('Regions', 'validate_zones'):
+                identifier = Config.get('Regions', 'identifier')
+                pop_field = Config.get('Regions', 'population_field')
+                emp_field = Config.get('Regions', 'employment_field')
+                helper_functions.validate_zones( Config.get("Regions", "filename"), identifier, pop_field, emp_field, output_file)
+

@@ -15,7 +15,7 @@ import rasterio
 import fiona
 import numpy as np
 import rasterstats
-from math import sqrt
+from pyGr.common.util import check_and_display_results
 
 def build_pop_raster(region_shapefile, pop_density_raster_file, region_raster_file, output_file, scale_factors):
     build_region_density_raster(region_shapefile, "population", pop_density_raster_file, region_raster_file, output_file, scale_factors)
@@ -88,11 +88,8 @@ def check_raster_output(region_shapefile, stats_raster, fields):
 
     print "results for", stats_raster,"..."
     print results
-    actuals, calcd = zip(*results)
-    print "\t actual:", "{:,}".format(sum(actuals))
-    print "\t calculated:", "{:,}".format(sum(calcd))
-    print "\t difference:", "{:,}".format(sum(actuals) - sum(calcd))
-    print "\t RMSE:", "{:,}".format(sqrt(sum([(a-b)**2 for (a,b) in results]) / len(results)))
+    check_and_display_results(results)
+
 
 def add_rasters(a_file,b_file, outputfile):
     with rasterio.open(a_file) as a:

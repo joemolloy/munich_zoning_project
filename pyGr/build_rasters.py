@@ -11,6 +11,8 @@ parser.add_argument("region", help="ESRI shapefile of study area and municipalit
 parser.add_argument("population", help="Raster of zensus population. Used to distribute municipal statistics. Must be trimmed to scaled to region boundary")
 parser.add_argument("land_use", help="Configuration file for land use processing, Land use data is used to disaggregate Employment data. resolution must be same as population raster")
 parser.add_argument("statistics", help="Population and employment stats for each municipality")
+parser.add_argument("pop_field", help="Population field in statistics file")
+parser.add_argument("emp_field", help="Employment field in statistics file")
 parser.add_argument("out", help="Output_directory", default='output')
 
 parser.add_argument("-t","--temp", help="Temporary directory", default='temp')
@@ -27,6 +29,8 @@ from pyGr.pre_processing import aggregation, extend_shapefile, \
 region_shapefile = args.region
 pop_density_raster = args.population
 region_stats_file = args.statistics
+pop_field = args.pop_field
+emp_field = args.emp_field
 
 land_use_config = config.LandUseConfig(args.land_use)
 land_use_shapefiles = land_use_config.shapefiles
@@ -59,17 +63,16 @@ pop_raster_file = path.join(output_folder, "population_{resolution}m.tif".format
 emp_raster_file = path.join(output_folder, "employment_{resolution}m.tif".format(resolution = resolution))
 merged_output_file = path.join(output_folder, "pop_emp_sum_{resolution}m.tif".format(resolution = resolution))
 
-
 #step flags
-CLEAR_DIRS = True
-ENCODE_LAND_USE_VALUES = True #we already have encoded values in the shapefile
-CREATE_LAND_USE_RASTERS = True
-MERGE_LAND_USE_RASTERS = True
-AGGREGATE_LAND_USE_RASTERS = True
-CLIP_LAND_USE_RASTERS = True
+CLEAR_DIRS = False
+ENCODE_LAND_USE_VALUES = False #we already have encoded values in the shapefile
+CREATE_LAND_USE_RASTERS = False
+MERGE_LAND_USE_RASTERS = False
+AGGREGATE_LAND_USE_RASTERS = False
+CLIP_LAND_USE_RASTERS = False
 BUILD_REGION_ID_RASTER = True
 
-ADD_REGION_STATS = True
+ADD_REGION_STATS = False
 
 BUILD_POPULATION_RASTER = True
 BUILD_EMPLOYMENT_RASTER = True
@@ -126,7 +129,7 @@ if BUILD_REGION_ID_RASTER:
 if ADD_REGION_STATS:
     #calc region land_use stats
     print("\ncalc region land_use stats")
-    extend_shapefile.add_region_stats(region_shapefile, region_stats_file, ['pop_2008','emp_2008'], regions_with_stats)
+    extend_shapefile.add_region_stats(region_shapefile, region_stats_file, [pop_field, emp_field], regions_with_stats)
 
 if BUILD_POPULATION_RASTER:
     #calc region land_use stats
@@ -138,7 +141,7 @@ if BUILD_POPULATION_RASTER:
                                 region_id_raster,
                                 pop_area_coverage_raster, [1])
 
-    statistics.distribute_region_statistics(regions_with_stats, "pop_2008",
+    statistics.distribute_region_statistics(regions_with_stats, pop_field,
                                             pop_area_coverage_raster, region_id_raster, pop_raster_file)
 
 
@@ -151,7 +154,7 @@ if BUILD_EMPLOYMENT_RASTER:
                                 region_id_raster,
                                 emp_area_coverage_raster, scale_factors['employment'])
 
-    statistics.distribute_region_statistics(regions_with_stats, "emp_2008",
+    statistics.distribute_region_statistics(regions_with_stats, emp_field,
                                             emp_area_coverage_raster, region_id_raster, emp_raster_file)
 
 #merge pop and employment rasters -> to output folder
@@ -160,9 +163,9 @@ if MERGE_POP_EMP_RASTERS:
 
 
 if RUN_CHECKING:
-    rasters.check_raster_output(regions_with_stats, pop_raster_file, ['pop_2008'])
-    rasters.check_raster_output(regions_with_stats, emp_raster_file, ['emp_2008'])
-    rasters.check_raster_output(regions_with_stats, merged_output_file, ['pop_2008', 'emp_2008'])
+    rasters.check_raster_output(regions_with_stats, pop_raster_file, [pop_field])
+    rasters.check_raster_output(regions_with_stats, emp_raster_file, [emp_field])
+    rasters.check_raster_output(regions_with_stats, merged_output_file, [pop_field, emp_field])
 
 
 

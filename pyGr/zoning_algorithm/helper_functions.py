@@ -3,6 +3,7 @@ from shapely.ops import cascaded_union
 from rasterstats import zonal_stats
 import rasterio
 import fiona
+from pyGr.common.util import check_and_display_results
 
 def quarter_polygon(geom_poly):
     #https://pcjericks.github.io/py-gdalogr-cookbook/geometry.html#quarter-polygon-and-create-centroids
@@ -173,3 +174,26 @@ def save(filename, outputSpatialReference, octtree, include_land_use = False, fi
                 'properties': properties
             })
 
+from collections import defaultdict
+
+def validate_zones(region_shapefile, identifier, pop_field, emp_field, zones_shapefile):
+    print 'validating zone values against statistics'
+    with fiona.open(zones_shapefile) as zs:
+        values = defaultdict(list)
+        zone_values = [(z['properties']['AGS'],z['properties']['Pop+Emp']) for z in zs]
+        for k,v in zone_values:
+            values[k].append(v)
+
+    with fiona.open(region_shapefile) as rs:
+        results = []
+        for r in rs:
+            ags = r['properties'][identifier]
+            total = r['properties'][pop_field] + r['properties'][emp_field]
+            #print ags, total, sum(values[ags]), values[ags]
+            results.append((total, sum(values[ags])))
+
+    check_and_display_results(results)
+
+
+if __name__  == '__main__':
+    validate_zones('data/temp2/regions_with_stats', 'AGS_Int', 'pop_2008', 'emp_2008','output/zones')
