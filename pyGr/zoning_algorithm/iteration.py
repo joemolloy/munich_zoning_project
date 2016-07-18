@@ -37,12 +37,13 @@ def solve_iteratively(Config, region_octtree, regions, raster, raster_affine):
 
     while not solved: # difference greater than 10%
         print 'step %d with threshold level %d...' % (step, pop_threshold)
+        prev_num_zones = num_zones
         region_octtree = build_out_nodes(Config, region_octtree, regions, raster, raster_affine, pop_threshold)
         num_zones = region_octtree.count_populated()
         print "\tnumber of cells:", num_zones
         print ''
 
-        solved = abs(num_zones - desired_num_zones)/float(desired_num_zones) < tolerance
+        solved = prev_num_zones == num_zones or (num_zones - desired_num_zones)/float(desired_num_zones) < tolerance
         if not solved:
             if num_zones > desired_num_zones:
                 best_low = max (best_low, pop_threshold)
