@@ -66,11 +66,13 @@ def calculate_pop_value(node, raster_array, affine):
     else:
         return 0
 
-def find_best_neighbour(node, neighbours):
+def find_best_neighbour(node, neighbours, threshold):
     max_length = 0
     best_neighbour = None
     for neighbour in neighbours:
-        if node.index != neighbour.index and node.polygon.touches(neighbour.polygon):
+        if node.index != neighbour.index \
+                and node.value + neighbour.value < threshold \
+                and node.polygon.touches(neighbour.polygon):
             #neighbour_area = neighbour.polygon.GetArea()
             length = get_common_boundary(node, neighbour)
             if length > max_length:
@@ -160,8 +162,12 @@ def save(filename, outputSpatialReference, octtree, include_land_use = False, fi
                 'Population': zone.population,
                 'Employment': zone.employment,
                 'Area': zone.polygon.area,
-                'AGS': zone.region['properties']['AGS_Int']
             }
+            if  hasattr(zone, 'region'):
+                properties['AGS'] = zone.region['properties']['AGS_Int']
+            else:
+                properties['AGS'] = 0
+
             if include_land_use:
                 land_use_remainder = 1.0
                 for (f, alias) in field_values:
