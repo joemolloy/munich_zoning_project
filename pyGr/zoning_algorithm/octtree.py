@@ -217,7 +217,4 @@ def merge(Config, region_results, threshold):
 
                     if not best_neighbour.is_acceptable(Config):
                         merge_set.add(best_neighbour)
-                else:
-                    print "no neighbour found for: ", node.index, " options were", [n.index for n in region_nodes]
-
 

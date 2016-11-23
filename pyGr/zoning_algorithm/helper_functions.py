@@ -78,8 +78,6 @@ def find_best_neighbour(node, neighbours, threshold):
             if length > max_length:
                 max_length = length
                 best_neighbour = neighbour
-    if max_length == 0:
-        print "failed for node:", node.index, "against ", [n.index for n in neighbours]
 
     return best_neighbour
 
