@@ -61,6 +61,7 @@ emp_area_coverage_raster = path.join(temp_directory, "employment_coverage_raster
 
 pop_raster_file = path.join(output_folder, "population_{resolution}m.tif".format(resolution = resolution))
 emp_raster_file = path.join(output_folder, "employment_{resolution}m.tif".format(resolution = resolution))
+emp_basic_raster_file = path.join(output_folder, "employment_simple_{resolution}m.tif".format(resolution = resolution))
 merged_output_file = path.join(output_folder, "pop_emp_sum_{resolution}m.tif".format(resolution = resolution))
 
 #step flags
