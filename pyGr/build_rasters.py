@@ -154,6 +154,7 @@ if BUILD_EMPLOYMENT_RASTER:
                                 land_use_clipped,
                                 region_id_raster,
                                 emp_area_coverage_raster, scale_factors['employment'])
+    rasters.build_simple_employment_raster(regions_with_stats, "employment", region_id_raster, emp_basic_raster_file)
 
     statistics.distribute_region_statistics(regions_with_stats, emp_field,
                                             emp_area_coverage_raster, region_id_raster, emp_raster_file)
