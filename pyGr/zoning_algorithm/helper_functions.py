@@ -66,13 +66,24 @@ def calculate_pop_value(node, raster_array, affine):
     else:
         return 0
 
+def is_potential_merge(node, node1, threshold):
+    if (node.index != node1.index
+            and node.value + node1.value < threshold
+            and node.polygon.touches(node1.polygon)) :
+        p_union = node.polygon.union(node1.polygon) #avoid donut shapes
+        return (p_union.geom_type == 'Polygon'
+            and p_union.is_simple
+            and p_union.centroid.intersects(p_union)
+        )
+    else:
+        return False
+
+
 def find_best_neighbour(node, neighbours, threshold):
     max_length = 0
     best_neighbour = None
     for neighbour in neighbours:
-        if node.index != neighbour.index \
-                and node.value + neighbour.value < threshold \
-                and node.polygon.touches(neighbour.polygon):
+        if is_potential_merge(node, neighbour, threshold):
             #neighbour_area = neighbour.polygon.GetArea()
             length = get_common_boundary(node, neighbour)
             if length > max_length:

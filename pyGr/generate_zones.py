@@ -17,7 +17,7 @@ if __name__ == "__main__":
     with rasterio.open(Config.get("Input", "combined_raster")) as r:
         raster_array = r.read(1)
         transform = r.affine
-        zonesSaptialRef = r.crs.to_dict()
+        zonesSaptialRef = r.crs
 
         regions = region_ops.load_regions(Config)
         boundary = region_ops.get_region_boundary(regions)
