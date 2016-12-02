@@ -177,9 +177,7 @@ def split(Config, tree, regions, raster, raster_affine):
                             spliced_node.value = calculate_pop_value(spliced_node, raster, raster_affine)
 
                             child.parent.children.append(spliced_node)
-                            if not spliced_node.is_acceptable(Config):
-                                #need to combine later
-                                region_results[-1]['to_merge'].add(spliced_node)
+                            region_results[-1]['to_merge'].add(spliced_node)
 
                             nodes_to_delete.add(child)
                 else:
@@ -214,7 +212,8 @@ def merge(Config, region_results, threshold):
 
                     node.parent.remove(node)
                     region_nodes.remove(node)
+                    merge_set.add(best_neighbour)
 
-                    if not best_neighbour.is_acceptable(Config):
-                        merge_set.add(best_neighbour)
+                    #if not best_neighbour.is_acceptable(Config):
+                     #   merge_set.add(best_neighbour)
 
