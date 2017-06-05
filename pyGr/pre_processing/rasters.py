@@ -70,7 +70,38 @@ def build_region_density_raster(region_shapefile, name, value_raster_file, regio
                     for band in range(num_bands):
                         out.write(density_arrays[band], indexes=band+1)
 
+def build_simple_employment_raster(region_shapefile, name, region_raster_file, output_file):
+        with rasterio.open(region_raster_file, 'r') as region_raster:
+            with fiona.open(region_shapefile) as regions:
 
+                (region_code_array,) = region_raster.read()
+
+                zs = rasterstats.zonal_stats(region_shapefile,
+                                                 region_code_array,
+                                                 affine=region_raster.affine,
+                                                 band=1,
+                                                 stats=['count'],
+                                                 geojson_out=True)
+
+                region_cell_count = {z['properties']['AGS_Int']: z['properties']['count'] for z in zs}
+                region_emp = {r['properties']['AGS_Int']: r['properties']['emp_2008'] for r in regions}
+                density_array = np.zeros(region_code_array.shape)
+
+                for (row,col), v in np.ndenumerate(region_code_array):
+                    try:
+                        region_id = int(region_code_array[row,col])
+                        density_array[row, col] = region_emp[region_id] / region_cell_count[region_id]
+
+                    except (KeyError, IndexError, TypeError, ZeroDivisionError):
+                        density_array[row, col] = 0
+
+
+                profile = region_raster.profile
+                profile.update(dtype=rasterio.float64)
+                print "Writing", name, "to: ", output_file
+                print profile
+                with rasterio.open(output_file, 'w', **profile) as out:
+                    out.write(density_array, indexes=1)
 
 def check_raster_output(region_shapefile, stats_raster, fields):
     zs = rasterstats.zonal_stats(region_shapefile, stats_raster, stats=['sum'])

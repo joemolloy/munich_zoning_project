@@ -61,15 +61,17 @@ emp_area_coverage_raster = path.join(temp_directory, "employment_coverage_raster
 
 pop_raster_file = path.join(output_folder, "population_{resolution}m.tif".format(resolution = resolution))
 emp_raster_file = path.join(output_folder, "employment_{resolution}m.tif".format(resolution = resolution))
+
+emp_basic_raster_file = path.join(output_folder, "employment_simple_{resolution}m.tif".format(resolution = resolution))
 merged_output_file = path.join(output_folder, "pop_emp_sum_{resolution}m.tif".format(resolution = resolution))
 
 #step flags
-CLEAR_DIRS = False
-ENCODE_LAND_USE_VALUES = False #we already have encoded values in the shapefile
-CREATE_LAND_USE_RASTERS = False
-MERGE_LAND_USE_RASTERS = False
-AGGREGATE_LAND_USE_RASTERS = False
-CLIP_LAND_USE_RASTERS = False
+CLEAR_DIRS = True
+ENCODE_LAND_USE_VALUES = True #we already have encoded values in the shapefile
+CREATE_LAND_USE_RASTERS = True
+MERGE_LAND_USE_RASTERS = True
+AGGREGATE_LAND_USE_RASTERS = True
+CLIP_LAND_USE_RASTERS = True
 BUILD_REGION_ID_RASTER = True
 
 ADD_REGION_STATS = False
@@ -153,6 +155,8 @@ if BUILD_EMPLOYMENT_RASTER:
                                 land_use_clipped,
                                 region_id_raster,
                                 emp_area_coverage_raster, scale_factors['employment'])
+
+    rasters.build_simple_employment_raster(regions_with_stats, "employment", region_id_raster, emp_basic_raster_file)
 
     statistics.distribute_region_statistics(regions_with_stats, emp_field,
                                             emp_area_coverage_raster, region_id_raster, emp_raster_file)

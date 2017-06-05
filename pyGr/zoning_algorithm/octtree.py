@@ -92,15 +92,16 @@ class OcttreeNode(Octtree):
             child.prune(bounding_area)
         return self.count()
 
-def build_out_nodes(Config, region_node, regions, raster, raster_affine, pop_threshold, split=True):
+
+def build_out_nodes(Config, region_node, regions, raster, raster_affine, pop_threshold, perform_split=True):
     Octtree.fid_counter = 0
 
     octtree_top =  build(region_node.polygon, region_node, raster, raster_affine, pop_threshold)
 
-    if split:
+    if perform_split:
         print "\toriginal number zones: ", octtree_top.count_populated()
-        to_merge = splice(Config, octtree_top, regions, raster, raster_affine)
-        merge(Config, to_merge)
+        to_merge = split(Config, octtree_top, regions, raster, raster_affine)
+        merge(Config, to_merge, pop_threshold)
         print "\tafter split and merge: ", octtree_top.count_populated()
     bounding_area = get_region_boundary(regions) #need to check against boundary too.
     octtree_top.prune(bounding_area)
@@ -140,7 +141,7 @@ def build(box, parent_node, raster, raster_affine, pop_threshold): #list of bott
         node.children = children
         return node
 
-def splice(Config, tree, regions, raster, raster_affine):
+def split(Config, tree, regions, raster, raster_affine):
     print "running splice algorithm..."
 
     region_results = []
@@ -175,26 +176,24 @@ def splice(Config, tree, regions, raster, raster_affine):
                             region_results[-1]['all'].add(spliced_node)
                             #calculate new population value
                             spliced_node.value = calculate_pop_value(spliced_node, raster, raster_affine)
-                            if spliced_node.is_acceptable(Config):
-                                child.parent.children.append(spliced_node)
-                            else:
-                                #need to combine later
-                                region_results[-1]['to_merge'].add(spliced_node)
+
+                            child.parent.children.append(spliced_node)
+                            region_results[-1]['to_merge'].add(spliced_node)
 
                             nodes_to_delete.add(child)
                 else:
                     node_queue.put(child)
 
 
-
-    #remove any nodes ouside boundary:
+    #remove any nodes outside boundary:
     for node in nodes_to_delete:
         node.parent.remove(node)
 
     return region_results
 
 
-def merge(Config, region_results):
+
+def merge(Config, region_results, threshold):
     print "running merging"
     for l in region_results:
         merge_set = l['to_merge']
@@ -207,7 +206,7 @@ def merge(Config, region_results):
                 if node not in node.parent.children:
                     node.parent.children.append(node)
             else:
-                best_neighbour = find_best_neighbour(node, region_nodes)
+                best_neighbour = find_best_neighbour(node, region_nodes, threshold)
                 if best_neighbour:
                     best_neighbour.polygon = best_neighbour.polygon.union(node.polygon)
                     best_neighbour.value = best_neighbour.value + node.value
@@ -215,12 +214,8 @@ def merge(Config, region_results):
                     node.parent.remove(node)
                     region_nodes.remove(node)
 
-                    if best_neighbour.is_acceptable(Config):
-                        if best_neighbour not in best_neighbour.parent.children:
-                            best_neighbour.parent.children.append(best_neighbour)
-                    else:
-                        merge_set.add(best_neighbour)
-                else:
-                    print "no neighbour found for: ", node.index, " options were", [n.index for n in region_nodes]
+                    merge_set.add(best_neighbour)
 
+                    #if not best_neighbour.is_acceptable(Config):
+                     #   merge_set.add(best_neighbour)
 

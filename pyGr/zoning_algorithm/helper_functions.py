@@ -4,6 +4,7 @@ from rasterstats import zonal_stats
 import rasterio
 import fiona
 from pyGr.common.util import check_and_display_results
+import math
 
 def quarter_polygon(geom_poly):
     #https://pcjericks.github.io/py-gdalogr-cookbook/geometry.html#quarter-polygon-and-create-centroids
@@ -66,18 +67,33 @@ def calculate_pop_value(node, raster_array, affine):
     else:
         return 0
 
-def find_best_neighbour(node, neighbours):
+
+def compactness_ratio(polygon):
+    return math.sqrt((4 * math.pi * polygon.area) / (polygon.exterior.length ** 2))
+
+def is_potential_merge(node, node1, threshold):
+    if (node.index != node1.index
+            and node.value + node1.value < 1.1 * threshold
+            and node.polygon.touches(node1.polygon)) :
+        p_union = node.polygon.union(node1.polygon) #avoid donut shapes
+        return (p_union.geom_type == 'Polygon' and len(p_union.interiors) == 0 # and compactness_ratio(p_union) > 0.6
+            and p_union.is_simple
+            and p_union.centroid.intersects(p_union)
+        )
+    else:
+        return False
+
+
+def find_best_neighbour(node, neighbours, threshold):
     max_length = 0
     best_neighbour = None
     for neighbour in neighbours:
-        if node.index != neighbour.index and node.polygon.touches(neighbour.polygon):
+        if is_potential_merge(node, neighbour, threshold):
             #neighbour_area = neighbour.polygon.GetArea()
             length = get_common_boundary(node, neighbour)
             if length > max_length:
                 max_length = length
                 best_neighbour = neighbour
-    if max_length == 0:
-        print "failed for node:", node.index, "against ", [n.index for n in neighbours]
 
     return best_neighbour
 
@@ -160,9 +176,16 @@ def save(filename, outputSpatialReference, octtree, include_land_use = False, fi
                 'Population': zone.population,
                 'Employment': zone.employment,
                 'Area': zone.polygon.area,
-                'AGS': zone.region['properties']['AGS_Int']
+
             }
-            if include_land_use:
+            if  hasattr(zone, 'region'):
+                properties['AGS'] = zone.region['properties']['AGS_Int']
+            else:
+                properties['AGS'] = 0
+
+
+
+if include_land_use:
                 land_use_remainder = 1.0
                 for (f, alias) in field_values:
                     land_use_remainder -= zone.landuse_pc[alias]
