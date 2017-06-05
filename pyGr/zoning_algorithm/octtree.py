@@ -92,6 +92,7 @@ class OcttreeNode(Octtree):
             child.prune(bounding_area)
         return self.count()
 
+
 def build_out_nodes(Config, region_node, regions, raster, raster_affine, pop_threshold, perform_split=True):
     Octtree.fid_counter = 0
 
@@ -184,12 +185,12 @@ def split(Config, tree, regions, raster, raster_affine):
                     node_queue.put(child)
 
 
-
     #remove any nodes outside boundary:
     for node in nodes_to_delete:
         node.parent.remove(node)
 
     return region_results
+
 
 
 def merge(Config, region_results, threshold):
@@ -212,6 +213,7 @@ def merge(Config, region_results, threshold):
 
                     node.parent.remove(node)
                     region_nodes.remove(node)
+
                     merge_set.add(best_neighbour)
 
                     #if not best_neighbour.is_acceptable(Config):

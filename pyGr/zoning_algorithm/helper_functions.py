@@ -5,6 +5,7 @@ import rasterio
 import fiona
 from pyGr.common.util import check_and_display_results
 import math
+
 def quarter_polygon(geom_poly):
     #https://pcjericks.github.io/py-gdalogr-cookbook/geometry.html#quarter-polygon-and-create-centroids
     (min_x, min_y, max_x, max_y) = geom_poly.bounds
@@ -65,6 +66,7 @@ def calculate_pop_value(node, raster_array, affine):
         return total
     else:
         return 0
+
 
 def compactness_ratio(polygon):
     return math.sqrt((4 * math.pi * polygon.area) / (polygon.exterior.length ** 2))
@@ -174,13 +176,16 @@ def save(filename, outputSpatialReference, octtree, include_land_use = False, fi
                 'Population': zone.population,
                 'Employment': zone.employment,
                 'Area': zone.polygon.area,
+
             }
             if  hasattr(zone, 'region'):
                 properties['AGS'] = zone.region['properties']['AGS_Int']
             else:
                 properties['AGS'] = 0
 
-            if include_land_use:
+
+
+if include_land_use:
                 land_use_remainder = 1.0
                 for (f, alias) in field_values:
                     land_use_remainder -= zone.landuse_pc[alias]

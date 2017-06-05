@@ -1,3 +1,4 @@
+
 import math
 
 def roundup_to_multiple_of(x, v):
@@ -16,4 +17,5 @@ def check_and_display_results(results):
     print "\t actual:", "{:,}".format(sum(actuals))
     print "\t calculated:", "{:,}".format(sum(calcd))
     print "\t difference:", "{:,}".format(sum(actuals) - sum(calcd))
+
     print "\t RMSE:", "{:,}".format(math.sqrt(sum([(a-b)**2 for (a,b) in results]) / len(results)))

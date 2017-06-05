@@ -103,7 +103,6 @@ def build_simple_employment_raster(region_shapefile, name, region_raster_file, o
                 with rasterio.open(output_file, 'w', **profile) as out:
                     out.write(density_array, indexes=1)
 
-
 def check_raster_output(region_shapefile, stats_raster, fields):
     zs = rasterstats.zonal_stats(region_shapefile, stats_raster, stats=['sum'])
     with fiona.open(region_shapefile) as regions:

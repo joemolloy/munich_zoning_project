@@ -1,4 +1,5 @@
 from octtree import build_out_nodes
+
 import numpy as np
 import csv
 import time
@@ -31,6 +32,7 @@ def solve_iteratively(Config, region_octtree, regions, raster, raster_affine):
     best_low = Config.getint("Parameters", "lower_population_threshold")
     best_high = Config.getint("Parameters", "upper_population_threshold")
     tolerance =  Config.getfloat("Parameters", "tolerance")
+
     times = []
     if best_low is None or best_low == 0: best_low = 1
     if best_high is None or best_high == 0: best_high = np.sum(raster)
@@ -40,6 +42,7 @@ def solve_iteratively(Config, region_octtree, regions, raster, raster_affine):
     num_zones = 0
 
     pop_threshold = (best_high - best_low) / 2
+
 
     start_time = time.time()
     times += [[0, 0]]
@@ -61,6 +64,7 @@ def solve_iteratively(Config, region_octtree, regions, raster, raster_affine):
             pop_threshold = (best_low + best_high) / 2
 
         step += 1
+
         times += [[time.time()-start_time, num_zones]]
 
     print "Solution found!"
@@ -74,6 +78,5 @@ def solve_iteratively(Config, region_octtree, regions, raster, raster_affine):
         timewriter.writerow(fieldnames)
         for x in times:
             timewriter.writerow(x)
-
 
     return region_octtree
